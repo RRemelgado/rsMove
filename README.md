@@ -1,2 +1,2 @@
 # rsMove
-Analyisis of Animal Movements with Remote Sensing (R Package)
+This R package provides generalized function for the use of remote sensing in the hnalysis of animal movements.
