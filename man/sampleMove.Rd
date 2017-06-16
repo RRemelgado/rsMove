@@ -4,16 +4,17 @@
 \alias{sampleMove}
 \title{sampleMove}
 \usage{
-sampleMove(x, y, time, error, method, layer, tUnit)
+sampleMove(x = x, y = y, tim = time, error = error, method = method,
+  tUnit = tUnit, layer = NULL)
 }
 \arguments{
-\item{x}{A Vector of x coordinates}
+\item{x}{Vector of x coordinates}
 
-\item{y}{A Vector of y coordinates}
+\item{y}{Vector of y coordinates}
 
-\item{time}{vVlid "POSIXlt" or "POSIXct" type vector with the time of observation for each record}
+\item{method}{Selects the appropriate method to estimate the distance between consecutive points. if 'm' it estimates the ecludian distance. If 'deg' it uses the haversine formula. Default is 'deg'.}
 
-\item{method}{Selects the appropriate method to estimate the distance between consecutive points. if 'm' it estimates the ecludian distance. If 'deg' it uses the haversine formula}
+\item{time}{Valid "POSIXlt" or "POSIXct" type vector with the time of observation for each record}
 }
 \value{
 Data frame with sample coordinates ('x' and 'y'), total time spent per sample ('time' expressed in minutes) and the total number of observations per sample ('count')
@@ -23,13 +24,18 @@ Sampling strategy to identify areas where an animal showed little or no movement
 }
 \examples{
 \dontrun{
+# reference data
+whiteStork <- data(WhiteStork_2013.rdata)
 
-# without reference grid
-moveData <- data('whiteStork')
-output <- sampleMove(input$x, input$y, input$t, 10, 'm')
+# sampling without reference grid
+output <- sampleMove(whiteStork$lon, whiteStork$lat, whiteStork$time, 7, 'm')
 
 # with reference grid
-rasterData <- data('grid')
-output <- sampleMove(input$x, input$y, input$t, 10, 'm', rasterData)
+refGrid<- data('constanceGrid')
+output <- sampleMove(whiteStork$lon, whiteStork$lat, whiteStork$time, 7, 'm', refGrid)
+
+# compare original vs new samples
+plot(whiteStork$lon, whiteStork$lat, col="black", pch=16)
+points(x, y, col="red", pch=15)
 }
 }

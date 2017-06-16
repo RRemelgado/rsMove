@@ -4,20 +4,18 @@
 \alias{hotMove}
 \title{hotMove}
 \usage{
-hotMove(x = x, y = y, res = res, ext = NULL, shp = F, cs = NULL)
+hotMove(x = x, y = y, pxr = pxr, shp = F, cs = NULL)
 }
 \arguments{
 \item{x}{Vector of x coordinates.}
 
 \item{y}{Vector of y coordinates.}
 
-\item{res}{Resolution of the grid used for region labelling. Unir depends on the projection of the input.}
-
-\item{ext}{Optional. Four element vector with a spatial extent expressed as c(xmin, xmax, ymin, ymax). If none is provided the extent is derived from the x and y coordinates.}
+\item{pxr}{Resolution of the grid used for region labelling. Unir depends on the projection of the input.}
 
 \item{shp}{Logical. If TRUE the function returns a shapefile defined by the convex hull of the samples within each region. Default is FALSE.}
 
-\item{proj}{If shp=TRUE then a valid CRS indicating the projection of the input coordinates is required.}
+\item{cs}{If shp=TRUE then a valid CRS indicating the projection of the input coordinates is required.}
 }
 \value{
 Returns a vector containing numeric labels that represent unique sample regions. If 'shp' is in use polygons are provided in addition.
@@ -27,9 +25,19 @@ Identifies hotspots of samples and labels these accordingly. It build a matrix f
 }
 \examples{
 \dontrun{
-hotMove(x=whiteStork$lon, y=whiteStork=lon, res=0.01, ext)
+# reference data
+whiteStork <- data(WhiteStork_2013.rdata)
+
+# lat/lon WGS84
+outProj <-  CRS("+init=epsg:4978")
+
+# extract regions
+hm <- hotMove(x=whiteStork$lon, y=whiteStork=lon, pxr=0.01, shp=T, cs=outProj)
+
+# plot shapefile
+plot(hm$polygons)
 }
 }
 \seealso{
-\code{\link{extent}}, \code{\link{sampleMove}}, \code{\link{crs}}
+\code{\link{sampleMove}}, \code{\link{cRS}}
 }
