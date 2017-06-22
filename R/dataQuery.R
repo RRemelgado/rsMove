@@ -1,6 +1,6 @@
 #' @title dataQuery
 #'
-#' @description Query environmental data for x/y coordinate pairs.
+#' @description Query environmental data for coordinate pairs.
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
 #' @param var Object of class RasterStack or RasterBrick containing environmental layers.

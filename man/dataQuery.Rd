@@ -7,17 +7,17 @@
 dataQuery(x = x, y = y, var = var)
 }
 \arguments{
-\item{x}{Vector of x coordinates}
+\item{x}{Vector of x coordinates.}
 
-\item{y}{Vector of y coordinates}
+\item{y}{Vector of y coordinates.}
 
 \item{var}{Object of class RasterStack or RasterBrick containing environmental layers.}
 }
 \value{
-matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
+Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
 }
 \description{
-Query environmental data with gps tracking data
+Query environmental data for x/y coordinate pairs.
 }
 \examples{
 \dontrun{
