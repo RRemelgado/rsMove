@@ -17,7 +17,7 @@ dataQuery(x = x, y = y, var = var)
 Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
 }
 \description{
-Query environmental data for x/y coordinate pairs.
+Query environmental data for coordinate pairs.
 }
 \examples{
 \dontrun{

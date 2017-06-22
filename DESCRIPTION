@@ -6,8 +6,8 @@ Date: 2017-06-14
 Author: Ruben Remelgado, <ruben.remelgado@uni-wuerzburg.de>
 Maintainer: Ruben Remelgado, <ruben.remelgado@uni-wuerzburg.de>
 Description: Provides generalized functions to analyse movement patterns based on GPS tracking data using remote sensing. It contains routines to sample, model and define study sites with an assessment of data requirements.
-Depends: R (>= 3.2.5), raster, sp
 License: GPL-3
 LazyData: TRUE
 Imports: raster, sp, caret
 RoxygenNote: 6.0.1
+License: GPL (>= 2)
