@@ -1,8 +1,8 @@
 #' @title dataQuery
 #'
 #' @description Query environmental data with gps tracking data
-#' @param x Vector of x coordinates
-#' @param y Vector of y coordinates
+#' @param x Vector of x coordinates.
+#' @param y Vector of y coordinates.
 #' @param var Object of class RasterStack or RasterBrick containing environmental layers.
 #' @import raster, grDevices
 #' @return matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
