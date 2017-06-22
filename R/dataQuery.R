@@ -1,11 +1,11 @@
 #' @title dataQuery
 #'
-#' @description Query environmental data with gps tracking data
+#' @description Query environmental data for x/y coordinate pairs.
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
 #' @param var Object of class RasterStack or RasterBrick containing environmental layers.
 #' @import raster, grDevices
-#' @return matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
+#' @return Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
 #' @examples \dontrun{
 #' }
 
