@@ -23,13 +23,12 @@ dataQuery <- function(x=x, y=y, var=var) {
   
   # derive pixel coordinates
   ext <- raster::extent(var) # raster extent
+  dims <- dim(var) # image dimensions
   pxr <- raster::res(var) # raster resolution
-  nc <- round((ext[2]-ext[1]) / pxr) + 1 # number of columns
-  nr <- round((ext[4]-ext[3]) / pxr) + 1 # number of rows
-  sp <- (round((ext[4]-y)/pxr)+1) + nr * round((x-ext[1])/pxr) # convert coordinates to pixel positions
+  sp <- (round((ext[4]-y)/pxr)+1) + dims[1] * round((x-ext[1])/pxr) # convert coordinates to pixel positions
   
   # identify pixels with valid/invalid samples
-  np <- nr*nc # number of pixels
+  np <- dims[1] * dims[2] # number of pixels
   if (max(sp) < 0 | min(sp) > np) {stop('error: samples do not overlap with the environmental data (is the projection correct?)')}
   ind0 <- which(sp < 0 | sp > np) # pixels outside the matrix
   ind1 <- which(sp > 0 | sp < np) # pixels inside the valid range
