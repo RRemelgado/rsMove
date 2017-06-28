@@ -4,12 +4,13 @@
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
 #' @param var Object of class "RasterStack" or "RasterBrick".
-#' @param remove.duplicates Logical. Defaut if FALSE.
+#' @param remove.duplicates Logical. Default if FALSE.
 #' @import raster grDevices
-#' @return Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
+#' @return Matrix of environmental variables for each sample.
 #' @details {Returns environmental variables from a raster object for a given set of x and y coordinates.
 #'          If "remove.duplicates" is TRUE, the function checks for and removes duplicated samples that 
-#'          fall in the same pixels. The pixel ID, contained in the output, informs on which samples were kept.}
+#'          fall in the same pixels. The pixel ID, contained in the output, informs on which samples were kept.
+#'          If a sample does not overlap with the reference raster NA is returned.}
 #' @examples \dontrun{
 #' }
 #' @export

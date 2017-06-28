@@ -7,12 +7,13 @@
 #' @param pr Numeric value giving the pixel resolution.
 #' @param rp A valid "CRS" object.
 #' @import raster grDevices
-#' @return Matrix containing unique samples. The output reports on sample coordinates ("x" and "y"), polygon id ("id") and pixel % cover ("cover").
+#' @return Matrix containing unique samples.
 #' @details {Determines coordinates of pixels within a given extent or reference raster layer.
 #'            "mpc" can be used to filter pixels with low purity, i.e. pixels where the 
 #'            percentage of area cover by a polygon is below the defined threshold.
 #'            If an extent object is provided, a reference projection system ("rp") 
-#'            and a target resoluton ("pr") are required.}
+#'            and a target resoluton ("pr") are required. The output reports on sample 
+#'            coordinates ("x" and "y"), polygon id ("id") and pixel percent cover ("cover").}
 #' @examples \dontrun{
 #' }
 #' @export
@@ -50,9 +51,9 @@ poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
   
   # check each polygon
   for (p in 1:np) {
-    te <- raster::extent(pol[1,]) # target extent
+    te <- raster::extent(pol[p,]) # target extent
     tr <- crop(rr, te) # target raster
-    r = as.matrix(raster::rasterize(pol[1,], tr, getCover=T)) # rasterize polygon
+    r = as.matrix(raster::rasterize(pol[p,], tr, getCover=T)) # rasterize polygon
     nr <- dim(r)[1] # number of columns
     ind <- which (r > mpc) # identify usable pixels
     if (length(ind)>0) {
@@ -65,7 +66,11 @@ poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
   }
   
   # build /return data frame
-  df <- data.frame(x=unlist(xc), y=unlist(yc), id=unlist(id), cover=unlist(pc), stringsAsFactors=F)
+  xc <- unlist(xc)
+  yc <- unlist(yc)
+  id <- unlist(id)
+  pc <- unlist(pc)
+  df <- data.frame(x=xc, y=yc, id=id, cover=pc, stringsAsFactors=F)
   return(df)
   
 }
