@@ -43,24 +43,25 @@ poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
   if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
   
   # output variables
-  np <- length(pol) # number of polygons
-  xc <- vector('list', np) # x coordinates
-  yc <- vector('list', np) # y coordinates
-  id <- vector('list', np) # polygon id coordinates
-  pc <- vector('list', np) # pixel cover
+  xc <- list() # x coordinates
+  yc <- list() # y coordinates
+  id <- list() # polygon id coordinates
+  pc <- list() # pixel cover
   
   # check each polygon
-  for (p in 1:np) {
+  lp <- 1
+  for (p in 1:length(pol)) {
     te <- raster::extent(pol[p,]) # target extent
     tr <- crop(rr, te) # target raster
     r = as.matrix(raster::rasterize(pol[p,], tr, getCover=T)) # rasterize polygon
     nr <- dim(r)[1] # number of columns
     ind <- which (r > mpc) # identify usable pixels
     if (length(ind)>0) {
-      xc[[p]] <- te[1]+((ind / nr)*pr) # convert pixel coordinates to x
-      yc[[p]] <- te[4]-((ind %% nr)*pr) # convert pixel coordinates to y
-      id[[p]] <- replicate(length(ind), p) # assign polygon ID ot coordinates
-      pc[[p]] <- r[ind] # assign pixel cover information
+      xc[[lp]] <- te[1]+((ind / nr)*pr) # convert pixel coordinates to x
+      yc[[lp]] <- te[4]-((ind %% nr)*pr) # convert pixel coordinates to y
+      id[[lp]] <- replicate(length(ind), p) # assign polygon ID ot coordinates
+      pc[[lp]] <- r[ind] # assign pixel cover information
+      lp <- lp + 1
     }
     rm(te, tr, r, ind)
   }
