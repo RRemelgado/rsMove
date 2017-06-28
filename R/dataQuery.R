@@ -4,6 +4,7 @@
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
 #' @param var Object of class RasterStack or RasterBrick containing environmental layers.
+#' @param remove.duplicates Optional. If TRUE, checks for and removes duplicated samples that fall in the same pixels.
 #' @import raster grDevices
 #' @return Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
 #' @examples \dontrun{
@@ -12,7 +13,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(x=x, y=y, var=var) {
+dataQuery <- function(x=x, y=y, var=var, remove.duplicates=F) {
   
   # check variables
   if (!exists(x)) {stop('error: "x" is missing')}
@@ -26,6 +27,12 @@ dataQuery <- function(x=x, y=y, var=var) {
   dims <- dim(var) # image dimensions
   pxr <- raster::res(var) # raster resolution
   sp <- (round((ext[4]-y)/pxr)+1) + dims[1] * round((x-ext[1])/pxr) # convert coordinates to pixel positions
+  if (remove.duplicates) {
+    sp <- unique(sp) # return unique records
+    id <- which(!duplicate(sp)) # return indices of unique records
+  } else {
+    id <- 1:length(sp)  
+  }
   
   # identify pixels with valid/invalid samples
   np <- dims[1] * dims[2] # number of pixels
@@ -34,9 +41,10 @@ dataQuery <- function(x=x, y=y, var=var) {
   ind1 <- which(sp > 0 | sp < np) # pixels inside the valid range
   
   # retrieve/return environmental data
-  ov <- matrix(0, length(x), raster::nlayers(var))
+  ov <- matrix(0, length(sp), (raster::nlayers(var)+1))
   ov[ind0,] <- NA
-  ov[ind1,] <- var[sp[ind1]]
+  ov[,1] <- id
+  ov[ind1,2:ncol(ov)] <- var[sp[ind1]]
   return(ov)
   
 }
