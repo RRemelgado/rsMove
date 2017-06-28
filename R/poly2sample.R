@@ -18,7 +18,7 @@
 #' }
 #' @export
 
-#--------------------------------------------------------------------------------------------------------------------------------------------------#
+#----------------------------------------------------------------------------------------------------------#
 
 poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
   
@@ -37,41 +37,61 @@ poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
     rr <- raster::raster(ras) # read reference raster
     pr <- raster::res(ras) # check pixel resolution
     rp <- raster::crs(ras) # check raster projection
+    ras <- raster::extent(rr) # extraxt extent
   }
   if (rp@projargs!=raster::crs(pol)@projargs) {stop('error: using different projections')}
   if (!exists('mpc')) {mpc <- 0}
   if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
-  
-  # output variables
-  xc <- list() # x coordinates
-  yc <- list() # y coordinates
-  id <- list() # polygon id coordinates
-  pc <- list() # pixel cover
-  
-  # check each polygon
-  lp <- 1
-  for (p in 1:length(pol)) {
-    te <- raster::extent(pol[p,]) # target extent
+
+#----------------------------------------------------------------------------------------------------------#
+    
+  # function to evaluate polygons
+  lf <- function(i) {
+    te <- raster::extent(pol[i,]) # target extent
     tr <- crop(rr, te) # target raster
-    r = as.matrix(raster::rasterize(pol[p,], tr, getCover=T)) # rasterize polygon
+    r = as.matrix(raster::rasterize(pol[i,], tr, getCover=T)) # rasterize polygon
     nr <- dim(r)[1] # number of columns
-    ind <- which (r > mpc) # identify usable pixels
-    if (length(ind)>0) {
-      xc[[lp]] <- te[1]+((ind / nr)*pr) # convert pixel coordinates to x
-      yc[[lp]] <- te[4]-((ind %% nr)*pr) # convert pixel coordinates to y
-      id[[lp]] <- replicate(length(ind), p) # assign polygon ID ot coordinates
-      pc[[lp]] <- r[ind] # assign pixel cover information
-      lp <- lp + 1
-    }
-    rm(te, tr, r, ind)
+    ind <- which (r > 0) # identify usable pixels
+    list(x=te[1]+((ind / nr)*pr), y=te[4]-((ind %% nr)*pr), 
+         id=replicate(length(ind), i), cover=r[ind])
   }
   
-  # build /return data frame
-  xc <- unlist(xc)
-  yc <- unlist(yc)
-  id <- unlist(id)
-  pc <- unlist(pc)
-  df <- data.frame(x=xc, y=yc, id=id, cover=pc, stringsAsFactors=F)
-  return(df)
+  # check each polygon
+  ov <- lapply(1:np, lf)
+  xc <- sapply(ov, function(x) {x$x}) # x coordinates
+  yc <- sapply(ov, function(x) {x$y}) # y coordinates
+  id <- sapply(ov, function(x) {x$id}) # polygon ids
+  pc <- sapply(ov, function(x) {x$pc}) # pixel cover
+  
+  rm(rr, ov)
+
+#----------------------------------------------------------------------------------------------------------#
+  
+  # convert coordinates to pixel indices
+  sp <- (round((ras[2]-yc)/pr)+1) + dim(rr)[1] * round((xc-ras[1])/pr)
+  
+  # remove duplicates (use unique pixel indices as reference)
+  # if duplicates exist, sum percent cover over repeated records
+  ui <- duplicated(sp)
+  if (sum(ui)>0) {
+    ui <- !ui
+    xc <- xc[ui]
+    yc <- yc[ui]
+    id <- id[ui]
+    pc <- apply(ind, function(x) {sum(which(sp==x))})
+    ind <- ind[ui]
+  }
+
+#----------------------------------------------------------------------------------------------------------#
+  
+  # apply percent cover filter  
+  ind <- which(pc > mpc)
+  xc <- xc[ind]
+  yc <- yc[ind]
+  id <- id[ind]
+  pc <- c[ind]
+  
+  # build/return output
+  return(data.frame(x=xc, y=yc, index=sp, id=id, cover=pc)
   
 }
