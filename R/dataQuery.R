@@ -3,10 +3,13 @@
 #' @description Query environmental data for coordinate pairs.
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
-#' @param var Object of class RasterStack or RasterBrick containing environmental layers.
-#' @param remove.duplicates Optional. If TRUE, checks for and removes duplicated samples that fall in the same pixels.
+#' @param var Object of class "RasterStack" or "RasterBrick".
+#' @param remove.duplicates Logical. Defaut if FALSE.
 #' @import raster grDevices
 #' @return Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
+#' @details {Returns environmental variables from a raster object for a given set of x and y coordinates.
+#'          If "remove.duplicates" is TRUE, the function checks for and removes duplicated samples that 
+#'          fall in the same pixels. The pixel ID, contained in the output, informs on which samples were kept.}
 #' @examples \dontrun{
 #' }
 #' @export

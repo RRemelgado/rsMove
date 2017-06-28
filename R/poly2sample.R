@@ -3,10 +3,16 @@
 #' @description Convert spatial polygons into x and y coordinates.
 #' @param pol Object of class "SpatialPolygons" or "SpatialPolygonDataFrame".
 #' @param ras Object of class "Raster", "RasterBrick" or "RasterStack".
-#' @param mpc Minimum pixel cover (0-100). Percent proportion a pixel should be covered by a polygon so that that sample is kept. Default is 0%.
-#' @param out Type of output. One of (or both of) "samples" and "raster".
+#' @param mpc Minimum pixel cover (0-100).
+#' @param pr Numeric value giving the pixel resolution.
+#' @param rp A valid "CRS" object.
 #' @import raster grDevices
 #' @return Matrix containing unique samples. The output reports on sample coordinates ("x" and "y"), polygon id ("id") and pixel % cover ("cover").
+#' @details {Determines coordinates of pixels within a given extent or reference raster layer.
+#'            "mpc" can be used to filter pixels with low purity, i.e. pixels where the 
+#'            percentage of area cover by a polygon is below the defined threshold.
+#'            If an extent object is provided, a reference projection system ("rp") 
+#'            and a target resoluton ("pr") are required.}
 #' @examples \dontrun{
 #' }
 #' @export
@@ -59,7 +65,7 @@ poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
   }
   
   # build /return data frame
-  df <- data.frame(x=unlist(xc), y=unlist(yc), id=unlist(id), cover=pc, stringsAsFactors=F)
+  df <- data.frame(x=unlist(xc), y=unlist(yc), id=unlist(id), cover=unlist(pc), stringsAsFactors=F)
   return(df)
   
 }
