@@ -4,6 +4,7 @@
 #' @param pol Object of class "SpatialPolygons" or "SpatialPolygonDataFrame".
 #' @param ras Object of class "Raster", "RasterBrick" or "RasterStack".
 #' @param mpc Minimum pixel cover (0-100). Percent proportion a pixel should be covered by a polygon so that that sample is kept. Default is 0%.
+#' @param out Type of output. One of (or both of) "samples" and "raster".
 #' @import raster grDevices
 #' @return Matrix containing unique samples. The output reports on sample coordinates ("x" and "y"), polygon id ("id") and pixel % cover ("cover").
 #' @examples \dontrun{
@@ -12,21 +13,30 @@
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample(pol, ras, mpc=0) {
+poly2sample(pol=pol, ras=ras, mpc=0, pr=NULL, rp=NULL) {
   
   # check input
-  if(!class(pol)[1]%in%c('SpatialPolygons', 'SpatialPolygonDataFrame')) {stop('error: "pol" is not a valid input.')}
-  if(!class(ras)[1]%in%c("Raster", "RasterStack", "RasterBrick")) {stop('error: "ras" is not a valid input.')}
-  if(mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
-  
-  # reference raster specifications
-  rr <- raster::raster(ras) # raster
-  pr <- raster::res(ras) # pixel resolution
-  re <- raster:extent(ras)[c(1,3)] # extent
-  nr <- dim(ras)[1] # number of columns
-  np <- length(pol) # number of polygons
+  if(!exists('pol')) {stop('error: "pol" is missing')}
+  if(!exists('ras')) {stop('error: "ras" is missing')}
+  if(!class(pol)[1]%in%c('SpatialPolygons', 'SpatialPolygonDataFrame')) {
+    stop('error: "pol" is not a valid input.')
+  }
+  if(!class(ras)[1]%in%c("Raster", "RasterStack", "RasterBrick")) {
+    if (class(ras)!='Extent') {stop('error: "ras" is not a valid input.')}
+    if (is.null(pr)) {stop('error: "ras" is of class "Extent" object. "pr" is required.')}
+    if (is.null(rp)) {stop('error: "ras" is of class "Extent" object. "rp" is required.')}
+    rr <- raster::raster(ras, res=pr, crs=rp) # create reference raster
+  } else {
+    rr <- raster::raster(ras) # read reference raster
+    pr <- raster::res(ras) # check pixel resolution
+    rp <- raster::crs(ras) # check raster projection
+  }
+  if (rp@projargs!=raster::crs(pol)@projargs) {stop('error: using different projections')}
+  if (!exists('mpc')) {mpc <- 0}
+  if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
   
   # output variables
+  np <- length(pol) # number of polygons
   xc <- vector('list', np) # x coordinates
   yc <- vector('list', np) # y coordinates
   id <- vector('list', np) # polygon id coordinates
@@ -37,10 +47,11 @@ poly2sample(pol, ras, mpc=0) {
     te <- raster::extent(pol[1,]) # target extent
     tr <- crop(rr, te) # target raster
     r = as.matrix(raster::rasterize(pol[1,], tr, getCover=T)) # rasterize polygon
+    nr <- dim(r)[1] # number of columns
     ind <- which (r > mpc) # identify usable pixels
     if (length(ind)>0) {
-      xc[[p]] <- ((ind / nr)*pr) - re[1] # convert pixel coordinates to x
-      yc[[p]] <- re[2] - ((ind %% nr)*pr) # convert pixel coordinates to y
+      xc[[p]] <- te[1]+((ind / nr)*pr) # convert pixel coordinates to x
+      yc[[p]] <- te[4]-((ind %% nr)*pr) # convert pixel coordinates to y
       id[[p]] <- replicate(length(ind), p) # assign polygon ID ot coordinates
       pc[[p]] <- r[ind] # assign pixel cover information
     }

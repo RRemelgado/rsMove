@@ -16,9 +16,9 @@
 dataQuery <- function(x=x, y=y, var=var, remove.duplicates=F) {
   
   # check variables
-  if (!exists(x)) {stop('error: "x" is missing')}
-  if (!exists(y)) {stop('error: "y" is missing')}
-  if (!exists(var)) {stop('error: "var" is missing')}
+  if (!exists('x')) {stop('error: "x" is missing')}
+  if (!exists('y')) {stop('error: "y" is missing')}
+  if (!exists('var')) {stop('error: "var" is missing')}
   if (class(var)!='RasterStack' & class(var)!='RasterBrick') {stop('error: "var" is not a valid raster object')}
   if (length(x)!=length(y)) {stop('error: x and y have different lengths')}
   
