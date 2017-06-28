@@ -3,7 +3,7 @@
 #' @description Convert spatial polygons into x and y coordinates.
 #' @param pol Object of class "SpatialPolygons" or "SpatialPolygonDataFrame".
 #' @param ras Object of class "Raster".
-#' @param mpc Minimum pixel cover. Percent proportion a pixel should be covered by a polygon so that that sample is kept. Default is 1%.
+#' @param mpc Minimum pixel cover (0-100). Percent proportion a pixel should be covered by a polygon so that that sample is kept. Default is 1%.
 #' @import raster grDevices
 #' @return Matrix containing unique samples. The output reports on sample coordinates ("x" and "y"), polygon id ("id") and pixel % cover ("cover").
 #' @examples \dontrun{
