@@ -49,6 +49,14 @@ poly2sample(pol=pol, re=NULL, mpc=0, pr=NULL) {
   if (!exists('mpc')) {mpc <- 0}
   if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
 
+  # update extent object
+  # (correspond x/y to pixel center)
+  ar <- pr / 2 # half resolution
+  re[1] <- re[1] + ar
+  re[2] <- re[2] - ar
+  re[3] <- re[3] + ar
+  re[4] <- re[4] - ar
+  
 #-------------------------------------------------------------------------------------------------------------------------#
     
   # function to apply
@@ -60,8 +68,8 @@ poly2sample(pol=pol, re=NULL, mpc=0, pr=NULL) {
     r = as.matrix(raster::rasterize(pol[i,], r, getCover=T)) # rasterize polygon
     nr <- dim(r)[1] # number of columns
     ind <- which (r > 0) # identify usable pixels
-    xp <- round(((te[1]+((ind/nr)*pr))-ras[1])/pr)+1 # x image coordinates
-    yp <- round((ras[4]-(te[4]-((ind%%nr)*pr)))/pr)+1 # y image coordinates
+    xp <- round((((te[1]+ar)+((ind/nr)*pr))-re[1])/pr)+1 # x image coordinates
+    yp <- round((re[4]-((te[4]-ar)-((ind%%nr)*pr)))/pr)+1 # y image coordinates
     return(list(pp=(yp+rr*xp), pc=r[ind])) # return metrics
   }
   np <- length(pol) # number of polygons
@@ -90,8 +98,8 @@ poly2sample(pol=pol, re=NULL, mpc=0, pr=NULL) {
 #------------------------------------------------------------------------------------------------------------------------#
   
   # build/return output
-  xc <- re[1] + ((up/rr)*pr) # convert positions to x coordinates
-  yc <- re[4] - ((up%%rr)*pr) # convert positions to y coordinates
+  xc <- re[1] + (round((up/rr)+1)*pr) # convert positions to x coordinates
+  yc <- re[4] - (round((up%%rr+1))*pr) # convert positions to y coordinates
   
   return(data.frame(x=xc, y=yc, index=up, cover=pc))
   
