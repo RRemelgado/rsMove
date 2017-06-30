@@ -44,18 +44,22 @@ poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
       if (class(re)!='Extent') {stop('error: "ras" is not a valid input.')}
       if (is.null(pr)) {stop('error: "re" is of class "Extent" object. "pr" is required.')}
       if (is.null(rp)) {stop('error: "re" is of class "Extent" object. "rp" is required.')}
-      rr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
+      rr <- raster(re, crs=rp, res=pr) # build reference raster
+      nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
     } else {
-      pr <- raster::res(re)[1] # check pixel resolution
-      rp <- raster::crs(re) # check raster projection
-      rr <- dim(re)[1] # number of rows in raster
-      re <- raster::extent(re) # extraxt extent
+      pr <- res(re)[1] # check pixel resolution
+      rp <- crs(re) # check raster projection
+      nr <- dim(re)[1] # number of rows in raster
+      rr <- re # set variable with reference raster
+      re <- extent(rr) # extraxt extent
     }
-    if (rp@projargs!=raster::crs(pol)@projargs) {stop('error: using different projections')}
+    if (rp@projargs!=crs(pol)@projargs) {stop('error: using different projections')}
   } else {
     if (is.null(pr)) {stop('error: provide "pr" since "re" is missing')}
-    re <- raster::extent(pol) # extent derived from 
-    rr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
+    re <- extent(pol) # extent derived from 
+    rr <- raster(re, crs=crs(pol), res=pr)
+    nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
+    
   }
   if (!exists('mpc')) {mpc <- 0}
   if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
@@ -72,30 +76,29 @@ poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
     
   # function to apply
   lf <- function(i) {
-    te <- raster::extent(pol[i,]) # target extent
-    nc <- (round(((te[2]-ar)-re[1])/pr)+1)-(round(((te[1]+ar)-re[1])/pr)+1) # number of columns
-    nr <- (round((re[4]-(te[3]+ar))/pr)+1)-(round((re[4]-(te[4]-ar))/pr)+1) # number of rows
-    r <-raster(nrows=nr, ncols=nc, xmn=te[1], xmx=te[2], ymn=te[3], ymx=te[4], crs=rp, resolution=pr) # target raster
-    r = as.matrix(raster::rasterize(pol[i,], r, getCover=T)) # rasterize polygon
-    nr <- dim(r)[1] # number of columns
-    ind <- which(r>0) + (round(((te[1]+ar)-re[1])/pr)+1) # identify usable pixels
-    return(list(pp=ind, pc=r[ind])) # return metrics
+    r <- crop(rr, extent(pol[i,]))
+    r <- rasterToPoints(rasterize(pol[i,], r, getCover=T))
+    ind <- which(r[,3] > 0) # usable pixels
+    pp <- (round((re[4]-r[ind,2])/pr)) + nr * (round((r[ind,1]-re[1])/pr))
+    pc <- r[ind,3] # percent cover
+    return(list(pp=pp, pc=pc))
   }
   np <- length(pol) # number of polygons
   x <- lapply(1:np, lf) # evaluate polygons
-  sp <- unlist(sapply(x, function(x) {x$pp})) # pixel positions in raster
-  pc <- unlist(sapply(x, function(x) {x$pc})) # pixel percent cover
+  pp <- unlist(sapply(x, function(x) {x$pp})) # positions
+  pc <- unlist(sapply(x, function(x) {x$pc})) # percent cover
   
   rm(x)
   
 #-------------------------------------------------------------------------------------------------------------------------#
   
   # remove duplicated pixels and update pecent count
-  up <- unique(sp) # unique pixels
-  pc <- sapply(up, function(x) {sum(pc[which(sp==x)])}) # update percentages
+  
+  up <- unique(pp) # unique ppositions
+  pc <- sapply(up, function(x) {sum(pc[which(pp==x)])}) # update percentages
   pc[which(pc>100)] <- 100 # account for miss-calculations (related to e.g. overlapping polygons)
   
-  rm(sp)
+  rm(pp)
   
 #-------------------------------------------------------------------------------------------------------------------------#
   
@@ -107,8 +110,8 @@ poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
 #------------------------------------------------------------------------------------------------------------------------#
   
   # build/return output
-  xc <- re[1] + (round((up/rr)+1)*pr) # convert positions to x coordinates
-  yc <- re[4] - (round((up%%rr+1))*pr) # convert positions to y coordinates
+  xc <- re[1] + (round(up/nr)*pr) # convert positions to x coordinates
+  yc <- re[4] - (round(up%%nr)*pr) # convert positions to y coordinates
   
   return(data.frame(x=xc, y=yc, index=up, cover=pc))
   
