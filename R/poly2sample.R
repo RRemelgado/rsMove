@@ -21,7 +21,18 @@
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample(pol=pol, re=NULL, mpc=0, pr=NULL) {
+poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
+  
+  #check if package is isntalled
+  pkgTest <- function(x){
+    if (!require(x,character.only = TRUE)){
+      install.packages(x,dep=TRUE)
+      if(!require(x,character.only = TRUE)) stop("Package not found")
+    }
+  }
+  pkgTest("raster")
+  
+#-------------------------------------------------------------------------------------------------------------------------#
   
   # check input
   if(is.null('pol')) {stop('error: "pol" is missing')}
@@ -62,15 +73,13 @@ poly2sample(pol=pol, re=NULL, mpc=0, pr=NULL) {
   # function to apply
   lf <- function(i) {
     te <- raster::extent(pol[i,]) # target extent
-    nc <- (round((te[2]-re[1])/pr)+1)-(round((te[1]-re[1])/pr)+1) # number of columns
-    nr <- (round((re[4]-te[3])/pr)+1)-(round((re[4]-te[4])/pr)+1) # number of rows
+    nc <- (round(((te[2]-ar)-re[1])/pr)+1)-(round(((te[1]+ar)-re[1])/pr)+1) # number of columns
+    nr <- (round((re[4]-(te[3]+ar))/pr)+1)-(round((re[4]-(te[4]-ar))/pr)+1) # number of rows
     r <-raster(nrows=nr, ncols=nc, xmn=te[1], xmx=te[2], ymn=te[3], ymx=te[4], crs=rp, resolution=pr) # target raster
     r = as.matrix(raster::rasterize(pol[i,], r, getCover=T)) # rasterize polygon
     nr <- dim(r)[1] # number of columns
-    ind <- which (r > 0) # identify usable pixels
-    xp <- round((((te[1]+ar)+((ind/nr)*pr))-re[1])/pr)+1 # x image coordinates
-    yp <- round((re[4]-((te[4]-ar)-((ind%%nr)*pr)))/pr)+1 # y image coordinates
-    return(list(pp=(yp+rr*xp), pc=r[ind])) # return metrics
+    ind <- which(r>0) + (round(((te[1]+ar)-re[1])/pr)+1) # identify usable pixels
+    return(list(pp=ind, pc=r[ind])) # return metrics
   }
   np <- length(pol) # number of polygons
   x <- lapply(1:np, lf) # evaluate polygons
