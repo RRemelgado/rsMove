@@ -15,56 +15,57 @@
 #' a single region. The result contains a raster with unique values for 
 #' each segment ("$segment") as well as a table ("$stats) which reports 
 #' on statistics for their raster values ("min", "max", "mean", "sd").
-#' @export
-#' @keywords
-#' @seealso
-#' @aliases
+#' @seealso \code{\link{moveModel}} \code{\link{modelApply}}
 #' @examples \dontrun{
 #'  
 #' }
-#' 
+#' @export
+
 #-----------------------------------------------------------------------------------#
 
 segRaster <- function(prob, pt=0.05, mp=0.5)
 
 #-----------------------------------------------------------------------------------#
-# check input variables
+# 1. check input variables
 #-----------------------------------------------------------------------------------#
   
   if (!exists("prob")) {return('error: "prob" is missing')}
   if (!class(prob)[1]!='RasterLayer') {return('error: "prob" is not a "RasterLayer"')}
 
 #-----------------------------------------------------------------------------------#
-# segment regions
+# 2. segment regions
 #-----------------------------------------------------------------------------------#
   
+  nc <- dim(prob)[1]
+  nr <- dim(prob)[2] 
+
   # identify usable pixels
   data <- as.matrix(prob)
   pos <- which(data > pt)
   
   # evaluate pixel connectivity
-  regions <- as.matrix(data)
+  regions <- data * 0
   for (r in 1:length(up)) {
-    xp <- pos[r] %% nr
-    yp <- pos[r] / nr
-    if (xp > 1) {sc<-xp-1} else {sc<-xp}
-    if (xp < nc) {ec<-xp+1} else {ec<-xp}
-    if (yp > 1) {sr<-yp-1} else {sr<-yp}
-    if (yp < nr) {er<-yr+1} else {er<-yp}
-    if (data[xp,yp]==0) {
-      diff <- abs(data[sc:ec,sr:er]-data[xp,yp]) <= ct
-      rv <- regions[sc:ec,sr:er]*ct
+    rp <- ((pos[r]-1) %% nr) + 1
+    cp <- ((pos[r]-1) %/% nr) + 1
+    if (cp > 1) {sc<-cp-1} else {sc<-cp}
+    if (cp < nc) {ec<-cp+1} else {ec<-cp}
+    if (rp > 1) {sr<-rp-1} else {sr<-rp}
+    if (rp < nr) {er<-rp+1} else {er<-rp}
+    if (data[rp,cp]==0) {
+      diff <- abs(data[sr:er,sc:ec]-data[rp,cp]) <= ct
+      rv <- regions[sr:er,sc:ec]*ct
       if (max(rv)>0) {
         mv <- min(rv)
         uv = unique(rv)
-        regions[xp,yp] <- mv
+        regions[rp,cp] <- mv
         for (u in 1:length(uv)) {regions[which(regions==uv[u])]<-mv}
-      } else {regions[sc:ec,sr:er] <- diff*(max(regions)+1)
+      } else {regions[sr:er,sc:ec] <- diff*(max(regions)+1)}
     }
   }
   
 #-----------------------------------------------------------------------------------#
-# derive segment statistics
+# 3. derive segment statistics
 #-----------------------------------------------------------------------------------#
     
   # update region id
@@ -87,11 +88,14 @@ segRaster <- function(prob, pt=0.05, mp=0.5)
   rm(regions, data)
   
 #-----------------------------------------------------------------------------------#
-# return output
+# 4. return output
 #-----------------------------------------------------------------------------------#
   
   # convert data back to raster
-  uregions <- raster(uregions, rr)
+  uregions = raster(uregions)
+  extent(uregions) <- extent(prob)
+  res(uregions) <- res(prob)
+  crs(uregions) <- crs(prob)
   
   # build/return data frame
   df <- data.frame(min=pmn, max=pmx, mean=pav, sd=psd, stringsAsFactors=F)
