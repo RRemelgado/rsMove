@@ -21,5 +21,8 @@ Figure 1 - Scale difference between animal movement and remotely-sensed data ([N
 <p align="justify">
 The development of packages such as *raster* and *sp* open the door for the use of remote sensing within R. they provide generic tools to process spatial data as well as an efficient approaches to handle the large datasets that are characteristic of the field of remote sensing. As a result, *rsMove* aims not to replicate the work done within these packages but rather extend its applicability to the particular issues that characterize its usage within movement ecology. In this section, we discuss some of the main applicabilities of this package.
 </p>
+
 #### Spatial and temporal querying
+<p align="justify">
 Deciding which data to include when analyzing animal movement can be challenging. While animal tracking dtaa The function *dataQuery()* extends on the *extract()* function provided by the *raster* package and 
+</p>
