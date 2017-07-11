@@ -8,9 +8,7 @@ In the scope of movement ecology, understanding the movement of an animal is dep
 <p align="center">
   <img width="600" height="300" src="http://media.springernature.com/full/springer-static/image/art%3A10.1186%2Fs40462-015-0036-7/MediaObjects/40462_2015_36_Fig1_HTML.gif">
 </p>
-##
 
 Figure 1 - Scale difference between animal movement and remotely-sensed data ([Neuman et al, 2015](https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7))
+##
 
-
-# aaaaaa!
