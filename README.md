@@ -6,7 +6,7 @@ Bridging Remote Sensing and Movement Ecology with R.
 ### 1. Why Develop rsMove?
 
 <p align="justify">
-In the scope of movement ecology, Global Positioning Systems (GPS) have evolved significantely offering an unique insight into the animal behavior. But understanding this behavior is dependent on our ability to compreeend the underlying environmental conditions that guides it. In this context, remote sensing becomes a fundamental tool. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be tricky due to the differences in the spatial and temporal scales at which they are acquired (Figure 1). As a consequence, a simple point-to-raster query becomes insuficient creating a demand for data handling methods that are sensitive to the constraints imposed by remote sensing. <i>rsMove</i> Answers to this issue providing tools to query and analyze movement data using remote sensing that are sensitive to the spatial and temporal limitations of satellite based environmental predictors.
+In the scope of movement ecology, Global Positioning Systems (GPS) have evolved significantely offering an unique insight into the animal behavior. But understanding this behavior is dependent on our ability to compreeend the underlying environmental conditions that guides it. In this context, remote sensing becomes a fundamental tool. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the differences in the spatial and temporal scales at which they are acquired (Figure 1). As a consequence, methods that are sensitive to the constraints imposed by remote sensing in the analysis of animal movement are required. <i>rsMove</i> Answers to this issue providing tools to query and analyze movement data using remote sensing.
 </p>
 
 <br>
@@ -21,19 +21,23 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 
 <br>
 
-### 2. Some generic tools (but mostly not)
+### 2. Instalation
+This gitHub is used as a basis for the improvement of *rsMove*. A stable release is avalible on CRAN and can installed with
+
+```R
+install.packages('rsMove')
+```
+
+
+#### 3. Example - Finding hotspots to find test sites
 <p align="justify">
-The development of packages such as <i>raster</i> and <i>sp</i> opened the door for the use of remote sensing within R. they provide generic tools to process spatial data as well as an efficient approaches to handle the large datasets that are characteristic of the field of remote sensing. As a result, <i>rsMove</i> aims not to replicate the work done within these packages but rather extend its applicability to the particular issues that characterize its usage within movement ecology. In this section, we provide some examples on the main applicabilities of this package.
+Within this section, we provide an example on the combine use of the functions  <i>sampleMove()</i> and  <i>hotMove()</i> for the identification of areas of interest that can serve as test sites. For this purpose, we rely on White Stork movement data (DOI: <a href="10.5441/001/1.78152p3q">10.5441/001/1.78152p3q</a>) which was colected by the Max Planck Institute for Ornithologie (MPIo) and is accessible through <a href="https://www.movebank.org/">MoveBank</a>.
+
 </p>
 
-#### 2.1. Example I - Finding hotspots to find test sites
+#### 2.2. Example - Sampling in space time
 <p align="justify">
-With the development of GPS tracking technologies animal tracking has become more precise but also longer. In the case of migratory bird species, the use of solar powered GPS sensors has allowed us to observe long-term migratory movements and how different build their migration strategies motivated by environmental drivers. Has these datasets grow they occupy increasingly larger areas. This creates challenges when handling animal tracking data. But also when handling explanatory environmental information acquired with remote sensing. NOTE: DISCUSS THE IMPORTANCE OF DEFINING SMALL (AND MANAGABLE) TEST SITES.
-</p>
-
-#### 2.2. Example II - Sampling in time
-<p align="justify">
-Wen using multi-temporal remote sensing data to understand animal movement patterns, querying remote sensing data can be challenging due to the dynamic spatial and temporal nature of animal tracking data. The function <i>dataQuery()</i> offers an interface to link remote sensing and movement data by selecting the most adequate temporal information for each GPS record. The function offers the choice for an exact match of an approximate match. While the first option only allows the selection of remote sensing data collected at the same time as the GPS record, the second is more permissive searching for the nearest clear pixel within a user defined temporal buffer.
+This example describes the 
 </p>
 
 ```R
@@ -48,13 +52,8 @@ NOTE: TALK ABOUT INTERPOLATION
 
 </p>
 
-#### 2.3. Example III - Sampling on the move
+### 3. Example - Sampling on the move
 
-### 3. Instalation
-This gitHub is used as a basis for the improvement of *rsMove*. A stable release is avalible on CRAN and can installed with
 
-```R
-install.packages('rsMove')
-```
 
 
