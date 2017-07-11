@@ -13,8 +13,10 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 
 <p align="center">
   <img width="566" height="291" src="http://media.springernature.com/full/springer-static/image/art%3A10.1186%2Fs40462-015-0036-7/MediaObjects/40462_2015_36_Fig1_HTML.gif">
+</p>
 
-  Figure 1 - Scale differences between animal movement and remotely-sensed data (<a href="https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7">Neuman et al, 2015</a>)  
+<p align="center">
+   Figure 1 - Scale differences between animal movement and remotely-sensed data (<ahref="https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7">Neuman et al, 2015</a>)  
 </p>
 
 <br>
