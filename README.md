@@ -24,7 +24,7 @@ Wen using multi-temporal remote sensing data to understand animal movement patte
 
 <br>
 
-```
+```R
 moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
 rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
 rsQuery <- dataQuery(xy=moveData,img=rsStack)
