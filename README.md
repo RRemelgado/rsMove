@@ -27,6 +27,9 @@ The development of packages such as <i>raster</i> and <i>sp</i> opened the door 
 </p>
 
 #### 2.1. Example I - Finding hotspots to find test sites
+<p align="justify">
+With the development of GPS tracking technologies animal tracking has become more precise but also longer. In the case of migratory bird species, the use of solar powered GPS sensors has allowed us to observe long-term migratory movements and how different build their migration strategies motivated by environmental drivers. Has these datasets grow they occupy increasingly larger areas. This creates challenges when handling animal tracking data. But also when handling explanatory environmental information acquired with remote sensing. NOTE: DISCUSS THE IMPORTANCE OF DEFINING SMALL (AND MANAGABLE) TEST SITES.
+</p>
 
 #### 2.2. Example II - Sampling in time
 <p align="justify">
