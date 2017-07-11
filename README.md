@@ -32,3 +32,6 @@ rsQuery <- dataQuery(xy=moveData,img=rsStack)
 
 <br>
 
+Independently of our ability to select temporal information, remote sensing suffers from an old and inescapable evil: cloud cover.
+
+
