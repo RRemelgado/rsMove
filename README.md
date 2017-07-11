@@ -20,7 +20,7 @@ Figure 1 - Scale difference between animal movement and remotely-sensed data ([N
 The development of packages such as *raster* and *sp* open the door for the use of remote sensing within R. they provide generic tools to process spatial data as well as an efficient approaches to handle the large datasets that are characteristic of the field of remote sensing. As a result, *rsMove* aims not to replicate the work done within these packages but rather extend its applicability to the particular issues that characterize its usage within movement ecology. In this section, we discuss some of the main applicabilities of this package.
 
 #### 2.1. Spatial and temporal querying
-Wen using multi-temporal remote sensing data to understand animal movement patterns, querying remote sensing data can be challenging due to the dynamic nature of animal tracking data. The function *dataQuery()* offers an interface to link remote sensing and movement data by selecting the most adequate temporal information for each GPS record. The function offers the choice for an exact match of an approximate match. While the first option only allows the selection of remote sensing data collected at the same time as the GPS record, the second is more permissive searching for the nearest clear pixel within a user defined temporal buffer.
+Wen using multi-temporal remote sensing data to understand animal movement patterns, querying remote sensing data can be challenging due to the dynamic spatial and temporal nature of animal tracking data. The function *dataQuery()* offers an interface to link remote sensing and movement data by selecting the most adequate temporal information for each GPS record. The function offers the choice for an exact match of an approximate match. While the first option only allows the selection of remote sensing data collected at the same time as the GPS record, the second is more permissive searching for the nearest clear pixel within a user defined temporal buffer.
 
 <br>
 
@@ -30,12 +30,5 @@ rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*t
 rsQuery <- dataQuery(xy=moveData,img=rsStack)
 ```
 
+<br>
 
-
-
-Thus explaining its behavior is dependent on our ability to represent the observed changes in the environment.
-
-
-While animal tracking data is acquired on very fine temporal scales (e.g. minutes, hours) satellite data is limited by its overpass time with open-access satellites such as the Moderate Resolution Spectrodadiometer (MODIS) offering daily acquisitions. Additionaly, more than often, the quality quality of satellite data is hindered by clouds that lead to annoying temporal gaps.
-
-The function *dataQuery()* extends on the *extract()* function provided by the *raster* package and 
