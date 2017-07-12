@@ -1,13 +1,14 @@
 Package: rsMove
 Type: Package
-Title: Combining animal movement and remote sensing data for animal ecology studies
+Title: Remote Sensing for Movement Ecology
 Version: 0.1
-Date: 2017-06-14
-Author: Ruben Remelgado, <ruben.remelgado@uni-wuerzburg.de>
-Maintainer: Ruben Remelgado, <ruben.remelgado@uni-wuerzburg.de>
-Description: Provides generalized functions to analyse movement patterns based on GPS tracking data using remote sensing. It contains routines to sample, model and define study sites with an assessment of data requirements.
-License: GPL-3
+Date: 2017-07-11
+Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de")
+URL: https://github.com/RRemelgado/rsMove/tree/master
+bugReports: https://github.com/RRemelgado/rsMove/issues
+Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>
+Description: Provides tools to analyze animal tracking data with remote sensing.
 LazyData: TRUE
-Imports: raster, sp, caret
+Imports: raster, sp, caret, grDevices
 RoxygenNote: 6.0.1
 License: GPL (>= 2)

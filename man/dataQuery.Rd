@@ -4,22 +4,58 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(x = x, y = y, var = var)
+dataQuery(xy = xy, st = NULL, img = img, rt = NULL, type = NULL,
+  bs = NULL, rd = F, fun = NULL)
 }
 \arguments{
-\item{x}{Vector of x coordinates.}
+\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{y}{Vector of y coordinates.}
+\item{st}{Object of class \emph{Date} with \emph{xy} observation dates.}
 
-\item{var}{Object of class RasterStack or RasterBrick containing environmental layers.}
+\item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+
+\item{rt}{Object of class \emph{Date} with \emph{img} observation dates.}
+
+\item{type}{One of \emph{exact} or \emph{nearest}.}
+
+\item{bs}{Buffer size (unit depends on the raster projection).}
+
+\item{rd}{Logical. Should the function ignore duplicated pixels? Default if FALSE.}
+
+\item{fun}{Passes an external function.}
 }
 \value{
-Matrix of environmental variables for each sample. If a sample does not overlap NA is returned.
+A SpatialPointsDataDataFrame.
 }
 \description{
 Query environmental data for coordinate pairs.
 }
+\details{
+{Returns environmental variables from a raster object for a given set of x and y coordinates.
+         A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample within an 
+         area. The defaut is to estimate a weighted mean. If acquisition times are provided (\emph{rt}) the 
+         raster data is treated as a time series. In this case, the function applies 
+         one of two sampling approaches: \emph{exact} or \emph{nearest}. If \emph{exact}, the function attempts to map the 
+         dates of the raster time series with the observation dates of the samples (\emph{ot}). If nearest, 
+         it searches for the nearest time step. If \emph{rd} is set, the function will account for duplicated 
+         pixels. The samples will be transposed to pixel coordinates and, for each unique pixel, median 
+         coordinates will be estimated for each pixel and used to build the output shapefile.}
+}
 \examples{
 \dontrun{
+
+ # read movement data
+ moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
+ 
+ # read remote sensing data
+ rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
+ 
+ # retrieve remote sensing data for samples
+ rsQuery <- dataQuery(xy=moveData,img=rsStack)
+
 }
+
+}
+\seealso{
+\code{\link{sampleMove}} \code{\link{backSample}}
 }
