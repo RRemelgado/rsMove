@@ -1,6 +1,9 @@
 ## rsMove
 Bridging Remote Sensing and Movement Ecology with R.
 
+
+ <font size="6">This is some text!</font> 
+
 <br>
 
 ### 1. Why Develop rsMove?
@@ -16,7 +19,7 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 </p>
 
 <p align="center">
-   Figure 1 - Scale differences between animal movement and remotely-sensed data (<a href="https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7">Neuman et al, 2015</a>)  
+Figure 1 - Scale differences between animal movement and remotely-sensed data (<a href="https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7">Neuman et al, 2015</a>)  
 </p>
 
 <br>
