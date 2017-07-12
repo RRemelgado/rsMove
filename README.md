@@ -35,9 +35,9 @@ Within this section, we provide an example on the combine use of the functions  
 
 <br>
 
- <p align="center"><img width="1331" height="255" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+ <p align="center"><img width="1000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
  
-<p align="center">Figure 2 - Movement tracks of 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
+<p align="center">Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
 
 ```R
 
@@ -51,5 +51,11 @@ ot = as.Date(shp@data$date)
 output <- sampleMove(xy=moveData, ot=ot, error=7, method='deg')
 
 ```
+
+<p align="center"><img width="1000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+ 
+<p align="center">Figure 2 - Comparison between original samples (in black) and the samples selected by <i>sampleMove</i>.</p>
+
+
 
 
