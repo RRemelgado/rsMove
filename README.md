@@ -35,27 +35,47 @@ Within this section, we provide an example on the combine use of the functions  
 
 <br>
 
- <p align="center"><img width="1000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+ <p align="center"><img width="600" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
  
 <p align="center">Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
 
 ```R
 
 # read movement data
-moveData <- shapefile("/WhiteStork_Konstanz.shp")
+shp <- shapefile("/WhiteStork_Konstanz.shp")
 
 # Extract time information and convert to date format
 ot = as.Date(shp@data$date)
 
-# sample with a radius of 7m. Data is geographic, so method is set to "deg".
-output <- sampleMove(xy=moveData, ot=ot, error=7, method='deg')
+# Derive unique identifiers
+ui <- unique(shp@data$ind)
+
+# sample for each unique identifier
+os = vector('list', length(ui))
+for (i in 1:length(ui)) {
+    ind = which(shp@data$ind==ui[i])
+    os[[i]] <- sampleMove(xy=shp[ind,], ot=as.Date(shp@data$dare[ind]), error=7, method="deg")
+}
 
 ```
 
-<p align="center"><img width="1000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+<p align="center"><img width="6000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.jpg"></p>
  
-<p align="center">Figure 2 - Comparison between original samples (in black) and the samples selected by <i>sampleMove</i>.</p>
+<p align="center">Figure 2 - Comparison between original samples (in black) and the samples selected by <i>sampleMove</i> (in red).</p>
 
+```R
 
+# derive shapefile from samples of each unique ID
+x = unlist(sapply(os, function(x){x@coords[,1]}))
+y = unlist(sapply(os, function(x){x@coords[,2]}))
+shp <- SpatialPoints(cbind(x,y), proj4string=crs(shp))
 
+# identify sample regions
+hm <- hotMove(xy=s, pxr=0.2, shp=T)
+
+```
+
+<p align="center"><img width="6000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
+ 
+<p align="center">Figure 2 - Polygons of different colors represent unique sample regions identified with <i>hotMove</i> (in red).</p>
 
