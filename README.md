@@ -127,3 +127,13 @@ hm.stats <- hotMoveStats(rid=hm, time=as.Date(moveData@data$timestamp))
 ```
 
 Then, using the output data frame, we see how much time was spent within each region and the amount of samples assigned to each of them (Figure 6).
+
+<br>
+
+<p align="center"><img width="414" height="260" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_6.png"></p>
+ 
+<p align="center">Figure 6 - Amount of time and number of samples per region. narrow.</p>
+
+<br>
+
+
