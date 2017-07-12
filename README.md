@@ -78,7 +78,7 @@ for (i in 1:length(ui)) {
 ```
 
 <p align="justify">
-The final sample set, which consists of the samples collected for each individual separately,  corresponds to 13% of the initial sample set (Figure 4). Each sample represents locations where the animal spend at least 5 minutes. <i>sampleMove()</i> also reports on the amount of data points used to define each of the new samples.
+The final sample set, which consists of the samples collected for each individual separately, corresponds to 13% of the initial sample set (Figure 4). Each sample represents locations where the animal spend at least 5 minutes. <i>sampleMove()</i> also reports on the amount of data points used to define each of the new samples.
 <p>
 
 <br>
