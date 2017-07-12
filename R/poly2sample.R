@@ -1,37 +1,38 @@
 #' @title poly2sample
 #'
 #' @description Convert spatial polygons into point samples.
-#' @param pol Object of class "SpatialPolygons" or "SpatialPolygonDataFrame".
-#' @param re Object of class "Extent" or a raster object from which an extent can be derived.
-#' @param mpc Minimum pixel cover (0-100).
+#' @param pol Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
+#' @param re Object of class \emph{Extent} or a raster object from which an extent can be derived.
+#' @param mpc Minimum pixel cover (0-100). Default is 100.
 #' @param pr Pixel resolution.
-#' @param rp A valid "CRS" object.
 #' @import raster grDevices
-#' @return Matrix containing unique samples.
-#' @details {Determines coordinates of pixels within a given extent. If "re" is missing the
-#'            target extent corresponds to the extent of the polygon layer. In this case, "pr"
-#'            is required. If "re" is an "Extent" object or "re" is missing rp" is required. 
-#'            "mpc" can be used to filter pixels with low purity, i.e. pixels where the 
+#' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
+#' @return A \emph{SpatialPointsDataFrame}.
+#' @details {Determines coordinates of pixels within a given extent. If \emph{re} is missing the
+#'            target extent corresponds to the extent of the polygon layer. In this case, \emph{pr}
+#'            is required. If \emph{re} is an \emph{Extent} object or \emph{re} is missing \emph{rp} is required. 
+#'            \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the 
 #'            percentage of area cover by a polygon is below the defined threshold. 
-#'            The output provides the coordinates ("x" and "y") the 
-#'            pixel percent cover ("cover") for each selected pixel.}
+#'            The output provides the coordinates (\emph{x} and \emph{y}) the 
+#'            pixel percent cover (\emph{cover}) for each selected pixel.}
 #' @examples \dontrun{
+#'  
+#'  # load example probability image
+#'  img <- raster(system.file('extdata', 'konstanz_probabilities.tif', package="rsMove"))
+#'  
+#'  # load area of interest
+#'  roi <- shapefile(system.file('extdata', 'konstanz_roi.shp', package="rsMove"))
+#'  
+#'  # segment probabilities
+#'  samples <- poly2sample(pol=roi, re=img)
+#'  
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
-  
-  #check if package is isntalled
-  pkgTest <- function(x){
-    if (!require(x,character.only = TRUE)){
-      install.packages(x,dep=TRUE)
-      if(!require(x,character.only = TRUE)) stop("Package not found")
-    }
-  }
-  pkgTest("raster")
-  
+poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
+
 #-------------------------------------------------------------------------------------------------------------------------#
   
   # check input
@@ -61,7 +62,7 @@ poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
     nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
     
   }
-  if (!exists('mpc')) {mpc <- 0}
+  if (!exists('mpc')) {mpc <- 100}
   if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
 
   # update extent object
@@ -113,7 +114,8 @@ poly2sample <- function(pol=pol, re=NULL, mpc=0, pr=NULL) {
   xc <- re[1] + (round(up/nr)*pr) # convert positions to x coordinates
   yc <- re[4] - (round(up%%nr)*pr) # convert positions to y coordinates
   
-  return(data.frame(x=xc, y=yc, index=up, cover=pc))
+  os <- data.frame(x=xc, y=yc, index=up, cover=pc)
+  return(SpatialPointsDataFrame(cbind(xc,yc), os, proj4string=crs(pol)))
   
 #------------------------------------------------------------------------------------------------------------------------#
   
