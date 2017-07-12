@@ -59,7 +59,7 @@ for (i in 1:length(ui)) {
 
 ```
 
-<p align="center"><img width="6000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.jpg"></p>
+<p align="center"><img width="600" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.jpg"></p>
  
 <p align="center">Figure 2 - Comparison between original samples (in black) and the samples selected by <i>sampleMove</i> (in red).</p>
 
@@ -75,7 +75,7 @@ hm <- hotMove(xy=s, pxr=0.2, shp=T)
 
 ```
 
-<p align="center"><img width="6000" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
+<p align="center"><img width="600" height="290" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
  
 <p align="center">Figure 2 - Polygons of different colors represent unique sample regions identified with <i>hotMove</i> (in red).</p>
 
