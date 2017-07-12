@@ -47,7 +47,7 @@ This data was collected with a temporal resolution of 5 minutes and an acquisiti
 
 <br>
 
-<p align="center"><img width="209" height="209" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.gif"></p>
+<p align="center"><img width="300" height="300" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.gif"></p>
  
 <p align="center">Figure 3 - Animation of White Stork movement tracks (Radofzell, Germany) narrow.</p>
 
