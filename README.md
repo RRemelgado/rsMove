@@ -63,7 +63,7 @@ As a consequence, before we can use this data to model the suitability of enviro
 shp <- shapefile("./WhiteStork_Germany.shp")
 
 # Extract time information and convert to date format
-ot <- as.Date(shp@data$date)
+obs.time <- as.Date(shp@data$date)
 
 # Derive unique identifiers
 ui <- unique(shp@data$ind)
@@ -72,7 +72,7 @@ ui <- unique(shp@data$ind)
 os <- vector('list', length(ui))
 for (i in 1:length(ui)) {
     ind = which(shp@data$ind==ui[i])
-    os[[i]] <- sampleMove(xy=shp[ind,], ot=as.Date(shp@data$dare[ind]), error=7.2, method="deg")
+    os[[i]] <- sampleMove(xy=shp[ind,], ot=obs.time[ind], error=7.2, method="deg")
 }
 
 ```
@@ -98,7 +98,8 @@ After obtaining a filtered sample set, we can use them to identify hotspots usin
 # derive shapefile from samples of each unique ID
 x <- unlist(sapply(os, function(x){x@coords[,1]}))
 y <- unlist(sapply(os, function(x){x@coords[,2]}))
-s <- SpatialPoints(cbind(x,y), proj4string=crs(shp))
+t <- unlist(sapply(os, function(x){x@data$timestamp}))
+s <- SpatialPointsDataFrame(cbind(x,y), data.frame(x=x, y=y, time=t), proj4string=crs(shp))
 
 # identify sample regions
 hm <- hotMove(xy=s, pxr=0.2, shp=T)
@@ -125,4 +126,4 @@ The function <i>hotMoveStats()</i> supports this choice by performing a statisti
 hm.stats <- hotMoveStats(rid=hm, time=as.Date(moveData@data$timestamp))
 ```
 
-If we look at the output table, 
+Then, using the output data frame, we  
