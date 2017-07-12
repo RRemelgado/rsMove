@@ -30,7 +30,7 @@ install.packages('rsMove')
 
 ### 3. Example - Selecting test sites through hotspot detection
 <p align="justify">
-Within this section, we provide an example on the combine use of the functions  <i>sampleMove()</i> and  <i>hotMove()</i> for the identification of areas of interest that can serve as test sites. For this purpose, we rely on White Stork movement data (DOI: <a href="10.5441/001/1.78152p3q">10.5441/001/1.78152p3q</a>) which was colected by the Max Planck Institute for Ornithologie (MPIo) and is accessible through <a href="https://www.movebank.org/">MoveBank</a>. We focused on data collected between June and December of 2013 which refers to the first migration of 13 juveniles between Radofzell, in Germany, and the Gibraltar narrow, at the coast of Spain (Figure 2).
+Within this section, we provide an example on the combine use of the functions  <i>sampleMove()</i>,  <i>hotMove()</i> and <i>hotMoveStats()</i> for the identification of areas of interest that can serve as test sites. For this purpose, we rely on White Stork movement data (DOI: <a href="10.5441/001/1.78152p3q">10.5441/001/1.78152p3q</a>) which was colected by the Max Planck Institute for Ornithologie (MPIo) and is accessible through <a href="https://www.movebank.org/">MoveBank</a>. We focused on data collected between June and December of 2013 which refers to the first migration of 13 juveniles between Radofzell, in Germany, and the Gibraltar narrow, at the coast of Spain (Figure 2). Due to size restrictions, this example data is not provided in the CRAN version of the package. However, you can obtain it <a href="">within this gitHub</a>. This is pre-processed version of the original data provided through MoveBank.
 </p>
 
 <br>
@@ -42,7 +42,7 @@ Within this section, we provide an example on the combine use of the functions  
 ```R
 
 # read movement data
-shp <- shapefile("/WhiteStork_Konstanz.shp")
+shp <- shapefile("./WhiteStork_Germany.shp")
 
 # Extract time information and convert to date format
 ot = as.Date(shp@data$date)
