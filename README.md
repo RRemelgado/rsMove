@@ -126,7 +126,7 @@ The function <i>hotMoveStats()</i> supports this choice by performing a statisti
 hm.stats <- hotMoveStats(rid=hm, time=as.Date(moveData@data$timestamp))
 ```
 
-Then, using the output data frame, we see how much time was spent within each region and the amount of samples assigned to each of them (Figure 6).
+Then, using the output data frame, we can look at how much time was spent within each region and the amount of samples assigned to each of them (Figure 6). Based on this analysis, we see that region 34 stands out with the biggest amount of time (76 days) and the biggest number of samples (15000).
 
 <br>
 
@@ -137,3 +137,12 @@ Then, using the output data frame, we see how much time was spent within each re
 <br>
 
 
+
+
+<br>
+
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_7.jpg"></p>
+ 
+<p align="center"><sub>Figure 7 - Location of region 34 (in blue) and a zoom in of the same region (bottom right) showing the samples that compose this region (in red).</sub></p>
+
+<br>
