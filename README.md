@@ -1,9 +1,6 @@
 ## rsMove
 Bridging Remote Sensing and Movement Ecology with R.
 
-
- <font size="40">This is some text!</font> 
-
 <br>
 
 ### 1. Why Develop rsMove?
@@ -19,7 +16,7 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 </p>
 
 <p align="center">
-Figure 1 - Scale differences between animal movement and remotely-sensed data (<a href="https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7">Neuman et al, 2015</a>)  
+<sub>Figure 1 - Scale differences between animal movement and remotely-sensed data (<a href="https://movementecologyjournal.biomedcentral.com/articles/10.1186/s40462-015-0036-7">Neuman et al, 2015</a>)</sub>
 </p>
 
 <br>
@@ -40,7 +37,7 @@ Within this section, we provide an example on the combine use of the functions <
 
 <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
  
-<p align="center">Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
+<p align="center"><sub>Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</sub></p>
 
 <br>
 
@@ -52,7 +49,7 @@ This data was collected with a temporal resolution of 5 minutes and an acquisiti
 
 <p align="center"><img width="414" height="260" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.gif"></p>
  
-<p align="center">Figure 3 - Animation of White Stork movement tracks (Radofzell, Germany) narrow.</p>
+<p align="center"><sub>Figure 3 - Animation of White Stork movement tracks (Radofzell, Germany) narrow.</sub></p>
 
 <br>
 
@@ -88,7 +85,7 @@ The final sample set, which consists of the samples collected for each individua
 
 <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
  
-<p align="center">Figure 4 - Comparison between original samples (in black) and the samples selected by <i>sampleMove()</i> (in red).</p>
+<p align="center"><sub>Figure 4 - Comparison between original samples (in black) and the samples selected by <i>sampleMove()</i> (in red).</sub></p>
 
 <br>
 
@@ -117,7 +114,7 @@ As <i>shp</i> was set to TRUE, the functions returns polygons for the sample reg
 
 <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_5.jpg"></p>
  
-<p align="center">Figure 5 - Polygons of different colors represent unique sample regions identified with <i>hotMove()</i> (in red).</p>
+<p align="center"><sub>Figure 5 - Polygons of different colors represent unique sample regions identified with <i>hotMove()</i> (in red).</sub></p>
 
 <br>
 
@@ -135,7 +132,7 @@ Then, using the output data frame, we see how much time was spent within each re
 
 <p align="center"><img width="600" height="300" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_6.png"></p>
  
-<p align="center">Figure 6 - Amount of time and number of samples per region. narrow.</p>
+<p align="center"><sub>Figure 6 - Amount of time and number of samples per region. narrow.</sub></p>
 
 <br>
 
