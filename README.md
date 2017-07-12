@@ -3,10 +3,10 @@ Bridging Remote Sensing and Movement Ecology with R.
 
 <br>
 
-### 1. Why Develop rsMove?
+### 1. Why develop rsMove?
 
 <p align="justify">
-In the scope of movement ecology, Global Positioning Systems (GPS) have evolved significantely offering an unique insight into the animal behavior. But understanding this behavior is dependent on our ability to compreeend the underlying environmental conditions that guides it. In this context, remote sensing becomes a fundamental tool. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the differences in the spatial and temporal scales at which they are acquired (Figure 1). As a consequence, methods that are sensitive to the constraints imposed by remote sensing in the analysis of animal movement are required. <i>rsMove</i> Answers to this issue providing tools to query and analyze movement data using remote sensing.
+In the scope of movement ecology, Global Positioning Systems (GPS) have evolved significantly offering a unique insight into the animal behavior. But understanding this behavior is dependent on our ability to comprehend the underlying environmental conditions that guides it. In this context, remote sensing becomes a fundamental tool. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the differences in the spatial and temporal scales at which they are acquired (Figure 1). As a consequence, methods that are sensitive to the constraints imposed by remote sensing in the analysis of animal movement are required. <i>rsMove</i> Answers to this issue providing tools to query and analyze movement data using remote sensing.
 </p>
 
 <br>
@@ -21,8 +21,8 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 
 <br>
 
-### 2. Instalation
-This gitHub is used as a basis for the improvement of *rsMove*. A stable release is avalible on CRAN and can installed with:
+### 2. Installation
+This gitHub is used as a basis for the improvement of *rsMove*. A stable release is available on CRAN and can installed with:
 
 ```R
 install.packages('rsMove')
@@ -30,7 +30,7 @@ install.packages('rsMove')
 
 ### 3. Example - Selecting test sites through hotspot detection
 <p align="justify">
-Within this section, we provide an example on the combine use of the functions <i>sampleMove()</i>,  <i>hotMove()</i> and <i>hotMoveStats()</i> for the identification of areas of interest that can serve as test sites. This is particularly important when dealing with migratory species. Such movement data often provides a large spatial coverage (e.g. continental, global) that can be difficult to analyze with remote sensing due to a high demand of data. Nowadays, processing big data is at the reach of our fingertips. Platforms such as <a href="https://earthengine.google.com/google/">Google Earth Engine</a> have made it simple and accessible creating a new era of global remote sensing products. However, developing new analytical approaches require an iterative process of trial and error that often demans a careful visual assessment of its results. As a consequence, carefully selecting representative test sites is essential for an efficient time management and for a carefull assessment of the consistency of new methodologies. To demonstrate how  <i>rsMove</i> can help with this issue, we used White Stork movement data (DOI: <a href="10.5441/001/1.78152p3q">10.5441/001/1.78152p3q</a>) which was colected by the Max Planck Institute for Ornithologie (MPIo) and is accessible through <a href="https://www.movebank.org/">MoveBank</a>. We focused on data collected between June and December of 2013 which refers to the first migration of 13 juveniles between Radofzell, in Germany, and the Gibraltar narrow, at the coast of Spain (Figure 2). Due to size restrictions, this example data is not provided in the CRAN version of the package. However, you can obtain it <a href="">here</a>. This is a processed version of the original data provided through MoveBank.
+Within this section, we provide an example on the combine use of the functions <i>sampleMove()</i>,  <i>hotMove()</i> and <i>hotMoveStats()</i> for the identification of areas of interest that can serve as test sites. This is particularly important when dealing with migratory species. Such movement data often provides a large spatial coverage (e.g. continental, global) that can be difficult to analyze with remote sensing due to a high demand of data. Nowadays, processing big data is at the reach of our fingertips. Platforms such as <a href="https://earthengine.google.com/google/">Google Earth Engine</a> have made it simple and accessible creating a new era of global remote sensing products. However, developing new analytical approaches require an iterative process of trial and error that often demands a careful visual assessment of its results. As a consequence, carefully selecting representative test sites is essential for an efficient time management and for a careful assessment of the consistency of new methodologies. To demonstrate how <i>rsMove</i> can help with this issue, we used White Stork movement data (DOI: <a href="10.5441/001/1.78152p3q">10.5441/001/1.78152p3q</a>) which was collected by the Max Planck Institute for Ornithologie (MPIo) and is accessible through <a href="https://www.movebank.org/">MoveBank</a>. We focused on data collected between June and December of 2013 which refers to the first migration of 13 juveniles between Radofzell, in Germany, and the Gibraltar narrow, at the coast of Spain (Figure 2). Due to size restrictions, this example data is not provided in the CRAN version of the package. However, you can obtain it <a href="">here</a>. This is a processed version of the original data provided through MoveBank.
 </p>
 
 <br>
@@ -144,3 +144,5 @@ Then, using the output data frame, we can look at how much time was spent within
 ### Bug reports & contact
 
 For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/tree/master">https://github.com/RRemelgado/rsMove/issues</a>. Feature requests and other contributions are also welcome.
+
+<br>
