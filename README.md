@@ -118,5 +118,11 @@ As <i>shp</i> was set to <span style="color:blue;">TRUE</span>, the functions re
 <br>
 
 <p align="justify">
-The function <i>hotMoveStats()</i> supports this choice by performing a statistical evaluation of the movement data that composes each of the sample regions acquired with <i>hotMove()</i>.
+The function <i>hotMoveStats()</i> supports this choice by performing a statistical evaluation of the movement data that composes each of the sample regions acquired with <i>hotMove()</i>. The base output of this function is a count of samples per region. However, if timestamps are provided, the function reports evaluates the time spent within each region. So let's apply the function using:
 </p>
+
+```
+hm.stats <- hotMoveStats(rid=hm, time=as.Date(moveData@data$timestamp))
+```
+
+If we look at the output table, 
