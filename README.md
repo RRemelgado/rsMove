@@ -35,9 +35,30 @@ Within this section, we provide an example on the combine use of the functions  
 
 <br>
 
- <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
  
 <p align="center">Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
+
+<br>
+
+This data was collected with a temporal resolution of 5 minutes and an acquisition error of 3.6 meters. Due to its fine resolution, it provides valuable information on the behavior of this species allowing us to understand how it interacts with its environment during different behavior stages. Figure 3 shows the movement of the White Storks analyzed within this example while they were nesting in Germany. This GIF, derived with the <a href="https://github.com/cran/moveVis">moveVis</a> package, shows that the animals spent most of their time in small density urban areas where their nests were located. But we also see how they move towards the outskirts of the urban fabric and into agricultural land when in search for food. As a result, this data gives us an insight into the differences in resource selection by the White Stork when it's resting and when it's feeding. But it also includes a lot of random information related to the travels between the nesting and feeding sites. Additionally, we can see some exploratory flights where the animals don't seem to focus on a particular area. While this info can be relevant to understand how the animal moves, from a remote sensing perspective, these samples account for noise that hinders our ability to accurately map relevant resources.
+
+<br>
+
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/ws_animation.jpg"></p>
+ 
+<p align="center">Figure 3 - Animation of White Stork movement tracks (Radofzell, Germany) narrow.</p>
+
+<br>
+
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+ 
+<p align="center">Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
+
+<br>
+
+As a consequence, before we can use this data to model the suitability of environmental resources, we first need to indetify samples that represent areas of interest and exclude random movements. <i>sampleMove()</i> offers a simple appproach to achieve this goal. Looking at continuous movements, the function evaluates the distance between consecutive points to identify the start of a stop. If the distance between consecutive points is lesser than the predefined error (in this case 7.2 meters, which is two times the error of the GPS sensor) the first points is set as a pointer. Then, the following observations are compared against this pointer and added to the segment if the distance between them is lower than the error. If not, the segment is closed and the function provides an average for the coordinates and timestamps as well as an estimate of the elapsed time within it. Below you can see how to read in the data and use <i>sampleMove()</i as well as the spatial distribution of the retrieved samples (Figure 3).
+
 
 ```R
 
@@ -54,14 +75,14 @@ ui <- unique(shp@data$ind)
 os = vector('list', length(ui))
 for (i in 1:length(ui)) {
     ind = which(shp@data$ind==ui[i])
-    os[[i]] <- sampleMove(xy=shp[ind,], ot=as.Date(shp@data$dare[ind]), error=7, method="deg")
+    os[[i]] <- sampleMove(xy=shp[ind,], ot=as.Date(shp@data$dare[ind]), error=7.2, method="deg")
 }
 
 ```
 
 <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.jpg"></p>
  
-<p align="center">Figure 2 - Comparison between original samples (in black) and the samples selected by <i>sampleMove</i> (in red).</p>
+<p align="center">Figure 3 - Comparison between original samples (in black) and the samples selected by <i>sampleMove</i> (in red).</p>
 
 ```R
 
@@ -77,5 +98,5 @@ hm <- hotMove(xy=s, pxr=0.2, shp=T)
 
 <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
  
-<p align="center">Figure 2 - Polygons of different colors represent unique sample regions identified with <i>hotMove</i> (in red).</p>
+<p align="center">Figure 4 - Polygons of different colors represent unique sample regions identified with <i>hotMove</i> (in red).</p>
 
