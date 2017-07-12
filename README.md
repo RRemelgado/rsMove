@@ -35,18 +35,16 @@ Within this section, we provide an example on the combine use of the functions  
 
 <br>
 
-
-<p align="center">Figure 2 - Movement tracks of 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
-
  <p align="center"><img width="566" height="291" src="http://media.springernature.com/full/springer-static/image/art%3A10.1186%2Fs40462-015-0036-7/MediaObjects/40462_2015_36_Fig1_HTML.gif"></p>
-
+ 
+<p align="center">Figure 2 - Movement tracks of 13 Juvenile white Storks between Germany and the Gribraltar narrow.</p>
 
 ```R
 
 # read movement data
-moveData <- shapefile(<i>movement data </i>)
+moveData <- shapefile("/WhiteStork_Konstanz.shp")
 
-# Extrac time information and convert to date format
+# Extract time information and convert to date format
 ot = as.Date(shp@data$date)
 
 # sample with a radius of 7m. Data is geographic, so method is set to "deg".
