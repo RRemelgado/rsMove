@@ -42,6 +42,17 @@ Within this section, we provide an example on the combine use of the functions  
  <p align="center"><img width="566" height="291" src="http://media.springernature.com/full/springer-static/image/art%3A10.1186%2Fs40462-015-0036-7/MediaObjects/40462_2015_36_Fig1_HTML.gif"></p>
 
 
+```R
 
+# read movement data
+moveData <- shapefile(<i>movement data </i>)
+
+# Extrac time information and convert to date format
+ot = as.Date(shp@data$date)
+
+# sample with a radius of 7m. Data is geographic, so method is set to "deg".
+output <- sampleMove(xy=moveData, ot=ot, error=7, method='deg')
+
+```
 
 
