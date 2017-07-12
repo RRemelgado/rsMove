@@ -106,12 +106,17 @@ hm <- hotMove(xy=s, pxr=0.2, shp=T)
 ```
 
 <p align="justify">
-As <i>shp</i> was set to <font color="Blue">TRUE</font>, the functions returns polygons for the sample regions.
+As <i>shp</i> was set to <span style="color:blue;">TRUE</span>, the functions returns polygons for the sample regions (Figure 5). These provide us with a good idea of where to start looking for answers highlighting some larger connected areas where the storks spend much of their time. However, we still have splenty of areas to look at with a total of 34 regions. If we want to test the use of different remote sensing datasets with the movement data, it can be troublesome to deal with such a large amount of test sites. For example, if we are dealing with Landsat data, the selected regions would account for 26 tiles. Considering that we would only be interested on the year of 2013 (when the animals were tracked), downloading all the available data sum up to ~600 Gb. While such amount of data is surely managable, processing and visually checking the results of our analyzis would surely become time consuming. So, how can we narrow down our focus?
 <p>
 
 <br>
 
 <p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
  
-<p align="center">Figure 5 - Polygons of different colors represent unique sample regions identified with <i>hotMove</i> (in red).</p>
+<p align="center">Figure 5 - Polygons of different colors represent unique sample regions identified with <i>hotMove()</i> (in red).</p>
 
+<br>
+
+<p align="justify">
+The function <i>hotMoveStats()</i> supports this choice by performing a statistical evaluation of the movement data that composes each of the sample regions acquired with <i>hotMove()</i>.
+<p>
