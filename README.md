@@ -47,7 +47,7 @@ This data was collected with a temporal resolution of 5 minutes and an acquisiti
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/ws_animation.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.gif"></p>
  
 <p align="center">Figure 3 - Animation of White Stork movement tracks (Radofzell, Germany) narrow.</p>
 
@@ -83,9 +83,9 @@ The final sample set, which consists of the samples collected for each individua
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
  
-<p align="center">Figure 3 - Comparison between original samples (in black) and the samples selected by <i>sampleMove()</i> (in red).</p>
+<p align="center">Figure 4 - Comparison between original samples (in black) and the samples selected by <i>sampleMove()</i> (in red).</p>
 
 <br>
 
@@ -112,7 +112,7 @@ As <i>shp</i> was set to TRUE, the functions returns polygons for the sample reg
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_5.jpg"></p>
  
 <p align="center">Figure 5 - Polygons of different colors represent unique sample regions identified with <i>hotMove()</i> (in red).</p>
 
