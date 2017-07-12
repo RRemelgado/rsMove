@@ -2,7 +2,7 @@
 Bridging Remote Sensing and Movement Ecology with R.
 
 
- <font size="6">This is some text!</font> 
+ <font size="40">This is some text!</font> 
 
 <br>
 
