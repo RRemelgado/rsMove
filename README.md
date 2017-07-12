@@ -143,4 +143,4 @@ Then, using the output data frame, we can look at how much time was spent within
 
 ### Bug reports & contact
 
-For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/tree/master">https://github.com/RRemelgado/rsMove/tree/master</a>). Feature requests and other contributions are also welcome.
+For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/tree/master">https://github.com/RRemelgado/rsMove/issues</a>). Feature requests and other contributions are also welcome.
