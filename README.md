@@ -130,7 +130,7 @@ Then, using the output data frame, we see how much time was spent within each re
 
 <br>
 
-<p align="center"><img width="414" height="260" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_6.png"></p>
+<p align="center"><img width="600" height="300" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_6.png"></p>
  
 <p align="center">Figure 6 - Amount of time and number of samples per region. narrow.</p>
 
