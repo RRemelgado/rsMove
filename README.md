@@ -35,7 +35,7 @@ Within this section, we provide an example on the combine use of the functions <
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_2.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/README_data/blob/master/rsMove/Figure_2.jpg"></p>
  
 <p align="center"><sub>Figure 2 - Movement track from 13 Juvenile white Storks between Germany and the Gribraltar narrow.</sub></p>
 
@@ -47,7 +47,7 @@ This data was collected with a temporal resolution of 5 minutes and an acquisiti
 
 <br>
 
-<p align="center"><img width="414" height="260" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_3.gif"></p>
+<p align="center"><img width="414" height="260" src="https://github.com/RRemelgado/README_data/blob/master/rsMove/Figure_3.gif"></p>
  
 <p align="center"><sub>Figure 3 - Animation of White Stork movement tracks (Radofzell, Germany) narrow.</sub></p>
 
@@ -83,7 +83,7 @@ The final sample set, which consists of the samples collected for each individua
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_4.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/README_data/blob/master/rsMove/Figure_4.jpg"></p>
  
 <p align="center"><sub>Figure 4 - Comparison between original samples (in black) and the samples selected by <i>sampleMove()</i> (in red).</sub></p>
 
@@ -112,7 +112,7 @@ As <i>shp</i> was set to TRUE, the functions returns polygons for the sample reg
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_5.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/README_data/blob/master/rsMove/Figure_5.jpg"></p>
  
 <p align="center"><sub>Figure 5 - Polygons of different colors represent unique sample regions identified with <i>hotMove()</i> (in red).</sub></p>
 
@@ -129,13 +129,13 @@ hm.stats <- hotMoveStats(rid=hm, time=as.Date(moveData@data$timestamp))
 Then, using the output data frame, we can look at how much time was spent within each region and the amount of samples assigned to each of them (Figure 6). Based on this analysis, we see that region 34 (Figure 7) stands out with the biggest amount of time (76 days) and the biggest number of samples (15000). Now we can focus on this region as a test site for our remote sensing based methodologies. This region covers only two two Landsat tiles amounting to a storage requirement of ~46 Gb to cover 2013.
 <br>
 
-<p align="center"><img width="600" height="300" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_6.png"></p>
+<p align="center"><img width="600" height="300" src="https://github.com/RRemelgado/README_data/blob/master/rsMove/Figure_6.png"></p>
  
 <p align="center"><sub>Figure 6 - Amount of time and number of samples per region. narrow.</sub></p>
 
 <br>
 
-<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/rsMove/blob/master/Figure_7.jpg"></p>
+<p align="center"><img width="605" height="315" src="https://github.com/RRemelgado/README_data/blob/master/rsMove/Figure_7.jpg"></p>
  
 <p align="center"><sub>Figure 7 - Location of region 34 (in blue) and a zoom in of the same region (bottom right) showing the samples that compose this region (in red).</sub></p>
 
