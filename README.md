@@ -28,7 +28,7 @@ This gitHub is used as a basis for the improvement of *rsMove*. A stable release
 install.packages('rsMove')
 ```
 
-### 3. Example - Finding hotspots to find test sites
+### 3. Example - Selecting test sites through hotspot detection
 <p align="justify">
 Within this section, we provide an example on the combine use of the functions  <i>sampleMove()</i> and  <i>hotMove()</i> for the identification of areas of interest that can serve as test sites. For this purpose, we rely on White Stork movement data (DOI: <a href="10.5441/001/1.78152p3q">10.5441/001/1.78152p3q</a>) which was colected by the Max Planck Institute for Ornithologie (MPIo) and is accessible through <a href="https://www.movebank.org/">MoveBank</a>. We focused on data collected between June and December of 2013 which refers to the first migration of 13 juveniles between Radofzell, in Germany, and the Gibraltar narrow, at the coast of Spain (Figure 2).
 </p>
