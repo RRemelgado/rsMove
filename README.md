@@ -140,3 +140,7 @@ Then, using the output data frame, we can look at how much time was spent within
 <p align="center"><sub>Figure 7 - Location of region 34 (in blue) and a zoom in of the same region (bottom right) showing the samples that compose this region (in red).</sub></p>
 
 <br>
+
+### Bug reports & contact
+
+For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/tree/master">https://github.com/RRemelgado/rsMove/tree/master</a>). Feature requests and other contributions are also welcome.
