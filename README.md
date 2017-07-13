@@ -28,7 +28,7 @@ This gitHub is used as a basis for the improvement of *rsMove*. A stable release
 install.packages('rsMove')
 ```
 ### Examples
-<p align="center">
-<a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Objective selection of study sites</a>
+<p align="justify">
+<a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
 </p>
 
