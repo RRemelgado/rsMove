@@ -29,12 +29,18 @@ install.packages('rsMove')
 ```
 ### Examples
 <p align="justify">
-<a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
+<ul type="disc"> <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
 </p>
 
 <br>
 
 ### Aknowledgements
 <p align="justify">
-This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment project</a> and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant *50 EE 1403*. We would like to give special thanks to the <a href="http://www.orn.mpg.de/">Max Plank’s Institute for Ornithology (MPIO)</a> for collecting and providing access to the movement data used in this study and to the National Aeronautics and Space Administration (NASA) and the United Stated Geological Survey (USGS) for the access to Landsat and MODIS data.
+This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant *50 EE 1403*.For news on other developments at the Department of Remote Sensing of the University of Würzburg, clike <a href="http://remote-sensing.eu/">here</a>
+</p>
+
+### Other packages developed by our department
+<p align="justify">
+<ul type="disc"> <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
+<ul type="disc"> <a href="https://github.com/cran/moveVis/">moveVis</a>
 </p>
