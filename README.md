@@ -32,6 +32,12 @@ install.packages('rsMove')
 <ul type="disc"> <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
 </p>
 
+<div class="disc"></div>
+<ol>
+    <li>List Item 1</li>
+    <li>List Item 2</li>
+</ol>
+
 <br>
 
 ### Aknowledgements
