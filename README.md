@@ -3,7 +3,7 @@ Bridging Remote Sensing and Movement Ecology with R.
 
 <br>
 
-### 1. Why develop rsMove?
+### Why develop rsMove?
 
 <p align="justify">
 In the scope of movement ecology, Global Positioning Systems (GPS) have evolved significantly offering a unique insight into the animal behavior. But understanding this behavior is dependent on our ability to comprehend the underlying environmental conditions that guides it. In this context, remote sensing becomes a fundamental tool. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the differences in the spatial and temporal scales at which they are acquired (Figure 1). As a consequence, methods that are sensitive to the constraints imposed by remote sensing in the analysis of animal movement are required. <i>rsMove</i> Answers to this issue providing tools to query and analyze movement data using remote sensing.
@@ -21,7 +21,7 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 
 <br>
 
-### 2. Installation
+### Installation
 This gitHub is used as a basis for the improvement of *rsMove*. A stable release is available on CRAN and can installed with:
 
 ```R
@@ -32,3 +32,9 @@ install.packages('rsMove')
 <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
 </p>
 
+<br>
+
+### Aknowledgements
+<p align="justify">
+This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment project</a> and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant *50 EE 1403*. We would like to give special thanks to the <a href="http://www.orn.mpg.de/">Max Plank’s Institute for Ornithology (MPIO)</a> for collecting and providing access to the movement data used in this study and to the National Aeronautics and Space Administration (NASA) and the United Stated Geological Survey (USGS) for the access to Landsat and MODIS data.
+</p>
