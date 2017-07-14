@@ -30,14 +30,23 @@ install.packages('rsMove')
 ### Examples
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
 
-
 <br>
+
+### What else are we doing?
+<p align="justify">
+The Department of Remote Sensing of the University of Würzburg has developed other R packages that might interest you. These are:
+</p>
+
+* <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
+* <a href="https://github.com/cran/moveVis/">moveVis</a>
+
+<p align="justify">
+For other news on the work at at the Department of Remote Sensing of the University of Würzburg, clike <a href="http://remote-sensing.eu/">here</a>
+</p>
 
 ### Aknowledgements
 <p align="justify">
-This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>.For news on other developments at the Department of Remote Sensing of the University of Würzburg, clike <a href="http://remote-sensing.eu/">here</a>
+This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>.
 </p>
 
-### Other packages developed by our department
-* <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
-* <a href="https://github.com/cran/moveVis/">moveVis</a>
+<br>
