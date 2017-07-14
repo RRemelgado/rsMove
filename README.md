@@ -53,6 +53,7 @@ This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-
 
 <br>
 
-<img width="347" height=152" src="https://www.uni-wuerzburg.de/typo3conf/ext/uw_sitepackage/Resources/Public/Images/uni-wuerzburg-logo.svg">
+<img width="347" height="152" src="https://www.uni-wuerzburg.de/typo3conf/ext/uw_sitepackage/Resources/Public/Images/uni-wuerzburg-logo.svg">
 
-<img width="347" height=152" src="http://remote-sensing.eu/wp-content/uploads/2016/05/eagle_master_full_noText.png">
+
+<img width="350" height="350" src="http://remote-sensing.eu/wp-content/uploads/2016/05/eagle_master_full_noText.png">
