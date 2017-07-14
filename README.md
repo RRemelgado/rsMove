@@ -44,9 +44,15 @@ The Department of Remote Sensing of the University of Würzburg has developed ot
 For other news on the work at at the Department of Remote Sensing of the University of Würzburg, clike <a href="http://remote-sensing.eu/">here</a>
 </p>
 
+<br>
+
 ### Aknowledgements
 <p align="justify">
 This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>.
 </p>
 
 <br>
+
+<img width="347" height=152" src="https://www.uni-wuerzburg.de/typo3conf/ext/uw_sitepackage/Resources/Public/Images/uni-wuerzburg-logo.svg">
+
+<img width="347" height=152" src="http://remote-sensing.eu/wp-content/uploads/2016/05/eagle_master_full_noText.png">
