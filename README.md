@@ -41,6 +41,6 @@ This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-
 
 ### Other packages developed by our department
 <p align="justify">
-<ul type="disc"> <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
-<ul type="disc"> <a href="https://github.com/cran/moveVis/">moveVis</a>
+* <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
+* <a href="https://github.com/cran/moveVis/">moveVis</a>
 </p>
