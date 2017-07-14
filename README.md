@@ -52,7 +52,7 @@ Click <a href="http://remote-sensing.eu/">here</a> for news on our department.
 
 ### Aknowledgements
 <p align="justify">
-This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo). Clikc below to reach the involved parties.
+This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo). Click below to reach the involved parties.
 </p>
 
 <br>
