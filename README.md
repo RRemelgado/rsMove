@@ -35,7 +35,7 @@ install.packages('rsMove')
 
 ### Aknowledgements
 <p align="justify">
-This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b<50 EE 1403</b>.For news on other developments at the Department of Remote Sensing of the University of Würzburg, clike <a href="http://remote-sensing.eu/">here</a>
+This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>.For news on other developments at the Department of Remote Sensing of the University of Würzburg, clike <a href="http://remote-sensing.eu/">here</a>
 </p>
 
 ### Other packages developed by our department
