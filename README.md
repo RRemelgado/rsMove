@@ -1,7 +1,5 @@
 
-<br>
-
-## rsMove
+# rsMove
 Bridging Remote Sensing and Movement Ecology with R.
 
 <br>
