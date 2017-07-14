@@ -28,15 +28,8 @@ This gitHub is used as a basis for the improvement of *rsMove*. A stable release
 install.packages('rsMove')
 ```
 ### Examples
-<p align="justify">
-<ul type="disc"> <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
-</p>
+* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
 
-<div class="disc"></div>
-<ol>
-    <li>List Item 1</li>
-    <li>List Item 2</li>
-</ol>
 
 <br>
 
@@ -46,7 +39,5 @@ This initiative is part of the <a href="http://www.fernerkundung.geographie.uni-
 </p>
 
 ### Other packages developed by our department
-<p align="justify">
 * <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
 * <a href="https://github.com/cran/moveVis/">moveVis</a>
-</p>
