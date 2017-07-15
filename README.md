@@ -1,8 +1,7 @@
 
 # rsMove
-Bridging Remote Sensing and Movement Ecology with R.
-
-<br>
+[![CRAN version](https://www.r-pkg.org/badges/version/rsMove)](https://CRAN.R-project.org/package=rsMove)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=moveVis)
 
 ### Why develop rsMove?
 
