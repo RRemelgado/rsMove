@@ -2,7 +2,7 @@
 % Please edit documentation in R/backSample.R
 \name{backSample}
 \alias{backSample}
-\title{backSampling}
+\title{backSample}
 \usage{
 backSample(xy = xy, rid = rid, method = method, img = img, nb = NULL)
 }
@@ -18,38 +18,46 @@ backSample(xy = xy, rid = rid, method = method, img = img, nb = NULL)
 \item{nb}{Number of random background samples.}
 }
 \value{
-A SpatialPoints object.
+A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
 }
 \description{
 Background sample selection.
 }
 \details{
-{The function selects a set of n background samples where n is determined by \emph{nb}. 
-If \emph{nb} is not provided all background pixels are considered. If the method is \emph{random} these 
-samples are returned. If \emph{pca} is used, a PCA analysis is performed over all available samples 
-(provided and random). For each unique region ID (\emph{rid}) the median and the Median Absolute 
-Deviation (MAD) is estimated for a given Principal Component (PC). Background samples where 
-the difference between their variance and the variance of the region samples exceeds the MAD 
-are selected. Only the samples that are selected by all unique regions are kept. This process 
-is repeated for all PC's with eigenvalues greater than 1 (Kaiser rule). The final set of samples 
-corresponds to the unique records selected by the different PC's. These samples are returned 
-as a new shapefile.}
+{The function selects a set of n background samples where n is determined by 
+\emph{nb}. If \emph{nb} is not provided all background pixels are considered. If the 
+method is \emph{random} these samples are returned in the form of a \emph{SpatialPoints} 
+object. If \emph{pca} is used, a PCA analysis is performed over all available samples 
+(provided and random). For each unique region ID (\emph{rid}) the median and the Median 
+Absolute Deviation (MAD) is estimated for a given Principal Component (PC). Background 
+samples where the difference between their variance and the variance of the region samples 
+exceeds the MAD are selected. Only the samples that are selected by all unique regions are 
+kept. This process is repeated for all PC's with eigenvalues greater than 1 (Kaiser rule). 
+The final set of samples corresponds to the unique records selected by the different PC's. 
+These samples are returned as a SpatialPointsDataFrame containing the variables extracted 
+from \emph{img}.}
 }
 \examples{
-\dontrun{
-
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
+ 
  # read movement data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
+ files <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
+ moveData <- shapefile(files)
  
  # find sample regions
  label <- labelSample(xy=moveData, rad=500, npx=2, pxr=30)
  
  # read remote sensing data
- rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
+ files <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+ rsStk <- stack(files)
  
  # select background samples
  ind <- which(label>0) # selected samples
- bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStack, method='pca')
+ bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='random')
  
 }
 }
