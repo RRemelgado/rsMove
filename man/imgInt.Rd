@@ -31,14 +31,20 @@ provided the function only considers the pixels that overlap with
 the these sample points. Otherwise, a RasterBrick is provided.}
 }
 \examples{
-\dontrun{
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
  
  # read movement data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
+ moveData <- shapefile(file)
  
  # read raster data
- rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
- rsStack <- stack(rsStack, rsStack, rsStack) # dummy files for the example
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+ rsStk <- stack(file)
+ rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
  
  # raster dates
  rd = seq.Date(as.Date("2012-01-01"), as.Date("2012-12-31"), 45)
@@ -47,7 +53,7 @@ the these sample points. Otherwise, a RasterBrick is provided.}
  td = seq.Date(as.Date("2012-04-01"), as.Date("2012-08-31"), 45)
  
  # interpolate raster data to target dates
- i.img <- imgInt(img=rsStack, rd=rd, td=td, bs=60, xy=moveData)
+ i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=60, xy=moveData)
  
 }
 }

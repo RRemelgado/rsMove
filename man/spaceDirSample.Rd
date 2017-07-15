@@ -9,7 +9,7 @@ spaceDirSample(xy = xy, ot = ot, img = img, dir = dir, fun = NULL)
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{ot}{Object of \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterLayer}.}
 
@@ -50,10 +50,15 @@ with these shapefiles reports on:
 }}
 }
 \examples{
-\dontrun{
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
  
  # read movement data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130804.shp', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
+ moveData <- shapefile(file)
  
  # observation time
  td <- as.Date(moveData@data$date)
@@ -62,8 +67,8 @@ with these shapefiles reports on:
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
  
  # perform directional sampling
- f <- function(x,y) {lm(y~x)$coefficients[2]}
- s.sample <- spaceDirSample(xy=moveData, ot=td, img=r, dir="bwd", fun=f)
+ of <- function(x,y) {lm(y~x)$coefficients[2]}
+ s.sample <- spaceDirSample(xy=moveData, ot=td, img=r, dir="bwd", fun=of)
  
 }
 }

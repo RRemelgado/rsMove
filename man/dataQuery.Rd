@@ -5,7 +5,7 @@
 \title{dataQuery}
 \usage{
 dataQuery(xy = xy, st = NULL, img = img, rt = NULL, type = NULL,
-  bs = NULL, rd = F, fun = NULL)
+  bs = NULL, rd = FALSE, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -42,16 +42,22 @@ Query environmental data for coordinate pairs.
          coordinates will be estimated for each pixel and used to build the output shapefile.}
 }
 \examples{
-\dontrun{
-
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
+ 
  # read movement data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
+ moveData <- shapefile(file)
  
  # read remote sensing data
- rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+ rsStk <- stack(file)
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData,img=rsStack)
+ rsQuery <- dataQuery(xy=moveData,img=rsStk)
 
 }
 

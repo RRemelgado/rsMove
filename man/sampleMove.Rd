@@ -34,10 +34,15 @@ the sample locations ('x' and 'y'), the total time spent per sample ('time' expr
 of observations per sample ('count').}
 }
 \examples{
-\dontrun{
-
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
+ 
  # reference data
- moveData <- shapefile(system.file('extdata', 'latLon_example.shp', package="rsMove"))
+ file <- system.file('extdata', 'latLon_example.shp', package="rsMove")
+ moveData <- shapefile(file)
 
  # sampling without reference grid
  ot = strptime(moveData$timestamp, "\%Y-\%m-\%d \%H:\%M:\%S")

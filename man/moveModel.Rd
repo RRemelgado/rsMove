@@ -4,13 +4,15 @@
 \alias{moveModel}
 \title{moveModel}
 \usage{
-moveModel(samples = samples, features = features, method = NULL,
+moveModel(pxy = pxy, axy = axy, label = NULL, method = NULL,
   control = NULL, nruns = 1)
 }
 \arguments{
-\item{samples}{Matrix or data frame containing x and y coordinates and sample region id (0 for background).}
+\item{pxy}{Object of class \emph{SpatialPoinsDataFrame} with presence environmental variables.}
 
-\item{features}{Environmental predictors.}
+\item{axy}{Object of class \emph{SpatialPoinsDataFrame} with background environmental variables.}
+
+\item{label}{Region labels. If missing, "pxy" is assumed as one region.}
 
 \item{method}{Classification algorithm (see \url{http://topepo.github.io/caret/index.html}. Default is \emph{rf} (Radom Forest).}
 
@@ -35,25 +37,35 @@ which is trained using all the samples. This output can be passed to modelApply(
 }
 \examples{
 \dontrun{
-
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
+ 
  # read example data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
+ moveData <- shapefile(file)
 
  # extract samples
- ot = strptime(moveData$timestamp, "\%Y-\%m-\%d \%H:\%M:\%S")
- output <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
+ ot = as.Date(moveData@data$date)
+ samples <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
 
  # read remote sensing data
- rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+ rsStk <- stack(file)
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=samples,img=rsStack, rd=T)
+ rsQuery <- dataQuery(xy=samples,img=rsStk, rd=TRUE)
  
  # identify unique sample regions
- label <- labelSample(xy=rsQuery, rad=90, npx=4, pxr=30)
+ label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStack)
+ 
+ # select background samples
+ ind <- which(label>0) # selected samples
+ bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='pca')
  
  # derive model predictions
- out <- moveModel(samples=c(rsQuery@coords,label), features=rsQuery@data)
+ out <- moveModel(pxy=rsQuery, axy=bSamples, label=label)
 
 }
 }

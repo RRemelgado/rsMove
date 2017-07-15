@@ -33,10 +33,15 @@ frame report on the minimum (\emph{min}), maximum (\emph{max}), mean (\emph{mean
 and standard deviation (\emph{sd}) of the pixels contained in each region.}
 }
 \examples{
-\dontrun{
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
  
  # load example probability image
- probImg <- raster(system.file('extdata', 'konstanz_probabilities.tif', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+ probImg <- raster(file)
  
  # segment probabilities
  rs <- segRaster(probImg)

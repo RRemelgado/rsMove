@@ -40,13 +40,18 @@ corresponding UTZ zone before retrieving the area. This is the default, if the p
 are in a cartesian coordinate system use \emph{m}.}
 }
 \examples{
-\dontrun{
+{
+
+require(rgdal)
+require(raster)
+require(sp)
 
 # reference data
-moveData <- shapefile(system.file('extdata', 'latLon_example.shp', package="rsMove"))
+file <- system.file('extdata', 'latLon_example.shp', package="rsMove")
+moveData <- shapefile(file)
 
 # extract regions
-hm <- hotMove(xy=xy, pxr=0.1, shp=T)
+hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
 
 # plot shapefile (color by region)
 plot(hm$polygons, col=hm$indices)

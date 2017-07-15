@@ -31,13 +31,19 @@ Convert spatial polygons into point samples.
            pixel percent cover (\emph{cover}) for each selected pixel.}
 }
 \examples{
-\dontrun{
+{
+ 
+ require(rgdal)
+ require(raster)
+ require(sp)
  
  # load example probability image
- img <- raster(system.file('extdata', 'konstanz_probabilities.tif', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+ img <- raster(file)
  
  # load area of interest
- roi <- shapefile(system.file('extdata', 'konstanz_roi.shp', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
+ roi <- shapefile(file)
  
  # segment probabilities
  samples <- poly2sample(pol=roi, re=img)

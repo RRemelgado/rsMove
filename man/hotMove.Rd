@@ -4,7 +4,7 @@
 \alias{hotMove}
 \title{hotMove}
 \usage{
-hotMove(xy = xy, pxr = pxr, shp = F)
+hotMove(xy = xy, pxr = pxr, shp = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
@@ -30,13 +30,18 @@ function also returns a shapefile for each region defined by the
 convex hull of the samples within them (\emph{$polygons}).}
 }
 \examples{
-\dontrun{
+{
+
+require(rgdal)
+require(raster)
+require(sp)
 
 # reference data
-moveData <- shapefile(system.file('extdata', 'latLon_example.shp', package="rsMove"))
+file <- system.file('extdata', 'latLon_example.shp', package="rsMove")
+moveData <- shapefile(file)
 
 # extract regions
-hm <- hotMove(xy=xy, pxr=0.1, shp=T)
+hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
 
 # plot shapefile (color by region)
 plot(hm$polygons, col=hm$indices)

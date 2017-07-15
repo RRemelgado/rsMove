@@ -19,10 +19,15 @@
 #' frame report on the minimum (\emph{min}), maximum (\emph{max}), mean (\emph{mean}) 
 #' and standard deviation (\emph{sd}) of the pixels contained in each region.}
 #' @seealso \code{\link{moveModel}} \code{\link{modelApply}}
-#' @examples \dontrun{
+#' @examples {
+#'  
+#'  require(rgdal)
+#'  require(raster)
+#'  require(sp)
 #'  
 #'  # load example probability image
-#'  probImg <- raster(system.file('extdata', 'konstanz_probabilities.tif', package="rsMove"))
+#'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+#'  probImg <- raster(file)
 #'  
 #'  # segment probabilities
 #'  rs <- segRaster(probImg)
@@ -38,7 +43,7 @@ segRaster <- function(prob, pt=0.1, mp=0.5) {
 # 1. check input variables
 #-----------------------------------------------------------------------------------#
   
-  if (class(prob)[1]!='RasterLayer') {stop('error: "prob" is not a "RasterLayer"')}
+  if (class(prob)[1]!='RasterLayer') {stop('"prob" is not a "RasterLayer"')}
 
 #-----------------------------------------------------------------------------------#
 # 2. segment regions

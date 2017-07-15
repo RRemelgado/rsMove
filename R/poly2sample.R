@@ -5,7 +5,7 @@
 #' @param re Object of class \emph{Extent} or a raster object from which an extent can be derived.
 #' @param mpc Minimum pixel cover (0-100). Default is 100.
 #' @param pr Pixel resolution.
-#' @import raster grDevices
+#' @import raster grDevices rgdal
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame}.
 #' @details {Determines coordinates of pixels within a given extent. If \emph{re} is missing the
@@ -15,13 +15,19 @@
 #'            percentage of area cover by a polygon is below the defined threshold. 
 #'            The output provides the coordinates (\emph{x} and \emph{y}) the 
 #'            pixel percent cover (\emph{cover}) for each selected pixel.}
-#' @examples \dontrun{
+#' @examples {
+#'  
+#'  require(rgdal)
+#'  require(raster)
+#'  require(sp)
 #'  
 #'  # load example probability image
-#'  img <- raster(system.file('extdata', 'konstanz_probabilities.tif', package="rsMove"))
+#'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+#'  img <- raster(file)
 #'  
 #'  # load area of interest
-#'  roi <- shapefile(system.file('extdata', 'konstanz_roi.shp', package="rsMove"))
+#'  file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
+#'  roi <- shapefile(file)
 #'  
 #'  # segment probabilities
 #'  samples <- poly2sample(pol=roi, re=img)
@@ -36,15 +42,15 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
 #-------------------------------------------------------------------------------------------------------------------------#
   
   # check input
-  if(is.null('pol')) {stop('error: "pol" is missing')}
+  if(is.null('pol')) {stop('"pol" is missing')}
   if(!class(pol)[1]%in%c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
-    stop('error: "pol" is not a valid input.')
+    stop('"pol" is not a valid input.')
   }
   if (!is.null(re)) {
     if(!class(re)[1]%in%c("RasterLayer", "RasterStack", "RasterBrick")) {
-      if (class(re)!='Extent') {stop('error: "ras" is not a valid input.')}
-      if (is.null(pr)) {stop('error: "re" is of class "Extent" object. "pr" is required.')}
-      if (is.null(rp)) {stop('error: "re" is of class "Extent" object. "rp" is required.')}
+      if (class(re)!='Extent') {stop('"ras" is not a valid input.')}
+      if (is.null(pr)) {stop('"re" is of class "Extent" object. "pr" is required.')}
+      if (is.null(rp)) {stop('"re" is of class "Extent" object. "rp" is required.')}
       rr <- raster(re, crs=rp, res=pr) # build reference raster
       nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
     } else {
@@ -54,16 +60,15 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
       rr <- re # set variable with reference raster
       re <- extent(rr) # extraxt extent
     }
-    if (rp@projargs!=crs(pol)@projargs) {stop('error: using different projections')}
+    if (rp@projargs!=crs(pol)@projargs) {stop('using different projections')}
   } else {
-    if (is.null(pr)) {stop('error: provide "pr" since "re" is missing')}
+    if (is.null(pr)) {stop('provide "pr" since "re" is missing')}
     re <- extent(pol) # extent derived from 
     rr <- raster(re, crs=crs(pol), res=pr)
     nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
-    
   }
-  if (!exists('mpc')) {mpc <- 100}
-  if (mpc>100 | mpc<0) {stop('error: "mpc" should be between 0 and 100.')}
+  if (is.null(mpc)) {mpc <- 100}
+  if (mpc < 0 | mpc > 100) {stop('"mpc" should be between 0 and 100')}
 
   # update extent object
   # (correspond x/y to pixel center)

@@ -9,7 +9,7 @@
 #' @param bs Buffer size (unit depends on the raster projection).
 #' @param rd Logical. Should the function ignore duplicated pixels? Default if FALSE.
 #' @param fun Passes an external function.
-#' @import raster grDevices
+#' @import raster grDevices rgdal
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
 #' @return A SpatialPointsDataDataFrame.
@@ -22,16 +22,22 @@
 #'          it searches for the nearest time step. If \emph{rd} is set, the function will account for duplicated 
 #'          pixels. The samples will be transposed to pixel coordinates and, for each unique pixel, median 
 #'          coordinates will be estimated for each pixel and used to build the output shapefile.}
-#' @examples \dontrun{
-#' 
+#' @examples {
+#'  
+#'  require(rgdal)
+#'  require(raster)
+#'  require(sp)
+#'  
 #'  # read movement data
-#'  moveData <- shapefile(system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove"))
+#'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
+#'  moveData <- shapefile(file)
 #'  
 #'  # read remote sensing data
-#'  rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
+#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+#'  rsStk <- stack(file)
 #'  
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData,img=rsStack)
+#'  rsQuery <- dataQuery(xy=moveData,img=rsStk)
 #' 
 #' }
 #' 
@@ -39,38 +45,39 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F, fun=NULL) {
+dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=FALSE, fun=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # samples
-  if (!exists('xy')) {stop('error: "xy" is missing')}
-  if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('error: "xy" is not of a valid class')}
+  if (!exists('xy')) {stop('"xy" is missing')}
+  if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   
   # raster
-  if (!exists('img')) {stop('error: "img" is missing')}
-  if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('error: "img" is not of a valid class')}
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('error: "xy" and "img" have different projections')}   
+  if (!exists('img')) {stop('"img" is missing')}
+  if (!class(img)[1]%in%c('RasterLayer','RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
+  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}   
   
   # check if raster is a ts
   if (!is.null(rt)) {
-    if (class(rt)[1]!='Date') {stop('error: "rt" is not of a valid class')}
-    if (length(rt)!=length(xy)) {stop('error: lengths of "rt" and "xy" differ')}
-    if (is.null(st)) {stop('error: "st" is missing')}
-    if (class(st)[1]!='Date') {stop('error: "st" is not of a valid class')}
-    if (length(st)!=length(xy)) {stop('error: lengths of "st" and "xy" differ')}
+    if (class(rt)[1]!='Date') {stop('"rt" is not of a valid class')}
+    if (length(rt)!=length(xy)) {stop('lengths of "rt" and "xy" differ')}
+    if (length(rt)!=nlayers(img)) {stop('lengths of "rt" and "img" differ')}
+    if (is.null(st)) {stop('"st" is missing')}
+    if (class(st)[1]!='Date') {stop('"st" is not of a valid class')}
+    if (length(st)!=length(xy)) {stop('lengths of "st" and "xy" differ')}
     processTime <- TRUE
   } else {processTime <- FALSE}
   
   # auxiliary
-  if (!is.null(bs)) {if (!is.numeric(bs)) {stop('error: "bs" assigned but not numeric')}} else {fun=NULL}
+  if (!is.null(bs)) {if (!is.numeric(bs)) {stop('"bs" assigned but not numeric')}} else {fun=NULL}
   if (!is.null(bs) & is.null(fun)) {fun <- function(x) {sum(x*x) / sum(x)}} else {
-  if (!is.null(fun)) {if (!is.function(fun)) {stop('error: "fun" is not a valid function')}}}
+  if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a valid function')}}}
   
   # duplicate removal
-  if (!is.logical(rd)) {stop('error: "rd" is not a valid logical argument')}
+  if (!is.logical(rd)) {stop('"rd" is not a valid logical argument')}
   if (rd) {
     ext <- extent(img)
     nr <- dim(img)[1]
@@ -87,7 +94,9 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
       yr[r] <- median(xy@coords[ind,2])
     }
     xy <- cbind(xr, yr)
-  } else {xy <- xy@coords}
+  } else {
+    op <- crs(xy)
+    xy <- xy@coords}
   
 #-------------------------------------------------------------------------------------------------------------------------------#
   

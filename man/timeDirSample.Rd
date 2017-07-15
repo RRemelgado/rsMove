@@ -55,14 +55,18 @@ the raster values. The output reports on:
 }}
 }
 \examples{
-\dontrun{
+{
+ 
+ require(raster)
  
  # read movement data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130804.shp', package="rsMove"))
+ file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
+ moveData <- shapefile(file)
  
  # read raster data
- rsStack <- stack(list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=T))
- rsStack <- stack(rsStack, rsStack, rsStack) # dummy files for the example
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+ rsStk <- stack(file)
+ rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
  
  # raster dates
  rd = seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
@@ -71,8 +75,8 @@ the raster values. The output reports on:
  td = as.Date(moveData@data$date)
  
  # perform directional sampling
- f <- function(x,y) {lm(y~x)$coefficients[2]}
- t.sample <- timeDirSample(xy=moveData, ot=td, img=rsStack, rt=rd, mws=10, dir="bwd", fun=f)
+ of <- function(x,y) {lm(y~x)$coefficients[2]}
+ t.sample <- timeDirSample(xy=moveData, ot=td, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
  
 }
 }
