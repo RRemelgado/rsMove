@@ -5,6 +5,7 @@
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param type Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).
 #' @param threshold Percent change threshold.
+#' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates. 
 #' @param fun Summary function.
 #' @import raster rgdal
 #' @seealso \code{\link{timeDirSample}} \code{\link{dataQuery}}
@@ -20,7 +21,8 @@
 #' change is observed between two consecutife points. The output consists of a list 
 #' containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the segment 
 #' ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) with the 
-#' amount of points in each region and the value returned by \emph{fun}. If \emph{fun} 
+#' amount of points in each region and the value returned by \emph{fun}. If \emph{ot} is 
+#' provided, the function also provides the elapsed time within each segment. If \emph{fun} 
 #' is set by the user, the provided function will be used to summarize the raster values 
 #' at each segment. Also, if \emph{img} is a \emph{RasterStack} or a \emph{RasterBrick}, 
 #' the \emph{fun} is used to reduce the multi-layered object to a single layer. By default, 
@@ -46,7 +48,7 @@
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, img=img, type='cont', threshold=0.1, fun=NULL) {
+moveSeg <- function(xy=xy, img=img, type='cont', ot=NULL, threshold=0.1, fun=NULL) {
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables  
@@ -55,6 +57,11 @@ moveSeg <- function(xy=xy, img=img, type='cont', threshold=0.1, fun=NULL) {
   # samples
   if (!exists('xy')) {stop('"xy" is missing')}
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  
+  # sample dates
+  if (!is.null(ot)) {
+    if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
+    if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}}
   
   # raster
   if (!exists('img')) {stop('"img" is missing')}
@@ -120,9 +127,18 @@ moveSeg <- function(xy=xy, img=img, type='cont', threshold=0.1, fun=NULL) {
   
   # build region report
   uid <- sort(unique(id))
-  count <- sapply(uid, function(x) {sum(id==x)})
-  df <- data.frame(sid=uid, count=count, value=rv)
+  if (!is.null(ot)) {
+    f <- function(x) {
+      ind <- which(id==x)
+      et <- difftime(ot[ind[length(ind)]], ot[ind[1]], units="mins")
+      np <- length(ind)
+      return(list(time=as.numeric(et), count=np))}
+    sstat <- lapply(uid, f)
+    df <- data.frame(sid=uid, count=sapply(sstat, function(x) {x$count}), 
+          time=sapply(sstat, function(x) {x$time}), value=rv)
+  } else {df <- data.frame(sid=uid, count=sapply(uid, function(x){sum(id==x)}))}
   
-  return(list(endpoints=p.shp, report=df))
+  # derive output
+  return(list(points=p.shp, report=df))
   
 }
