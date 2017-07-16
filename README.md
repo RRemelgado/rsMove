@@ -32,7 +32,6 @@ install.packages('rsMove')
 
 ### Examples
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection.</a>
-* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_2.md">Directional Sampling - Where from and where to?</a>
 
 <br>
 
