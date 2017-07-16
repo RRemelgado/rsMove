@@ -9,7 +9,7 @@
 #' @param bs Buffer size (unit depends on the raster projection).
 #' @param rd Logical. Should the function ignore duplicated pixels? Default if FALSE.
 #' @param fun Passes an external function.
-#' @import raster grDevices rgdal
+#' @import raster rgdal
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
 #' @return A SpatialPointsDataDataFrame.

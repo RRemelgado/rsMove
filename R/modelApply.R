@@ -3,7 +3,7 @@
 #' @description Apply a model or an ensemble of models to raster data.
 #' @param model List object as provided by \emph{moveModel()}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
-#' @import raster sp caret grDevices rgdal
+#' @import raster sp caret rgdal
 #' @importFrom stats complete.cases
 #' @return A \emph{Raster}.
 #' @details {The function uses the output of \emph{moveModel()}. If this contains a 

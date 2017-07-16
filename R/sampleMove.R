@@ -6,7 +6,7 @@
 #' @param error Distance (in meters).
 #' @param method How should the disntance be estimated? One of 'm' or 'deg'. Default is 'm'.
 #' @param tUnit Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.
-#' @import raster grDevices rgdal
+#' @import raster rgdal
 #' @importFrom stats median
 #' @return A \emph{SpatialPointsDataFrame}.
 #' @details {This function offers a simple approach to sample from locati where an animal showed little or no movement 

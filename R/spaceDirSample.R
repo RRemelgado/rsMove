@@ -6,7 +6,7 @@
 #' @param img Object of class \emph{RasterLayer}.
 #' @param dir One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.
 #' @param fun Summary function.
-#' @import raster sp
+#' @import raster sp rgdal
 #' @importFrom stats lm
 #' @seealso \code{\link{timeDirSample}} \code{\link{dataQuery}}
 #' @return A \emph{list}.

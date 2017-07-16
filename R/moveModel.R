@@ -7,7 +7,7 @@
 #' @param method Classification algorithm (see \url{http://topepo.github.io/caret/index.html}. Default is \emph{rf} (Radom Forest).
 #' @param control Object derived by \emph{trainControl} (see \code{\link[caret]{trainControl}}). Default used out-of-bag (\emph{oob}) accuracies.
 #' @param nruns Number of runs. Default is 1.
-#' @import caret grDevices raster rgdal
+#' @import caret raster rgdal
 #' @importFrom stats complete.cases
 #' @return A \emph{list}.
 #' @details {For n iterations, where n is the number of unique sample regions, 

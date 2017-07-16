@@ -22,7 +22,7 @@
 #' resolution the more independent regions are likely to be returned. The output is 
 #' a vector with ID's assigning each sample to its region. Samples filtered by 
 #' \emph{npt} or \emph{npx} will be returned as zeros.}
-#' @import raster grDevices rgdal
+#' @import raster rgdal
 #' @seealso \code{\link{sampleMove}} \code{\link{hotMove}}
 #' @examples {
 #'  

@@ -5,7 +5,7 @@
 #' @param re Object of class \emph{Extent} or a raster object from which an extent can be derived.
 #' @param mpc Minimum pixel cover (0-100). Default is 100.
 #' @param pr Pixel resolution.
-#' @import raster grDevices rgdal
+#' @import sp raster rgdal
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame}.
 #' @details {Determines coordinates of pixels within a given extent. If \emph{re} is missing the

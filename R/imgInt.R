@@ -6,7 +6,7 @@
 #' @param rd Raster dates. Object of class \emph{Date}.
 #' @param bs Temporal buffer size (in days).
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @import raster sp grDevices rgdal
+#' @import raster sp rgdal
 #' @importFrom stats lm
 #' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDirSample}} \code{\link{spaceDirSample}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}.
@@ -53,7 +53,7 @@ imgInt <- function(img=img, rd=rd, td=td, bs=NULL, xy=NULL) {
   # check variables
   if (!exists('img')) {stop('"img" is missing')}
   if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}   
+  if (!is.null(xy) {if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}}   
   if (!exists('td')) {stop('"td" is missing')}
   if(class(td)!='Date') {stop('"td" is not a "Date" object')}
   if (!exists('rd')) {stop('"rd" is missing')}

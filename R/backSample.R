@@ -6,7 +6,7 @@
 #' @param method One of \emph{random} or \emph{pca}. Default is \emph{random}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param nb Number of random background samples.
-#' @import raster sp grDevices rgdal
+#' @import raster sp rgdal
 #' @importFrom stats complete.cases prcomp median
 #' @return A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
 #' @details {The function selects a set of n background samples where n is determined by 

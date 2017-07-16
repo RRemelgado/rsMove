@@ -59,14 +59,22 @@ moveSeg <- function(xy=xy, img=img, type='cont', threshold=0.1, fun=NULL) {
   # raster
   if (!exists('img')) {stop('"img" is missing')}
   if (!class(img)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
+  if (type=='cat' & nlayers(img)>1) {stop(paste0('type was set to ', type, '. raster should be a single layer'))}
+  
+  # compare projections
+  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
   
   # change threshold
   if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}
 
   # summariy function
-  if (!is.null(fun)) {
-    if (!is.function(fun)) {stop('"fun" is not a function')}
-  } else {fun = function(x) {return(max(x, na.rm=T))}}
+  if (type=='cont') {
+  if (!type%in%c('cont', 'cat')) {stop('type is not  avalid keyword')}
+  if (!is.null(fun)) {if (!is.function(fun)) {
+    stop('"fun" is not a function')}} else {fun = function(x) {return(max(x, na.rm=T))}}}
+  if (type=='cat') {
+    threshold <- 1
+    fun <- function(x){return(x[1])}}
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. identify segments
@@ -84,14 +92,12 @@ moveSeg <- function(xy=xy, img=img, type='cont', threshold=0.1, fun=NULL) {
   rv <- list() # segment value
   
   for (r in 2:length(xy)) {
-    diff <- abs(1-(edata[r,1]/edata[(r-1),1]))
+    if (type=='cont') {diff <- abs(1-(edata[r,1]/edata[(r-1),1]))}
+    if (type=='cat') {diff <- abs(edata[r,1]-edata[(r-1),1])}
     if (!is.na(diff)) {
       if (diff >= threshold) {
         ep <- r-1
         rv[[li]] <- fun(edata[c(r0:ep),1])
-        
-        if(length(rv[[li]])>1) {stop()}
-        
         id[[li]] <- replicate(length(c(r0:ep)), li)
         r0 <- r
         li <- li + 1
@@ -101,9 +107,6 @@ moveSeg <- function(xy=xy, img=img, type='cont', threshold=0.1, fun=NULL) {
       } else {if (r==length(xy)) {
         ep <- r
         rv[[li]] <- fun(edata[c(r0:ep),1])
-        
-        if(length(rv[[li]])>1) {stop()}
-        
         id[[li]] <- replicate(length(c(r0:ep)), li)}}}}
   rv <- unlist(rv)
   id <- unlist(id)
