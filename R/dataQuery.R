@@ -81,7 +81,7 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
   if (!is.null(bs)) {if (!is.numeric(bs)) {stop('"bs" assigned but not numeric')}} else {fun=NULL}
   if (!is.null(bs) & is.null(fun)) {fun <- function(x) {sum(x*x) / sum(x)}} else {
   if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a valid function')}}}
-  
+  if (!type%in%c('nearest', 'exact')) {stop('"type" is not a recognized keyword')}
   # duplicate removal
   if (!is.logical(rd)) {stop('"rd" is not a valid logical argument')}
   if (rd) {
@@ -107,45 +107,50 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
   
 #-------------------------------------------------------------------------------------------------------------------------------#
   
+  # read data
+  edata <- extract(img, xy, bs=NULL, fun=fun, na.rm=T)
+  
   # extract environmental data
   if (processTime) {
     
-    # function to determine target indices
-    ifun <- function(x) {
-      if (type=='exact') {
-        diff <- abs(x-rt)
-        return(which(diff==min(diff)[1]))}
-      if (type=='nearest') {
-        loc <- which(rt==x)
-        if (length(loc)>0) {return(loc[1])} else {return(NA)}}}
+    if (type=='nearest') {
+      
+      # function to select pixels
+      qf <- function(i) {
+        ind <- which(!is.na(edata[i,]))
+        if (length(ind)!=0) {
+          diff <- abs(st[i]-rt[ind])
+          loc <- which(diff==min(diff))[1]
+          return(list(value=edata[i,ind[loc]], date=rt[loc]))}}
+      
+      # retrieve values
+      edata <- lapply(1:ns, qf)
+      orv <- do.call('c', lapply(edata, function(x) {x$value}))
+      ord <- do.call('c', lapply(edata, function(x) {x$date}))
+      
+      # derive shapefile
+      return(SpatialPointsDataFrame(xy, data.frame(value=orv, date=ord), proj4string=op))
+      
+    }
     
-    # retrieve indices per sample
-    ind <- sapply(st, ifun)
-    ui <- unique(ind)
-    
-    # output variables
-    orv <- vector('numeric', ns)
-    odv <- vector('numeric', ns)
-    class(odv) <- 'Date'
-    
-    # query data
-    for (i in 1:length(ui)) {
-      loc <- which(ind==ui[i])
-      if(!is.na(ui[i])) {
-        orv[loc] <- extract(img[[ui[i]]], xy[loc,], buffer=bs, fun=fun, na.rm=T)
-        odv[loc] <- rt[ui[i]]
-      } else {
-        orv[loc] <- NA
-        odv[loc] <- NA}}
-    
-    # derive output
-    return(SpatialPointsDataFrame(xy, as.data.frame(date=odv, value=orv), proj4string=op))
-    
+    if (type=='exact') {
+      
+      # function to extract values
+      qf <- function(i) {
+        ind <- which(!is.na(edata[i,]))
+        if (length(ind)!=0) {
+          diff <- abs(st[i]-rt[ind])
+          loc <- which(diff==0)[1]
+          if (length(loc) > 0) {return(edata[i,ind[loc]])} else {return(NA)}}}
+      orv <- as.numeric(sapply(1:ns, qf))
+      
+      # derive shapefile
+      return(SpatialPointsDataFrame(xy, data.frame(value=orv), proj4string=op))}
+      
   } else {
     
     # simple query
-    orv <- extract(img, xy, buffer=bs, fun=fun, na.rm=T)
-    return(SpatialPointsDataFrame(xy, as.data.frame(value=orv), proj4string=op))
+    return(SpatialPointsDataFrame(xy, as.data.frame(edata), proj4string=op))
     
   }
 }
