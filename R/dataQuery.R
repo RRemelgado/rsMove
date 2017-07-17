@@ -139,7 +139,4 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
     return(SpatialPointsDataFrame(xy, as.data.frame(value=orv), proj4string=op))
     
   }
-
- 
-  
 }
