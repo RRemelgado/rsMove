@@ -103,36 +103,43 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
   # extract environmental data
   if (processTime) {
     
-    # function for exact date query
-    qf <- if (type=='exact') {
-      function(x) {
-        ind <- which(rt==st[x])
-        if (length(ind)>1) {return(extract(xy[x,], img[[ind]], buffer=bs, fun=fun, na.rm=T))}
-      }
-    }
+    # function to determine target indices
+    ifun <- function(x) {
+      if (type=='exact')) {
+        diff <- abs(x-rd)
+        return(which(diff==min(diff)[1]))}
+      if (type=='nearest') {
+        loc <- which(rd==x)
+        if length(loc)>0) {return(loc[1])} else {return(NA)}}}
     
-    # function for nearest date query
-    qf <- if (type=="nearest") {
-      function(x) {
-        td <- abs(st[x]-rt[x])
-        ind <- which(td==min(td))
-        return(extract(img[[ind]], xy[x,], buffer=bs, fun=fun, na.rm=T))
-      }
-    }
+    # retrieve indices per sample
+    ind <- sapply(st, ifun)
+    ui <- unique(ind)
     
-    # apply query function
-    ov <- unlist(sapply(1:nrow(xy), qf))
+    # output variables
+    class(odv) <- 'Date'
+    
+    # query data
+    for (i in 1:length(ui)) {
+      loc <- which(ind==ui[i])
+      if(!is.na(x)) {
+        orv <- extract(xy[loc,], img[[ui[i]]], buffer=bs, fun=fun, na.rm=T)
+        odv <- rd[x]
+      } else {
+        orv[loc] <- NA
+        odv[loc] <- NA}}
+    
+    # derive output
+    return(SpatialPointsDataFrame(xy, as.data.frame(date=odv, value=orv), proj4string=op))
     
   } else {
     
     # simple query
-    ov <- extract(img, xy, buffer=bs, fun=fun, na.rm=T)
-  
+    orv <- extract(img, xy, buffer=bs, fun=fun, na.rm=T)
+    return(SpatialPointsDataFrame(xy, as.data.frame(value=orv), proj4string=op))
+    
   }
-  
-#-------------------------------------------------------------------------------------------------------------------------------#
-  
-  # return output
-  return(SpatialPointsDataFrame(xy, as.data.frame(ov), proj4string=op))
+
+ 
   
 }
