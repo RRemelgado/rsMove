@@ -4,7 +4,7 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = xy, img = img, type = "cont", threshold = 0.1,
+moveSeg(xy = xy, img = img, type = "cont", ot = NULL, threshold = 0.1,
   fun = NULL)
 }
 \arguments{
@@ -13,6 +13,8 @@ moveSeg(xy = xy, img = img, type = "cont", threshold = 0.1,
 \item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
 \item{type}{Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).}
+
+\item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{threshold}{Percent change threshold.}
 
@@ -36,7 +38,8 @@ sequence of samples is labeled as a unique segment. If \emph{method} is set as
 change is observed between two consecutife points. The output consists of a list 
 containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the segment 
 ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) with the 
-amount of points in each region and the value returned by \emph{fun}. If \emph{fun} 
+amount of points in each region and the value returned by \emph{fun}. If \emph{ot} is 
+provided, the function also provides the elapsed time within each segment. If \emph{fun} 
 is set by the user, the provided function will be used to summarize the raster values 
 at each segment. Also, if \emph{img} is a \emph{RasterStack} or a \emph{RasterBrick}, 
 the \emph{fun} is used to reduce the multi-layered object to a single layer. By default, 

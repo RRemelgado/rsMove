@@ -32,12 +32,19 @@
 #'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
 #'  moveData <- shapefile(file)
 #'  
-#'  # read remote sensing data
+#'  # read raster data
 #'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
 #'  rsStk <- stack(file)
+#'  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+#'  
+#'  # raster dates
+#'  r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+#'  
+#'  # sample dates
+#'  o.date <- as.Date(moveData@data$date)
 #'  
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData,img=rsStk)
+#'  rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, type='nearest')
 #' 
 #' }
 #' 
@@ -63,7 +70,6 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
   # check if raster is a ts
   if (!is.null(rt)) {
     if (class(rt)[1]!='Date') {stop('"rt" is not of a valid class')}
-    if (length(rt)!=length(xy)) {stop('lengths of "rt" and "xy" differ')}
     if (length(rt)!=nlayers(img)) {stop('lengths of "rt" and "img" differ')}
     if (is.null(st)) {stop('"st" is missing')}
     if (class(st)[1]!='Date') {stop('"st" is not of a valid class')}
@@ -95,6 +101,7 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
     }
     xy <- cbind(xr, yr)
   } else {
+    ns <- length(xy)
     op <- crs(xy)
     xy <- xy@coords}
   
@@ -105,26 +112,28 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, type=NULL, bs=NULL, rd=F
     
     # function to determine target indices
     ifun <- function(x) {
-      if (type=='exact')) {
-        diff <- abs(x-rd)
+      if (type=='exact') {
+        diff <- abs(x-rt)
         return(which(diff==min(diff)[1]))}
       if (type=='nearest') {
-        loc <- which(rd==x)
-        if length(loc)>0) {return(loc[1])} else {return(NA)}}}
+        loc <- which(rt==x)
+        if (length(loc)>0) {return(loc[1])} else {return(NA)}}}
     
     # retrieve indices per sample
     ind <- sapply(st, ifun)
     ui <- unique(ind)
     
     # output variables
+    orv <- vector('numeric', ns)
+    odv <- vector('numeric', ns)
     class(odv) <- 'Date'
     
     # query data
     for (i in 1:length(ui)) {
       loc <- which(ind==ui[i])
-      if(!is.na(x)) {
-        orv <- extract(xy[loc,], img[[ui[i]]], buffer=bs, fun=fun, na.rm=T)
-        odv <- rd[x]
+      if(!is.na(ui[i])) {
+        orv[loc] <- extract(img[[ui[i]]], xy[loc,], buffer=bs, fun=fun, na.rm=T)
+        odv[loc] <- rt[ui[i]]
       } else {
         orv[loc] <- NA
         odv[loc] <- NA}}
