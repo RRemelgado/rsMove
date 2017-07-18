@@ -36,8 +36,6 @@ install.packages('rsMove')
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_4.md">Querying remote sensing data in time.</a>
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_5.md">Point-Based Interpolation.</a>
 
-htt
-
 <br>
 
 ### Bug reports & contact
