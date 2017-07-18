@@ -4,7 +4,7 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param type Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).
-#' @param threshold Percent change threshold.
+#' @param threshold Change threshold.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates. 
 #' @param fun Summary function.
 #' @import raster rgdal
@@ -99,8 +99,7 @@ moveSeg <- function(xy=xy, img=img, type='cont', ot=NULL, threshold=0.1, fun=NUL
   rv <- list() # segment value
   
   for (r in 2:length(xy)) {
-    if (type=='cont') {diff <- abs(1-(edata[r,1]/edata[(r-1),1]))}
-    if (type=='cat') {diff <- abs(edata[r,1]-edata[(r-1),1])}
+    diff <- abs(edata[r,1]-edata[(r-1),1])
     if (!is.na(diff)) {
       if (diff >= threshold) {
         ep <- r-1

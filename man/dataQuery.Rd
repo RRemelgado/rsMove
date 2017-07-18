@@ -52,12 +52,19 @@ Query environmental data for coordinate pairs.
  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
  moveData <- shapefile(file)
  
- # read remote sensing data
+ # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
+ rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ 
+ # raster dates
+ r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+ 
+ # sample dates
+ o.date <- as.Date(moveData@data$date)
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData,img=rsStk)
+ rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, type='nearest')
 
 }
 

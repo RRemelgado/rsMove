@@ -5,7 +5,7 @@
 #' @param pxr Grid resolution. Unit depends on \emph{xy} projection.
 #' @param shp Logical. Should the function provide polygons? Default is FALSE.
 #' @return A list object.
-#' @import sp raster rgdal
+#' @import sp raster rgdal grDevices
 #' @details {The function builds a matrix for a given resolution and a 
 #' spatial extent derived from a set of samples (\emph{xy}). First, these 
 #' samples are converted into unique pixel coordinates. Then, the 

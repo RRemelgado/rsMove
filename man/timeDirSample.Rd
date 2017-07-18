@@ -69,10 +69,10 @@ the raster values. The output reports on:
  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
  
  # raster dates
- rd = seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+ rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
  
  # sample dates
- td = as.Date(moveData@data$date)
+ td <- as.Date(moveData@data$date)
  
  # perform directional sampling
  of <- function(x,y) {lm(y~x)$coefficients[2]}
