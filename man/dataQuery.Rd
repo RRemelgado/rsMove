@@ -4,8 +4,8 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(xy = xy, st = NULL, img = img, rt = NULL, type = NULL,
-  bs = NULL, rd = FALSE, fun = NULL)
+dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
+  type = NULL, bs = NULL, remove.dup = FALSE, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -16,11 +16,13 @@ dataQuery(xy = xy, st = NULL, img = img, rt = NULL, type = NULL,
 
 \item{rt}{Object of class \emph{Date} with \emph{img} observation dates.}
 
+\item{tb}{Temporal search buffer, expressed in days.}
+
 \item{type}{One of \emph{exact} or \emph{nearest}.}
 
 \item{bs}{Buffer size (unit depends on the raster projection).}
 
-\item{rd}{Logical. Should the function ignore duplicated pixels? Default if FALSE.}
+\item{remove.dup}{Logical. Should the function ignore duplicated pixels? Default if FALSE.}
 
 \item{fun}{Passes an external function.}
 }
@@ -32,14 +34,16 @@ Query environmental data for coordinate pairs.
 }
 \details{
 {Returns environmental variables from a raster object for a given set of x and y coordinates.
-         A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample within an 
-         area. The defaut is to estimate a weighted mean. If acquisition times are provided (\emph{rt}) the 
-         raster data is treated as a time series. In this case, the function applies 
-         one of two sampling approaches: \emph{exact} or \emph{nearest}. If \emph{exact}, the function attempts to map the 
-         dates of the raster time series with the observation dates of the samples (\emph{ot}). If nearest, 
-         it searches for the nearest time step. If \emph{rd} is set, the function will account for duplicated 
-         pixels. The samples will be transposed to pixel coordinates and, for each unique pixel, median 
-         coordinates will be estimated for each pixel and used to build the output shapefile.}
+         A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample 
+         within an area. The defaut is to estimate a weighted mean. If acquisition times are provided 
+         (\emph{rt}) the raster data is treated as a time series. In this case, the function applies 
+         one of two sampling approaches: \emph{exact} or \emph{nearest}. If \emph{exact}, the function 
+         attempts to map the dates of the raster time series with the observation dates of the samples 
+         (\emph{ot}). If nearest, it searches for the nearest time step. In this case, a temporal buffer, 
+         defined by \emph{tb}, can be defined to restric the search. If \emph{remove.dup} is set, the 
+         function will account for duplicated pixels. The samples will be transposed to pixel coordinates 
+         and, for each unique pixel, median coordinates will be estimated for each pixel and used to build 
+         the output shapefile.}
 }
 \examples{
 {
@@ -64,7 +68,7 @@ Query environmental data for coordinate pairs.
  o.date <- as.Date(moveData@data$date)
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, type='nearest')
+ rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=30, type='nearest')
 
 }
 

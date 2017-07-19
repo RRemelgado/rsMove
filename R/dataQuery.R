@@ -86,7 +86,7 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, type=NULL, bs=N
   if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a valid function')}}}
   if (!type%in%c('nearest', 'exact')) {stop('"type" is not a recognized keyword')}
   # duplicate removal
-  if (!is.logical(rd)) {stop('"rd" is not a valid logical argument')}
+  if (!is.logical(remove.dup)) {stop('"remove.dup" is not a valid logical argument')}
   if (remove.dup) {
     ext <- extent(img)
     nr <- dim(img)[1]

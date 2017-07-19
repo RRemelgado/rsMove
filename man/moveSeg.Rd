@@ -5,7 +5,7 @@
 \title{moveSeg}
 \usage{
 moveSeg(xy = xy, img = img, type = "cont", ot = NULL, threshold = 0.1,
-  fun = NULL)
+  r.fun = NULL, s.fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -16,35 +16,17 @@ moveSeg(xy = xy, img = img, type = "cont", ot = NULL, threshold = 0.1,
 
 \item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
-\item{threshold}{Percent change threshold.}
+\item{threshold}{Change threshold.}
 
-\item{fun}{Summary function.}
+\item{r.fun}{Raster summary function. Default is a pca.}
+
+\item{s.fun}{Output summary function. Default is mean.}
 }
 \value{
 A \emph{list}.
 }
 \description{
 Remote sensing based point segmentation
-}
-\details{
-{Segmentation of a point shapefile based on the spatial variability 
-of a raster dataset. When the \emph{method} is set to \emph{'cont'}, the raster 
-data is assumed to be continuous. Then, the function determines the percentual 
-change between each pair of two consecutive coordinate pairs. If this change is 
-above a predifined \emph{threshold}, a new pointer is added and the previous 
-sequence of samples is labeled as a unique segment. If \emph{method} is set as 
-\emph{'cat'}, the function assumes the raster data is categorical ignoring the 
-\emph{theshold} keyword. In this case, a new segment is identified if the any 
-change is observed between two consecutife points. The output consists of a list 
-containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the segment 
-ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) with the 
-amount of points in each region and the value returned by \emph{fun}. If \emph{ot} is 
-provided, the function also provides the elapsed time within each segment. If \emph{fun} 
-is set by the user, the provided function will be used to summarize the raster values 
-at each segment. Also, if \emph{img} is a \emph{RasterStack} or a \emph{RasterBrick}, 
-the \emph{fun} is used to reduce the multi-layered object to a single layer. By default, 
-the maximum value is used. Like for \emph{threshold}, \emph{fun} is ignored if 
-\emph{method} is \emph{cat}.}
 }
 \examples{
 {

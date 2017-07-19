@@ -70,6 +70,7 @@ imgInt <- function(img=img, rd=rd, td=td, bs=NULL, xy=NULL) {
 #-------------------------------------------------------------------------------------------------#
   
   # interpolation function
+  otd <- ''
   int <- function(x) {
     di <- which(rd==otd & !is.na(x))
     if (length(di)>0) {return(mean(x[di]))} else {
@@ -81,7 +82,6 @@ imgInt <- function(img=img, rd=rd, td=td, bs=NULL, xy=NULL) {
       } else {return(NA)}}}
     
   # apply function
-  np <- nrow(iData)
   if (is.null(xy)) {
     out<-brick(img[[1]], nl=length(td))
     for (r in 1:length(td)) {
@@ -89,9 +89,10 @@ imgInt <- function(img=img, rd=rd, td=td, bs=NULL, xy=NULL) {
       out[[r]] <- calc(img, int)}}
   if (!is.null(xy)) {
     idata <- extract(img, xy)
-    out<-data.frame(date=td, matrix(0,length(td),np))
+    out<-data.frame(date=td, matrix(0,length(td),nrow(idata)))
     for (r in 1:nrow(idata)) {
-      out[r,2:ncol(out)] <- apply(iData, 1, int)}}
+      otd <- td[r]
+      out[r,2:ncol(out)] <- apply(idata, 1, int)}}
 
   # provide output
   return(out)
