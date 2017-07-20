@@ -24,8 +24,6 @@
 #' @seealso \code{\link{hotMove}}
 #' @examples {
 #' 
-#' require(rgdal)
-#' require(raster)
 #' require(sp)
 #' 
 #' # reference data
