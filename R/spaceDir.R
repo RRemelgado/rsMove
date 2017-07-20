@@ -1,6 +1,6 @@
-#' @title spaceDirSample
+#' @title spaceDir
 #'
-#' @description Spatial forward and backward sampling of a raster using GPS tracking data.
+#' @description Spatial directional raster analysis.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterLayer}
@@ -52,14 +52,14 @@
 #'  
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  s.sample <- spaceDirSample(xy=moveData, ot=td, img=r, dir="bwd", fun=of)
+#'  s.sample <- spaceDir(xy=moveData, ot=td, img=r, dir="bwd", fun=of)
 #'  
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-spaceDirSample <- function(xy=xy, ot=ot, img=img, edata=NULL, dir=dir, fun=NULL) {
+spaceDir <- function(xy=xy, ot=ot, img=img, edata=NULL, dir=dir, fun=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
