@@ -4,8 +4,8 @@
 \alias{timeDirSample}
 \title{timeDirSample}
 \usage{
-timeDirSample(xy = xy, ot = ot, img = img, rt = rt, mws = NULL,
-  dir = NULL, fun = NULL)
+timeDirSample(xy = xy, ot = ot, img = img, edata = NULL, rt = rt,
+  mws = NULL, dir = NULL, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class "SpatialPoints" or "SpatialPointsDataFrame".}
@@ -13,6 +13,8 @@ timeDirSample(xy = xy, ot = ot, img = img, rt = rt, mws = NULL,
 \item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
+
+\item{edata}{Object of class \emph{data frame}.}
 
 \item{rt}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.}
 
@@ -51,8 +53,10 @@ the raster values. The output reports on:
  \item{\emph{y} - mean y coordinates}
  \item{\emph{timestamp} - mean observation time}
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
- \item{\emph{stat}: statistical metric}
-}}
+ \item{\emph{stat}: statistical metric}}
+If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
+will contain the environmental data with each column representing a different variable.Otherwise, 
+this data will be retrieved from \emph{img}.}
 }
 \examples{
 {

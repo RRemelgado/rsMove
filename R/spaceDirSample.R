@@ -3,7 +3,8 @@
 #' @description Spatial forward and backward sampling of a raster using GPS tracking data.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @param img Object of class \emph{RasterLayer}.
+#' @param img Object of class \emph{RasterLayer}
+#' @param edata Object of class \emph{vector}.
 #' @param dir One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.
 #' @param fun Summary function.
 #' @import raster sp rgdal
@@ -32,13 +33,12 @@
 #'  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
 #'  \item{\emph{travel.distance} - distance between a segment endpoints}
 #'  \item{\emph{travel.time} - elapsed time between a segment endpoints}
-#'  \item{\emph{stat}: statistical metric}
-#' }}
+#'  \item{\emph{stat}: statistical metric}}
+#' If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} will 
+#' contain the environmental data. Otherwise, this will be retrieved from \emph{img}.}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read movement data
 #'  file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
@@ -59,7 +59,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-spaceDirSample <- function(xy=xy, ot=ot, img=img, dir=dir, fun=NULL) {
+spaceDirSample <- function(xy=xy, ot=ot, img=img, edata=NULL, dir=dir, fun=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -68,6 +68,7 @@ spaceDirSample <- function(xy=xy, ot=ot, img=img, dir=dir, fun=NULL) {
   # samples
   if (!exists('xy')) {stop('"xy" is missing')}
   if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  rProj <- crs(xy)
   
   # sample dates
   if (!exists('ot')) {stop('"ot" is missing')}
@@ -76,7 +77,7 @@ spaceDirSample <- function(xy=xy, ot=ot, img=img, dir=dir, fun=NULL) {
   
   # raster
   if (!exists('img')) {stop('"img" is missing')}
-  if (!class(img)[1]%in%'RasterLayer') {stop('"img" is not of a valid class')}
+  if (!class(img)[1]=='RasterLayer') {stop('"img" is not of a valid class')}
   if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}   
   
   # query direction
@@ -84,6 +85,11 @@ spaceDirSample <- function(xy=xy, ot=ot, img=img, dir=dir, fun=NULL) {
     if (length(dir)>1) {stop('"dir" has too many entries')}
     if (!dir%in%c('bwd', 'fwd', 'both')) {stop('"dir" is not a valid entry')}
   } else {dir <- 'both'}
+  
+  # environmental data
+  if (!is.null(edata)) {
+    if (class(edata)[1]!='vector') {stop('"edata" provided but not a vector')}
+    if (length(edata)!=length(xy)) {stop('number of elements in "xy" and "edata" do not match')}}
   
   # check/define input metrics
   if (is.null(fun)) {fun <- function(x,y) {lm(y~x)$coefficients[2]}} else {
@@ -93,12 +99,11 @@ spaceDirSample <- function(xy=xy, ot=ot, img=img, dir=dir, fun=NULL) {
 # 2. summarize unique pixel segments
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  # raster dimensions
+  # convert xy to single pixels
   ext <- extent(img)
   pxr <- res(img)
   nr <- dim(img)[1]
   sp <- sp <- ((ext[4]-xy@coords[,2])%/%pxr) + nr * (((xy@coords[,1]-ext[1])%/%pxr)-1)
-  rProj <- crs(img)
   
   # search for segments and return median values
   sp0 <- 1
@@ -223,13 +228,13 @@ spaceDirSample <- function(xy=xy, ot=ot, img=img, dir=dir, fun=NULL) {
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # retrieve environmental variables
-  envData <- extract(img, cbind(xc,yc))
+  if (class(edata)[1]!='data.frame') {edata <- extract(img, cbind(xc,yc))}
   
   # query function
   f2 <- function(i) {
     ind <- us==i
-    u <- !is.na(envData[ind])
-    if (sum(u)>1) {return(as.numeric(fun(1:length(u),as.numeric(envData[ind[u]]))))} else {return(NA)}}
+    u <- !is.na(edata[ind])
+    if (sum(u)>1) {return(as.numeric(fun(1:length(u),as.numeric(edata[ind[u]]))))} else {return(NA)}}
   
   # apply user provided functon
   if(dir=='bwd') {ov <- sapply(2:length(sg), f2)}

@@ -33,9 +33,7 @@ Convert spatial polygons into point samples.
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # load example probability image
  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")

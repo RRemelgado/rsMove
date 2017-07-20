@@ -6,6 +6,7 @@
 #' @param rd Raster dates. Object of class \emph{Date}.
 #' @param bs Temporal buffer size (in days).
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
+#' @param edata Object of class \emph{data frame} or \emph{matrix} with remote sensing data.
 #' @import raster sp rgdal
 #' @importFrom stats lm
 #' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDirSample}} \code{\link{spaceDirSample}}
@@ -14,16 +15,16 @@
 #' for a given set of dates (\emph{td}). A teporal buffer (\emph{bs}) is required 
 #' to limit the search for reference data points (\emph{rd}). If \emph{xy} is 
 #' provided the function only considers the pixels that overlap with 
-#' the these sample points. Otherwise, a RasterBrick is provided.}
+#' the these sample points. Otherwise, a RasterBrick is provided. However, 
+#' if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a 
+#' data frame is provided.}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read movement data
 #'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
-#'  moveData <- shapefile(file)
+#'  moveData <- shapefile(file)[1:10,]
 #'  
 #'  # read raster data
 #'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
@@ -34,7 +35,7 @@
 #'  rd = seq.Date(as.Date("2012-01-01"), as.Date("2012-12-31"), 45)
 #'  
 #'  # target dates
-#'  td = seq.Date(as.Date("2012-04-01"), as.Date("2012-08-31"), 45)
+#'  td = as.Date("2012-04-01")
 #'  
 #'  # interpolate raster data to target dates
 #'  i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=60, xy=moveData)
@@ -44,26 +45,31 @@
 
 #-------------------------------------------------------------------------------------------------#
 
-imgInt <- function(img=img, rd=rd, td=td, bs=NULL, xy=NULL) {
+imgInt <- function(img=NULL, rd=rd, td=td, bs=NULL, xy=NULL, edata=NULL) {
   
 #-------------------------------------------------------------------------------------------------#
 # 1. check input variables  
 #-------------------------------------------------------------------------------------------------#
   
-  # check variables
-  if (!exists('img')) {stop('"img" is missing')}
-  if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
-  if (!is.null(xy)) {
-    if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {
-      stop('"shp is nor a valid point shapefile object')}
+  # check variables (if edata is provided)
+  if(class(td)!='Date') {stop('"td" is not a "Date" object')}
+  if(class(rd)!='Date') {stop('"rd" is not a "Date" object')}
+  if (!is.null(edata)) {
+    if (class(edata)[1]!='data.frame') {stop('"edata" is neither a matrix or a data frame')}
+    if (ncol(edata)!=length(rd)) {stop('mismatch in "edata" and "rd" dimensions')}
+    xy <- NULL
+    img <- NULL
+    bs <- NULL
+  } else {
+    if (is.null(img)) {stop('"img" is missing')}
+    if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
+    if (!is.null(xy)) {
+      if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {
+        stop('"shp is nor a valid point shapefile object')}
       if (crs(xy)@projargs!=crs(img)@projargs) {
         stop('"xy" and "img" have different projections')}}
-  if (!exists('td')) {stop('"td" is missing')}
-  if(class(td)!='Date') {stop('"td" is not a "Date" object')}
-  if (!exists('rd')) {stop('"rd" is missing')}
-  if(class(rd)!='Date') {stop('"rd" is not a "Date" object')}
-  if (is.null(bs)) {stop('"bs" is missing')}
-  if (!is.numeric(bs)) {stop('"bs" is not numeric')}
+    if (nlayers(img)!=length(rd)) {stop('length of "img" and "rd" do not match')}
+    if (!is.null(bs)) {if (!is.numeric(bs)) {stop('"bs" is not numeric')}}}
   
 #-------------------------------------------------------------------------------------------------#
 # 2. interpolate values
@@ -82,17 +88,18 @@ imgInt <- function(img=img, rd=rd, td=td, bs=NULL, xy=NULL) {
       } else {return(NA)}}}
     
   # apply function
-  if (is.null(xy)) {
+  if (is.null(xy) & !is.null(img)) {
     out<-brick(img[[1]], nl=length(td))
     for (r in 1:length(td)) {
       otd <- td[r]
       out[[r]] <- calc(img, int)}}
   if (!is.null(xy)) {
-    idata <- extract(img, xy)
-    out<-data.frame(date=td, matrix(0,length(td),nrow(idata)))
-    for (r in 1:nrow(idata)) {
+    if (is.null(edata)) {edata <- extract(img, xy)}
+    out <- matrix(0, length(xy), length(td))
+    colnames(out) <- as.character(td)
+    for (r in 1:length(td)) {
       otd <- td[r]
-      out[r,2:ncol(out)] <- apply(idata, 1, int)}}
+      out[,r] <- apply(edata, 1, int)}}
 
   # provide output
   return(out)

@@ -36,9 +36,7 @@ of observations per sample ('count').}
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # reference data
  file <- system.file('extdata', 'latLon_example.shp', package="rsMove")

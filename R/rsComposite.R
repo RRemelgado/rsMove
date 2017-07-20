@@ -36,9 +36,7 @@
 #' }}
 #' @examples \dontrun{
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read raster data
 #'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)

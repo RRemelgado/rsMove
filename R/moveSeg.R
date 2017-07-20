@@ -2,11 +2,12 @@
 #'
 #' @description Remote sensing based point segmentation
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
+#' @param edata Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param type Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).
 #' @param threshold Change threshold.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates. 
-#' @param fun Summary function.
+#' @param r.fun Raster summary function. Default is pca.
+#' @param s.fun Output summary function. Default is mean.
 #' @import raster rgdal
 #' @seealso \code{\link{timeDirSample}} \code{\link{dataQuery}}
 #' @return A \emph{list}.
@@ -17,22 +18,23 @@
 #' above a predifined \emph{threshold}, a new pointer is added and the previous 
 #' sequence of samples is labeled as a unique segment. If \emph{method} is set as 
 #' \emph{'cat'}, the function assumes the raster data is categorical ignoring the 
-#' \emph{theshold} keyword. In this case, a new segment is identified if the any 
-#' change is observed between two consecutife points. The output consists of a list 
-#' containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the segment 
-#' ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) with the 
-#' amount of points in each region and the value returned by \emph{fun}. If \emph{ot} is 
-#' provided, the function also provides the elapsed time within each segment. If \emph{fun} 
-#' is set by the user, the provided function will be used to summarize the raster values 
-#' at each segment. Also, if \emph{img} is a \emph{RasterStack} or a \emph{RasterBrick}, 
-#' the \emph{fun} is used to reduce the multi-layered object to a single layer. By default, 
-#' the maximum value is used. Like for \emph{threshold}, \emph{fun} is ignored if 
-#' \emph{method} is \emph{cat}.}
+#' \emph{theshold} and \emph{s.fun} keywords. In this case, a new segment is identified 
+#' if the any change is observed between two consecutife points. The output consists of 
+#' a list containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the 
+#' segment ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) 
+#' with the amount of points in each region and the value returned by \emph{s.fun}. If 
+#' \emph{ot} is provided, the function also provides the elapsed time within each segment. 
+#' If \emph{fun} is set by the user, the provided function will be used to summarize the 
+#' raster values at each segment. Also, if \emph{edata} is a \emph{RasterStack} or a 
+#' \emph{RasterBrick}, \emph{r.fun} is used to reduce the multi-layered object to a single 
+#' layer. he user can either use a Principal Component Analysis (PCA) analysis by setting 
+#' \emph{r.fun} to \emph{pca} or provide a function. If \emph{pca} is selected, the first 
+#' Principal Conponent (PC) \emph{threshold} will be set automatically to the standard 
+#' deviation of the first PC. This is the default. If \emph{method} is \emph{cat} the 
+#' function will assume the data is categorical and wil define segments whenever a change occurres.}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read movement data
 #'  moveData <- shapefile(system.file('extdata', 'konstanz_20130804.shp', package="rsMove"))
@@ -41,14 +43,14 @@
 #'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
 #'  
 #'  # perform directional sampling
-#'  seg <- moveSeg(xy=moveData, img=r, type="cont", threshold=0.1)
+#'  seg <- moveSeg(xy=moveData, edata=r, type="cont", threshold=0.1)
 #'  
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, img=img, type='cont', ot=NULL, threshold=0.1, fun=NULL) {
+moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, threshold=0.1, r.fun=NULL, s.fun=NULL) {
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables  
@@ -57,40 +59,52 @@ moveSeg <- function(xy=xy, img=img, type='cont', ot=NULL, threshold=0.1, fun=NUL
   # samples
   if (!exists('xy')) {stop('"xy" is missing')}
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  rProj <- crs(xy) # output projection
   
   # sample dates
   if (!is.null(ot)) {
     if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
     if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}}
   
-  # raster
-  if (!exists('img')) {stop('"img" is missing')}
-  if (!class(img)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
-  if (type=='cat' & nlayers(img)>1) {stop(paste0('type was set to ', type, '. raster should be a single layer'))}
+  # environmental data
+  if (class(edata)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
+    if (crs(xy)@projargs!=crs(edata)@projargs) {stop('"xy" and "edata" have different projections')}
+    nvar <- nlayers(edata)
+    } else {
+    if (!class(edata)[1]%in%c('data.frame')) {stop('"edata" is neither a raster or a data frame')}
+    if (nrow(edata)!=length(xy)) {stop('number of elements in "xy" and "edata" do not match')}
+      nvar <- ncol(edata)}
+  if (type=='cat' & nvar>1) {stop(paste0('type was set to ', type, '. raster should be a single layer'))}
   
-  # compare projections
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
-  
-  # change threshold
+  # check threshold
   if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}
-
-  # summariy function
-  if (type=='cont') {
+  
+  # check query type
   if (!type%in%c('cont', 'cat')) {stop('type is not  avalid keyword')}
-  if (!is.null(fun)) {if (!is.function(fun)) {
-    stop('"fun" is not a function')}} else {fun = function(x) {return(max(x, na.rm=T))}}}
+  if (type=='cont') {
+    if(nvar>1) {
+      if (is.null(r.fun)) {r.fun <- 'pca'}
+      if (!is.null(r.fun) & r.fun!='pca') {if (!is.function(r.fun)){stop('"r.fun" is not a valid keyword or function')}}}
+    if (!is.null(s.fun)) {if (!is.function(s.fun)){stop('"s.fun" is not a valid keyword or function')}}
+    if (is.null(s.fun)) {s.fun <- function(x) {return(mean(x, na.rm=T))}}}
   if (type=='cat') {
     threshold <- 1
-    fun <- function(x){return(x[1])}}
+    s.fun <- function(x){return(x[1])}}
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. identify segments
 #---------------------------------------------------------------------------------------------------------------------#
   
-  edata <- as.data.frame(extract(img, xy)) # read rs data
-  if (nlayers(img)) {edata <- as.data.frame(apply(edata, 1, fun))}
-  pxr <- res(img)[1] # pixel resolution
-  rProj <- crs(img)
+  # read rs data
+  if (class(edata)[1]!='data.frame') {edata <- as.data.frame(extract(edata, xy))}
+  
+  # summarize data (if needed)
+  if (nvar>1) {
+    if (is.function(r.fun)) {edata <- as.data.frame(apply(edata, 1, r.fun))}
+    if (r.fun=='pca') {
+      edata <- prcomp(edata, scale=T, center=T)
+      threshold <- edata$sdev[1]
+      edata <- as.data.frame(edata$x[,1])}}
   
   # search for segments
   r0 <- 1
@@ -103,7 +117,7 @@ moveSeg <- function(xy=xy, img=img, type='cont', ot=NULL, threshold=0.1, fun=NUL
     if (!is.na(diff)) {
       if (diff >= threshold) {
         ep <- r-1
-        rv[[li]] <- fun(edata[c(r0:ep),1])
+        rv[[li]] <- s.fun(edata[c(r0:ep),1])
         id[[li]] <- replicate(length(c(r0:ep)), li)
         r0 <- r
         li <- li + 1
@@ -112,7 +126,7 @@ moveSeg <- function(xy=xy, img=img, type='cont', ot=NULL, threshold=0.1, fun=NUL
           rv[[li]] <- edata[r,1]}
       } else {if (r==length(xy)) {
         ep <- r
-        rv[[li]] <- fun(edata[c(r0:ep),1])
+        rv[[li]] <- s.fun(edata[c(r0:ep),1])
         id[[li]] <- replicate(length(c(r0:ep)), li)}}}}
   rv <- unlist(rv)
   id <- unlist(id)

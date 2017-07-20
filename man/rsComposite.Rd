@@ -53,9 +53,7 @@ closer to the target that will be used when possible. The output provides:
 \examples{
 \dontrun{
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)

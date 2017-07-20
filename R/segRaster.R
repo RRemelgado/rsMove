@@ -21,9 +21,7 @@
 #' @seealso \code{\link{moveModel}} \code{\link{modelApply}}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # load example probability image
 #'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")

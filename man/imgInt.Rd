@@ -4,7 +4,8 @@
 \alias{imgInt}
 \title{imgInt}
 \usage{
-imgInt(img = img, rd = rd, td = td, bs = NULL, xy = NULL)
+imgInt(img = NULL, rd = rd, td = td, bs = NULL, xy = NULL,
+  edata = NULL)
 }
 \arguments{
 \item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
@@ -16,6 +17,8 @@ imgInt(img = img, rd = rd, td = td, bs = NULL, xy = NULL)
 \item{bs}{Temporal buffer size (in days).}
 
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+
+\item{edata}{Object of class \emph{data frame} or \emph{matrix} with remote sensing data.}
 }
 \value{
 A \emph{RasterBrick} or a \emph{data frame}.
@@ -28,14 +31,14 @@ Temporal linear interpolation of raster data.
 for a given set of dates (\emph{td}). A teporal buffer (\emph{bs}) is required 
 to limit the search for reference data points (\emph{rd}). If \emph{xy} is 
 provided the function only considers the pixels that overlap with 
-the these sample points. Otherwise, a RasterBrick is provided.}
+the these sample points. Otherwise, a RasterBrick is provided. However, 
+if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a 
+data frame is provided.}
 }
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read movement data
  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")

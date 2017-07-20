@@ -32,9 +32,7 @@ convex hull of the samples within them (\emph{$polygons}).}
 \examples{
 {
 
-require(rgdal)
 require(raster)
-require(sp)
 
 # reference data
 file <- system.file('extdata', 'latLon_example.shp', package="rsMove")

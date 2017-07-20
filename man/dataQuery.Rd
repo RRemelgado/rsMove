@@ -16,7 +16,7 @@ dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
 
 \item{rt}{Object of class \emph{Date} with \emph{img} observation dates.}
 
-\item{tb}{Temporal search buffer, expressed in days.}
+\item{tb}{Two element vector with temporal search buffer, expressed in days.}
 
 \item{type}{One of \emph{exact} or \emph{nearest}.}
 
@@ -40,10 +40,11 @@ Query environmental data for coordinate pairs.
          one of two sampling approaches: \emph{exact} or \emph{nearest}. If \emph{exact}, the function 
          attempts to map the dates of the raster time series with the observation dates of the samples 
          (\emph{ot}). If nearest, it searches for the nearest time step. In this case, a temporal buffer, 
-         defined by \emph{tb}, can be defined to restric the search. If \emph{remove.dup} is set, the 
-         function will account for duplicated pixels. The samples will be transposed to pixel coordinates 
-         and, for each unique pixel, median coordinates will be estimated for each pixel and used to build 
-         the output shapefile.}
+         defined by \emph{tb}, can be defined to restric the search. \emph{tb} passes two values which 
+         represent the size of the buffer in two directions: before and after the target date. This allows 
+         for bacward of forward sampling. If \emph{remove.dup} is set, the function will account for duplicated 
+         pixels. The samples will be transposed to pixel coordinates and, for each unique pixel, median 
+         coordinates will be estimated for each pixel and used to build the output shapefile.}
 }
 \examples{
 {
@@ -68,7 +69,7 @@ Query environmental data for coordinate pairs.
  o.date <- as.Date(moveData@data$date)
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=30, type='nearest')
+ rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30), type='nearest')
 
 }
 

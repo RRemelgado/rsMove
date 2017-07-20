@@ -5,7 +5,7 @@
 #' @param st Object of class \emph{Date} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param rt Object of class \emph{Date} with \emph{img} observation dates.
-#' @param tb Temporal search buffer, expressed in days.
+#' @param tb Two element vector with temporal search buffer, expressed in days.
 #' @param type One of \emph{exact} or \emph{nearest}.
 #' @param bs Buffer size (unit depends on the raster projection).
 #' @param remove.dup Logical. Should the function ignore duplicated pixels? Default if FALSE.
@@ -21,15 +21,14 @@
 #'          one of two sampling approaches: \emph{exact} or \emph{nearest}. If \emph{exact}, the function 
 #'          attempts to map the dates of the raster time series with the observation dates of the samples 
 #'          (\emph{ot}). If nearest, it searches for the nearest time step. In this case, a temporal buffer, 
-#'          defined by \emph{tb}, can be defined to restric the search. If \emph{remove.dup} is set, the 
-#'          function will account for duplicated pixels. The samples will be transposed to pixel coordinates 
-#'          and, for each unique pixel, median coordinates will be estimated for each pixel and used to build 
-#'          the output shapefile.}
+#'          defined by \emph{tb}, can be defined to restric the search. \emph{tb} passes two values which 
+#'          represent the size of the buffer in two directions: before and after the target date. This allows 
+#'          for bacward of forward sampling. If \emph{remove.dup} is set, the function will account for duplicated 
+#'          pixels. The samples will be transposed to pixel coordinates and, for each unique pixel, median 
+#'          coordinates will be estimated for each pixel and used to build the output shapefile.}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read movement data
 #'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
@@ -47,7 +46,7 @@
 #'  o.date <- as.Date(moveData@data$date)
 #'  
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=30, type='nearest')
+#'  rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30), type='nearest')
 #' 
 #' }
 #' 
@@ -85,6 +84,10 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, type=NULL, bs=N
   if (!is.null(bs) & is.null(fun)) {fun <- function(x) {sum(x*x) / sum(x)}} else {
   if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a valid function')}}}
   if (!type%in%c('nearest', 'exact')) {stop('"type" is not a recognized keyword')}
+  if (!is.null(tb)) {
+    if (!is.numeric(tb)) {stop('"tb" is not numeric')}
+    if (length(tb)!=2) {stop('"tb" should be a two element vector')}}
+  
   # duplicate removal
   if (!is.logical(remove.dup)) {stop('"remove.dup" is not a valid logical argument')}
   if (remove.dup) {
@@ -134,7 +137,7 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, type=NULL, bs=N
           ind <- which(!is.na(edata[i,]))
           if (length(ind)!=0) {
             diff <- abs(st[i]-rt[ind])
-            loc <- diff <= tb
+            loc <- rt[ind] >= (st[i]-tb[1]) & rt[ind] <= (st[i]+tb[2])
             if (sum(loc)>0) {
               loc <- which(diff==min(diff[loc]))[1]
               return(list(value=edata[i,ind[loc]], date=rt[ind[loc]]))

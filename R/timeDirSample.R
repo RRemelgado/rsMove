@@ -4,6 +4,7 @@
 #' @param xy Object of class "SpatialPoints" or "SpatialPointsDataFrame".
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterStack} or \emph{RasterBrick}.
+#' @param edata Object of class \emph{data frame}.
 #' @param rt Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.
 #' @param mws Moving window size (expressed in days).
 #' @param dir One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.
@@ -34,8 +35,10 @@
 #'  \item{\emph{y} - mean y coordinates}
 #'  \item{\emph{timestamp} - mean observation time}
 #'  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
-#'  \item{\emph{stat}: statistical metric}
-#' }}
+#'  \item{\emph{stat}: statistical metric}}
+#' If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
+#' will contain the environmental data with each column representing a different variable.Otherwise, 
+#' this data will be retrieved from \emph{img}.}
 #' @examples {
 #'  
 #'  require(raster)
@@ -64,7 +67,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-timeDirSample <- function(xy=xy, ot=ot, img=img, rt=rt, mws=NULL, dir=NULL, fun=NULL) {
+timeDirSample <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -84,11 +87,15 @@ timeDirSample <- function(xy=xy, ot=ot, img=img, rt=rt, mws=NULL, dir=NULL, fun=
   if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
   if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}   
   
+  # environmental data
+  if (!is.null(edata)) {
+    if (class(edata)[1]!='data.frame') {stop('"edata" provided but not a data frame')}
+    if (nrow(edata)!=length(xy)) {stop('number of elements in "xy" and "edata" do not match')}}
+  
   # raster dates
   if (!exists('rt')) {stop('"rt" is missing')}
   if (!class(rt)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"rt" is nof of a valid class')}
   if (length(rt)!=nlayers(img)) {stop('errorr: "img" and "rt" have different lengths')}
-  
   
   # time information
   if (is.null(mws)) {stop('"mws" is missing')} else {

@@ -4,13 +4,13 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = xy, img = img, type = "cont", ot = NULL, threshold = 0.1,
-  r.fun = NULL, s.fun = NULL)
+moveSeg(xy = xy, edata = edata, type = "cont", ot = NULL,
+  threshold = 0.1, r.fun = NULL, s.fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+\item{edata}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
 \item{type}{Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).}
 
@@ -18,7 +18,7 @@ moveSeg(xy = xy, img = img, type = "cont", ot = NULL, threshold = 0.1,
 
 \item{threshold}{Change threshold.}
 
-\item{r.fun}{Raster summary function. Default is a pca.}
+\item{r.fun}{Raster summary function. Default is pca.}
 
 \item{s.fun}{Output summary function. Default is mean.}
 }
@@ -28,12 +28,33 @@ A \emph{list}.
 \description{
 Remote sensing based point segmentation
 }
+\details{
+{Segmentation of a point shapefile based on the spatial variability 
+of a raster dataset. When the \emph{method} is set to \emph{'cont'}, the raster 
+data is assumed to be continuous. Then, the function determines the percentual 
+change between each pair of two consecutive coordinate pairs. If this change is 
+above a predifined \emph{threshold}, a new pointer is added and the previous 
+sequence of samples is labeled as a unique segment. If \emph{method} is set as 
+\emph{'cat'}, the function assumes the raster data is categorical ignoring the 
+\emph{theshold} and \emph{s.fun} keywords. In this case, a new segment is identified 
+if the any change is observed between two consecutife points. The output consists of 
+a list containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the 
+segment ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) 
+with the amount of points in each region and the value returned by \emph{s.fun}. If 
+\emph{ot} is provided, the function also provides the elapsed time within each segment. 
+If \emph{fun} is set by the user, the provided function will be used to summarize the 
+raster values at each segment. Also, if \emph{edata} is a \emph{RasterStack} or a 
+\emph{RasterBrick}, \emph{r.fun} is used to reduce the multi-layered object to a single 
+layer. he user can either use a Principal Component Analysis (PCA) analysis by setting 
+\emph{r.fun} to \emph{pca} or provide a function. If \emph{pca} is selected, the first 
+Principal Conponent (PC) \emph{threshold} will be set automatically to the standard 
+deviation of the first PC. This is the default. If \emph{method} is \emph{cat} the 
+function will assume the data is categorical and wil define segments whenever a change occurres.}
+}
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read movement data
  moveData <- shapefile(system.file('extdata', 'konstanz_20130804.shp', package="rsMove"))
@@ -42,7 +63,7 @@ Remote sensing based point segmentation
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
  
  # perform directional sampling
- seg <- moveSeg(xy=moveData, img=r, type="cont", threshold=0.1)
+ seg <- moveSeg(xy=moveData, edata=r, type="cont", threshold=0.1)
  
 }
 }

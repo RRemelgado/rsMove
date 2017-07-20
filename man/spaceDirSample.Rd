@@ -4,14 +4,17 @@
 \alias{spaceDirSample}
 \title{spaceDirSample}
 \usage{
-spaceDirSample(xy = xy, ot = ot, img = img, dir = dir, fun = NULL)
+spaceDirSample(xy = xy, ot = ot, img = img, edata = NULL, dir = dir,
+  fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
-\item{img}{Object of class \emph{RasterLayer}.}
+\item{img}{Object of class \emph{RasterLayer}}
+
+\item{edata}{Object of class \emph{vector}.}
 
 \item{dir}{One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.}
 
@@ -46,15 +49,14 @@ with these shapefiles reports on:
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
  \item{\emph{travel.distance} - distance between a segment endpoints}
  \item{\emph{travel.time} - elapsed time between a segment endpoints}
- \item{\emph{stat}: statistical metric}
-}}
+ \item{\emph{stat}: statistical metric}}
+If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} will 
+contain the environmental data. Otherwise, this will be retrieved from \emph{img}.}
 }
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read movement data
  file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")

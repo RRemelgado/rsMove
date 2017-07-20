@@ -17,9 +17,7 @@
 #'            pixel percent cover (\emph{cover}) for each selected pixel.}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # load example probability image
 #'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
