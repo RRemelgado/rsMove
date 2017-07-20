@@ -32,7 +32,7 @@
 #'  
 #'  # read movement data
 #'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
-#'  moveData <- shapefile(file)
+#'  moveData <- shapefile(file)[1:10,]
 #'  
 #'  # read raster data
 #'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)

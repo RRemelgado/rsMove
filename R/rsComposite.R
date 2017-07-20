@@ -9,7 +9,7 @@
 #' @param d.buffer Search buffer (expressed in days).
 #' @import raster rgdal
 #' @importFrom stats lm
-#' @seealso \code{\link{imgInt}} \code{\link{spaceDirSample}}
+#' @seealso \code{\link{imgInt}} \code{\link{dataQuery}}
 #' @return A \emph{list}.
 #' @details {The function uses a multi-layer raster object to build a composite. 
 #' It looks at a ginve set of dates (e.g. GPS tracking dates) and estimates a 

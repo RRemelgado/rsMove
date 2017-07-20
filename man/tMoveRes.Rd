@@ -23,13 +23,14 @@ Provides historical information on cloud cover.
 {This function makes use of the global cloud cover statistics provided 
 through EarthEnv (\url{http://www.earthenv.org/cloud}) to extract base statistics 
 for a shapefile containing GPS tracking data. The function starts by downloading 
-monthly means of fractional cloud cover. If the data already exists in \emph{dpath} 
-this step will ignored. If the data already exists, please assure it has not been 
-modified. Then, the values for each point are extracted (\emph{$point.data}) and 
-used to derive the min, max, mean and sd for each month (\emph{$stats}). This 
-statistics are then used to build a plot with ggplot expressing the mean and 
-maximum cloud cover fraction per month. This plot will be added to the output 
-(\emph{$plot}). If \emph{p.res} is TRUE, it is also ploted on screen.}
+monthly means of fractional cloud cover. This requires 9.63 Gb of space on the disk. 
+If the data already exists in \emph{dpath} this step will ignored. If the data 
+already exists, please assure it has not been modified. Then, the values for each 
+point are extracted (\emph{$point.data}) and used to derive the min, max, mean and 
+sd for each month (\emph{$stats}). This statistics are then used to build a plot 
+with ggplot expressing the mean and maximum cloud cover fraction per month. This 
+plot will be added to the output (\emph{$plot}). If \emph{p.res} is TRUE, it is 
+also ploted on screen.}
 }
 \examples{
 \dontrun{
@@ -49,5 +50,5 @@ maximum cloud cover fraction per month. This plot will be added to the output
 \url{https://doi.org/10.1371/journal.pbio.1002415}
 }
 \seealso{
-\code{\link{moveSeg}} \code{\link{sMoveRes}}
+\code{\link{sMoveRes}}
 }

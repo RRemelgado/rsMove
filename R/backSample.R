@@ -24,9 +24,7 @@
 #' @seealso \code{\link{labelSample}} \code{\link{hotMove}} \code{\link{dataQuery}}
 #' @examples {
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read movement data
 #'  files <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")

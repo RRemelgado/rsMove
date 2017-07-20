@@ -11,7 +11,7 @@
 #' @param fun Summary function.
 #' @import raster rgdal
 #' @importFrom stats lm
-#' @seealso \code{\link{spaceDirSample}} \code{\link{dataQuery}}
+#' @seealso \code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame}.
 #' @details {This function evaluates how do environmental conditions change in time 
 #' along a movement track. Before an output is returned, the function looks for 
@@ -39,6 +39,7 @@
 #' If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
 #' will contain the environmental data with each column representing a different variable.Otherwise, 
 #' this data will be retrieved from \emph{img}.}
+#' @note "xy" should be provided with a cartesian coordinate system (e.g. UTM).
 #' @examples {
 #'  
 #'  require(raster)

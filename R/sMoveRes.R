@@ -12,7 +12,7 @@
 #' samples would be grouped. The function returns a data frame (\emph{$stats}) and a 
 #' plot (\emph{$plot}) with the statistics per resolution as well as a data frame with 
 #' the pixel indices per resolution (\emph{$indices}).}
-#' @seealso \code{\link{moveSeg}} \code{\link{tMoveRes}}
+#' @seealso \code{\link{tMoveRes}}
 #' @examples {
 #'  
 #'  require(raster)

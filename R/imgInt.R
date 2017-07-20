@@ -9,7 +9,7 @@
 #' @param edata Object of class \emph{data frame} or \emph{matrix} with remote sensing data.
 #' @import raster sp rgdal
 #' @importFrom stats lm
-#' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDirSample}} \code{\link{spaceDirSample}}
+#' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}.
 #' @details {Performs a pixel-wise linear interpolation over a raster 
 #' for a given set of dates (\emph{td}). A teporal buffer (\emph{bs}) is required 

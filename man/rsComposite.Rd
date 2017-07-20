@@ -72,5 +72,5 @@ closer to the target that will be used when possible. The output provides:
 }
 }
 \seealso{
-\code{\link{imgInt}} \code{\link{spaceDirSample}}
+\code{\link{imgInt}} \code{\link{dataQuery}}
 }

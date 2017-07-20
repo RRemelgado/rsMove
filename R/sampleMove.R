@@ -9,6 +9,7 @@
 #' @import raster rgdal
 #' @importFrom stats median
 #' @return A \emph{SpatialPointsDataFrame}.
+#' @seealso \code{\link{labelSample}} \code{\link{backSample}} \code{\link{dataQuery}}
 #' @details {This function offers a simple approach to sample from locati where an animal showed little or no movement 
 #' based on GPS tracking data. It looks at the distance among consecutive samples (\emph{error}) and estimates mean coordinates 
 #' for the temporal segments where the animal moved less than the defined distance from the first location of the segment. 

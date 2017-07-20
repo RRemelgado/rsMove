@@ -9,7 +9,7 @@
 #' @param fun Summary function.
 #' @import raster sp rgdal
 #' @importFrom stats lm
-#' @seealso \code{\link{timeDirSample}} \code{\link{dataQuery}}
+#' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}
 #' @return A \emph{list}.
 #' @details {This function evaluates how do environmental conditions change in space 
 #' along a movement track. Before an output is returned, the function looks for segments 
@@ -36,6 +36,7 @@
 #'  \item{\emph{stat}: statistical metric}}
 #' If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} will 
 #' contain the environmental data. Otherwise, this will be retrieved from \emph{img}.}
+#' @note "xy" should be provided with a cartesian coordinate system (e.g. UTM).
 #' @examples {
 #'  
 #'  require(raster)

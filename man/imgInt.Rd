@@ -42,7 +42,7 @@ data frame is provided.}
  
  # read movement data
  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
- moveData <- shapefile(file)
+ moveData <- shapefile(file)[1:10,]
  
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
@@ -53,7 +53,7 @@ data frame is provided.}
  rd = seq.Date(as.Date("2012-01-01"), as.Date("2012-12-31"), 45)
  
  # target dates
- td = seq.Date(as.Date("2012-04-01"), as.Date("2012-08-31"), 45)
+ td = as.Date("2012-04-01")
  
  # interpolate raster data to target dates
  i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=60, xy=moveData)
@@ -61,5 +61,5 @@ data frame is provided.}
 }
 }
 \seealso{
-@seealso \code{\link{dataQuery}} \code{\link{timeDirSample}} \code{\link{spaceDirSample}}
+@seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 }

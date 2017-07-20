@@ -52,3 +52,6 @@ of observations per sample ('count').}
  
 }
 }
+\seealso{
+\code{\link{labelSample}} \code{\link{backSample}} \code{\link{dataQuery}}
+}

@@ -9,7 +9,7 @@
 #' @param r.fun Raster summary function. Default is pca.
 #' @param s.fun Output summary function. Default is mean.
 #' @import raster rgdal
-#' @seealso \code{\link{timeDirSample}} \code{\link{dataQuery}}
+#' @seealso \code{\code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list}.
 #' @details {Segmentation of a point shapefile based on the spatial variability 
 #' of a raster dataset. When the \emph{method} is set to \emph{'cont'}, the raster 

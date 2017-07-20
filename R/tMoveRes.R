@@ -19,7 +19,7 @@
 #' plot will be added to the output (\emph{$plot}). If \emph{p.res} is TRUE, it is 
 #' also ploted on screen.}
 #' @references \url{https://doi.org/10.1371/journal.pbio.1002415}
-#' @seealso \code{\link{moveSeg}} \code{\link{sMoveRes}}
+#' @seealso \code{\link{sMoveRes}}
 #' @examples \dontrun{
 #'  
 #'  require(raster)

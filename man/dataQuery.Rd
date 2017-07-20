@@ -49,9 +49,7 @@ Query environmental data for coordinate pairs.
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read movement data
  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")

@@ -42,5 +42,5 @@ the pixel indices per resolution (\emph{$indices}).}
 }
 }
 \seealso{
-\code{\link{moveSeg}} \code{\link{tMoveRes}}
+\code{\link{tMoveRes}}
 }
