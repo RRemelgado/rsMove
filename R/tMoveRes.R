@@ -46,6 +46,7 @@ tMoveRes <- function(xy=xy, dpath=dpath, p.res=T) {
   rr <- crs(xy) # reference projection
   if (is.na(rr@projargs)) {stop('"xy" does not have a valid projection')}
   if (!dir.exists(dpath)) {stop('"dpath" not found in file system')}
+  if (!is.logical(p.res)) {stop('"p.res" is not a logical argument')}
   
 #---------------------------------------------------------------------------------------------------------------------#
 #  2. list, check for and download files

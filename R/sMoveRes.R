@@ -38,6 +38,7 @@ sMoveRes <- function(xy=xy, pxr=pxr, p.res=T) {
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (!is.numeric(pxr)) {stop('"pxr" is not numeric')}
   if (!is.vector(pxr)) {stop('"pxr" is not a vector')}
+  if (!is.logical(p.res)) {stop('"p.res" is not a logical argument')}
   
   # evaluate each resolution
   ext <- extent(xy) # reference extent

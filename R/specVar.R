@@ -1,18 +1,27 @@
 #' @title specVar
 #'
-#' @description Evaluates how a change in raster resolution impacst the availability of data points.
+#' @description Quantifies how changes in the resolution of a raster affects the perception of spectral complexity.
+#' @param img Object of class \emph{RasterLayer}.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pxr vector of target resolutions.
 #' @param p.res Should the output be ploted on screen? Default is TRUE.
-#' @import ggplot2 sp rgdal grDevices
+#' @import ggplot2 sp raster rgdal grDevices
 #' @return A \emph{list}.
-#' @details {Given a vector of pixel resolutions (\emph{pxr}), the function determines 
-#' the number of unique pixels and unique pixel groups. Additionaly, for each pixel, 
-#' the function returns the corresponding pixel indices per resolution showing which 
-#' samples would be grouped. The function returns a data frame (\emph{$stats}) and a 
-#' plot (\emph{$plot}) with the statistics per resolution as well as a data frame with 
-#' the pixel indices per resolution (\emph{$indices}).}
-#' @seealso \code{\link{tMoveRes}}
+#' @details {Given a raster object, the function determines how reducing the resolution 
+#' of the raster impacts our ability to perceive the complexity of the landscape. The 
+#' function aggregates \emph{img} to each of the given pixel resolutions (\emph{pxr}) 
+#' and estimates the Mean Absolute Error (MAE) for each pixel with the aggregated 
+#' layer where the differences are estimated from the pixel within the original raster 
+#' that overlap with the target pixel. If a point shapefile is provided (\emph{xy}), 
+#' the function will only report on the values that overlap with the points. The output 
+#' of the function consists of:
+#' \itemize{
+#'  \item{\emph{mae} - MAE, either for all pixels or for the points within \emph{xy}}
+#'  \item{\emph{pixel.optimal} - raster reporting on the resolution with the lowest MAE for each pixel}
+#'  \item{\emph{pixel.optimal.stats} - Proportion of samples per resolution derived from \emph{pixel.optimal}}
+#'  \item{\emph{plot} - boxplots of the variability of the MAE per resolution}}
+#' If \emph{xy} is set, the output will contain a vector with the optimal resolution per sample (\emph{$sample.optimal}).}
+#' @seealso \code{\link{tMoveRes}} \code{\link{sMoveRes}}
 #' @examples {
 #'  
 #'  require(raster)
@@ -21,24 +30,37 @@
 #'  file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
 #'  moveData <- shapefile(file)
 #'  
-#'  # test function for 5, 10 20 and 30 m
-#'  a.res <- sMoveRes(xy=moveData, pxr=c(5, 10, 20, 30))
+#'  # read raster data
+#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  
+#'  # apply function
+#'  s.var <- specVar(img=r, xy=moveData, pxr=c(60, 90), p.res=F)
 #'  
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-specVar <- function(img=img, xy=NULL, p.res=T) {
+specVar <- function(img=img, xy=NULL, pxr=pxr, p.res=T) {
   
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
 #---------------------------------------------------------------------------------------------------------------------#
   
-  if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  # raster/shapefile
+  if (!exists('img')) {stop('"img" is missing')}
+  if (!class(img)[1]=='RasterLayer') {stop('"img" is not of a valid class')}
+  if (!is.null(xy)) {
+    if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+    crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}}
+  
+  # pixel resolution
   if (!is.numeric(pxr)) {stop('"pxr" is not numeric')}
   if (!is.vector(pxr)) {stop('"pxr" is not a vector')}
-
+  
+  # plotting
+  if (!is.logical(p.res)) {stop('"p.res" is not a logical argument')}
+  
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. extract raster parameters and define scaling factor
 #---------------------------------------------------------------------------------------------------------------------#
