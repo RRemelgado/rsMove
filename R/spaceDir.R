@@ -10,7 +10,7 @@
 #' @param fun Summary function.
 #' @import raster sp rgdal
 #' @importFrom stats lm
-#' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}
+#' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list}.
 #' @details {This function evaluates how do environmental conditions change in space 
 #' along a movement track. Before an output is returned, the function looks for segments 
@@ -174,7 +174,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
           aCoef <- sin(yDiff/2) * sin(yDiff/2) + cos(y00[o]) * cos(x00[o]) * sin(xDiff/2.) * sin(xDiff/2.)
           cCoef <- 2 * atan2(sqrt(aCoef), sqrt(1.-aCoef))
           return(6371000 * cCoef)}
-        d0 <- sum(sapply(2:length(x00), sf)}
+        d0 <- sum(sapply(2:length(x00), sf))}
       return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), sg[i])))}
     op <- lapply(2:length(sg), f1)}
   
@@ -209,7 +209,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
           aCoef <- sin(yDiff/2) * sin(yDiff/2) + cos(y00[o]) * cos(x00[o]) * sin(xDiff/2.) * sin(xDiff/2.)
           cCoef <- 2 * atan2(sqrt(aCoef), sqrt(1.-aCoef))
           return(6371000 * cCoef)}
-        d0 <- sum(sapply(2:length(x00), sf)}
+        d0 <- sum(sapply(2:length(x00), sf))}
       return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), sg[i])))}
     op <- lapply(1:(length(sg)-1), f1)}
   
@@ -255,7 +255,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
           aCoef <- sin(yDiff/2) * sin(yDiff/2) + cos(y00[o]) * cos(x00[o]) * sin(xDiff/2.) * sin(xDiff/2.)
           cCoef <- 2 * atan2(sqrt(aCoef), sqrt(1.-aCoef))
           return(6371000 * cCoef)}
-        d0 <- sum(sapply(1:length(x00), sf)}
+        d0 <- sum(sapply(1:length(x00), sf))}
       return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), sg[i])))}
     op <- lapply(2:(length(sg)-1), f1)}
     
@@ -276,7 +276,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
   edata <- extract(img, cbind(xc,yc))
   
   
-  if (type='cont') {
+  if (type=='cont') {
     
     # query function
     f2 <- function(i) {
@@ -292,14 +292,14 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
   
   }
   
-  if (type='cat' {
+  if (type=='cat') {
     
     uc <- unique(img) # unique classes
     
     # function to sumarize class composition
     f2 <- function(i) {
       ind <- which(us==i)
-      return(sapply(uc, function(y) {sum(edata[ind]==uc[y], na.rm=T))}))}
+      return(sapply(uc, function(y) {sum(edata[ind]==uc[y], na.rm=T)}))}
     
     if(dir=='bwd') {ov <- do.call(rbind, lapply(2:length(sg), f2))}
     if(dir=='fwd') {ov <- do.call(rbind, lapply(1:(length(sg)-1), f2))}

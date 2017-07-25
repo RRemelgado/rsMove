@@ -4,19 +4,21 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(xy = xy, ot = ot, img = img, edata = NULL, dir = dir,
-  fun = NULL)
+spaceDir(xy = xy, ot = ot, img = img, dir = dir, type = type,
+  dm = "m", fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
-\item{img}{Object of class \emph{RasterLayer}}
-
-\item{edata}{Object of class \emph{vector}.}
+\item{img}{Object of class \emph{RasterLayer}.}
 
 \item{dir}{One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.}
+
+\item{type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
+
+\item{dm}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
 
 \item{fun}{Summary function.}
 }
@@ -33,12 +35,11 @@ of consecutive samples that appear within the same pixel and provides mean value
 their coordinates and observation times as well as the corresponding pixel value and 
 the elapsed time during the segment (in minutes). this step avoids the replication of 
 samples while preserving observation related to revisits to the same pixels. Then, for 
-each observation, the function looks at it imediate neighbors to define spatial segments 
-over which a statistical metric will be estimated. All the pixels between the two endpoints 
-of the segment are considered in this process. By defaut, the slope of the linear regression 
-between the first and the last observation is returned. The user can use the argument \emph{dir} #
-to prompt the function to focus at previous (\emph{bwd}) or following (\emph{fwd}) observations or to 
-look in both directions (\emph{both}). The output consists of a list containing two shapefiles, one 
+each observation, the function looks at it imediate neighbors to define spatial segments. 
+All the pixels between the two endpoints of the segment are considered in this process. 
+The user can use the argument \emph{dir} to prompt the function to focus on previous 
+(\emph{bwd}) or following (\emph{fwd}) observations or to look in both directions (\emph{both}) 
+when defining the segments. The output consists of a list containing two shapefiles, one 
 \emph{SpatialPointsDataFrame} (\emph{$endpoints}) with the endpoints of each segment and a 
 \emph{SpatialLinesDataFrame} (\emph{$segments}) representing each segment. The data frames provided 
 with these shapefiles reports on:
@@ -48,13 +49,15 @@ with these shapefiles reports on:
  \item{\emph{timestamp} - mean observation time}
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
  \item{\emph{travel.distance} - distance between a segment endpoints}
- \item{\emph{travel.time} - elapsed time between a segment endpoints}
- \item{\emph{stat}: statistical metric}}
-If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} will 
-contain the environmental data. Otherwise, this will be retrieved from \emph{img}.}
-}
-\note{
-"xy" should be provided with a cartesian coordinate system (e.g. UTM).
+ \item{\emph{travel.time} - elapsed time between a segment endpoints}}
+ The additionaly information added to the data frame depends on the type of data. If \emph{type} is set 
+ to \emph{'cont'}, the function will assume the input raster is a continuous variable as estimate a 
+ statistical metric for each segment. If none is provided throught the keyword \emph{fun}, the slope 
+ will be returned by default and assigned to the column \emph{'stat'} within the output data frame. If 
+ \emph{type} is set to '\emph{'cat'}, the function will assume the data is categorical. As a result,
+ the keyword \emph{fun} is ignored. Instead, the function will return the proportion of pixels occupied 
+ by each class for each segment. In addition, the dominant class (\emph{'main'}) and the shannon index 
+ (\emph{'shannon'}) will be returned for each segment within the output data frame.}
 }
 \examples{
 {
@@ -72,8 +75,11 @@ contain the environmental data. Otherwise, this will be retrieved from \emph{img
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
  
  # perform directional sampling
- of <- function(x,y) {lm(y~x)$coefficients[2]}
- s.sample <- spaceDir(xy=moveData, ot=td, img=r, dir="bwd", fun=of)
+ of <- function(x) {lm(1:lengh(x)~x)$coefficients[2]}
+ s.sample <- spaceDir(xy=moveData, ot=td, img=r, dir="bwd", type='cont', fun=of)
  
 }
+}
+\seealso{
+\code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 }

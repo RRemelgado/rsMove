@@ -67,3 +67,6 @@ function will assume the data is categorical and wil define segments whenever a 
  
 }
 }
+\seealso{
+\code{\link{dataQuery}} \code{\link{imgInt}}
+}

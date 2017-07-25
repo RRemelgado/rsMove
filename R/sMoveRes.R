@@ -98,28 +98,28 @@ sMoveRes <- function(xy=xy, pxr=pxr, p.res=T) {
   # determine fill scale range
   mv = max(out1$n.regions)
   if (mv < 100) {
-    mv / 10
-    fr = round(mv*2)/2
-    if (mv > fr) {fr = (fr+0.5)*10} else {fr = fr*10}
+    mv <- mv / 10
+    fr <- round(mv*2)/2
+    if (mv > fr) {fr <- (fr+0.5)*10} else {fr <- fr*10}
   }
   if (mv >= 100) {
     mv <- mv / 100
-    fr = round(mv*20)/20
-    if (mv > fr) {fr = (fr+0.5)*100} else {fr = fr*100}}
+    fr <- round(mv*20)/20
+    if (mv > fr) {fr <- (fr+0.5)*100} else {fr <- fr*100}}
   
   # determine yscale range
-  mv = max(out1$n.pixels)
+  mv <- max(out1$n.pixels)
   if (mv < 100) {
     mv <- mv / 10
-    yr = round(mv*2)/2
-    if (mv > yr) {yr = (yr+0.5)*10} else {yr = yr*10}}
+    yr <- round(mv*2)/2
+    if (mv > yr) {yr <- (yr+0.5)*10} else {yr <- yr*10}}
   if (mv >= 100) {
     mv <- mv / 100
-    yr = round(mv*20)/20
-    if (mv > yr) {yr = (yr+0.5)*100} else {yr = yr*100}}
+    yr <- round(mv*20)/20
+    if (mv > yr) {yr <- (yr+0.5)*100} else {yr <- yr*100}}
   
   # make color palette
-  cr = colorRampPalette(c("khaki2", "forestgreen"))
+  cr <- colorRampPalette(c("khaki2", "forestgreen"))
   
   # build plot object
   p <- ggplot(out1, aes(x=factor(pxr), y=n.pixels, fill=n.regions)) + 

@@ -55,11 +55,8 @@ the raster values. The output reports on:
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
  \item{\emph{stat}: statistical metric}}
 If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
-will contain the environmental data with each column representing a different variable.Otherwise, 
+will contain the environmental data with each column representing a different variable. Otherwise, 
 this data will be retrieved from \emph{img}.}
-}
-\note{
-"xy" should be provided with a cartesian coordinate system (e.g. UTM).
 }
 \examples{
 {
