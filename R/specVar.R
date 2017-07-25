@@ -46,8 +46,8 @@ specVar <- function(img=img, p.res=T) {
   # evaluate each resolution
   ext <- extent(img) # reference extent
   rproj <- crs(img) # reference projection
-  xy <- xyFromCell(img, 1:ncell(img)) # original xy
-
+  ixy <- xyFromCell(img, 1:ncell(img)) # original xy
+  
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
@@ -59,37 +59,43 @@ specVar <- function(img=img, p.res=T) {
   for (p in 1:length(pxr)) {    
     
     # resample data to and from a higher resolution
-    tmp <- resample(resample(img, raster(ext, res=pxr[p], crs=rproj)), img)
+    tmp <- resample(img, raster(ext, res=pxr[p], crs=rproj))
+    rv <- resample(tmp, img)
     
     # extract difference vales
-    rv <- getValues(img - tmp)
-    
+    rv <- getValues(img - rv)
+      
     # convert coordinates to pixel positions
-    nc <- round((ext[2]-ext[1]) / pxr[p]) + 1 # number of columns
-    nr <- round((ext[4]-ext[3]) / pxr[p]) + 1 # number of rows
-    sp <- (round((ext[4]-xy[,2])/pxr[p])+1) + nr * round((xy[,1]-ext[1])/pxr[p])
-    
-    # remove NA values
-    cc <- complete.cases(rv)
-    rv <- rv[cc]
-    sp <- sp[cc]
-    
+    sp <- cellFromXY(tmp, ixy)
+      
     # derive RMSE for each pixel
     up <- unique(sp) # unique pixel positions
-    rv <- sapply(up, function(x) {ind <- which(sp==x)
-    sqrt((sum(rv[ind]^2) / length(ind)))})
+    rv <- sapply(up, function(x) {ind <- which(sp==x & !is.na(x))
+    if (length(ind)>0) {sum(abs(rv[ind])) / length(ind)} else {return(NA)}})
+    
+    # if xy is provided, extract values
+    if (!is.null(xy)) {
+      rv <- setValues(tmp, rv)
+      rv <- extract(rv, xy@coords)}
     
     # add output to list
     out[[p]] <- list(value=rv, resolution=replicate(length(rv), pxr[p]))
     
     # remove temporary data from memory
-    rm(tmp, nc, nr, sp, cc, rv, up)
+    rm(tmp, sp, rv, up)
     
+  }
+  
+  # build shapefile if one is provided
+  if (!is.null(xy)) {
+    odf <- do.call(cbind, lapply(out, function(x) {x$value}))
+    colnames(odf) <- as.character(pxr) 
   }
   
   # final data frame
   odf <- data.frame(RMSE=unlist(sapply(out, function(x){x$value})), 
                     Resolution=factor(unlist(sapply(out, function(x){x$resolution})), levels=as.character(pxr)))
+  
   
   # remove temporary data from memory
   rm(xy, ext, rproj, out)
