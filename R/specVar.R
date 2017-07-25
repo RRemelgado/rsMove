@@ -29,18 +29,18 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-specVar <- function(img=img, p.res=T) {
+specVar <- function(img=img, xy=NULL, p.res=T) {
   
 #---------------------------------------------------------------------------------------------------------------------#
-  #  1. check inpur variables
-  #---------------------------------------------------------------------------------------------------------------------#
+#  1. check inpur variables
+#---------------------------------------------------------------------------------------------------------------------#
   
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (!is.numeric(pxr)) {stop('"pxr" is not numeric')}
   if (!is.vector(pxr)) {stop('"pxr" is not a vector')}
 
 #---------------------------------------------------------------------------------------------------------------------#
-# 2. convert pixels to coordinates and extract raster info
+# 2. extract raster parameters and define scaling factor
 #---------------------------------------------------------------------------------------------------------------------#
     
   # evaluate each resolution
@@ -48,8 +48,13 @@ specVar <- function(img=img, p.res=T) {
   rproj <- crs(img) # reference projection
   ixy <- xyFromCell(img, 1:ncell(img)) # original xy
   
+  # aggregation factor
+  af <- cbind(pxr / res(img)[1], pxr / res(img)[2])
+  cc <- (as.integer(af)) == af
+  if (min(cc)==0) {stop('one or more elements in "pxr" is not a multiple of "img" resolution')}
+  
 #---------------------------------------------------------------------------------------------------------------------#
-# 2. determine grid coordinates for given pixels
+# 3. extract statistics
 #---------------------------------------------------------------------------------------------------------------------#
   
   # output variable
@@ -59,19 +64,22 @@ specVar <- function(img=img, p.res=T) {
   for (p in 1:length(pxr)) {    
     
     # resample data to and from a higher resolution
-    tmp <- resample(img, raster(ext, res=pxr[p], crs=rproj))
-    rv <- resample(tmp, img)
+    tmp <- aggregate(img, fact=af[p,], fun=mean, na.rm=T)
+    rv <- crop(disaggregate(tmp, fact=af[p,]), img)
     
     # extract difference vales
     rv <- getValues(img - rv)
       
     # convert coordinates to pixel positions
     sp <- cellFromXY(tmp, ixy)
-      
+    
     # derive RMSE for each pixel
     up <- unique(sp) # unique pixel positions
     rv <- sapply(up, function(x) {ind <- which(sp==x & !is.na(x))
-    if (length(ind)>0) {sum(abs(rv[ind])) / length(ind)} else {return(NA)}})
+    if (length(ind)>0) {1/sum(abs(rv[ind]))*sum(abs(rv[ind])*abs(rv[ind]))} else {return(NA)}})
+    
+    # assign values to original raster
+    orv <- sapply(sp, function(x) {rv[which(up==x)]})
     
     # if xy is provided, extract values
     if (!is.null(xy)) {
@@ -79,33 +87,52 @@ specVar <- function(img=img, p.res=T) {
       rv <- extract(rv, xy@coords)}
     
     # add output to list
-    out[[p]] <- list(value=rv, resolution=replicate(length(rv), pxr[p]))
+    out[[p]] <- list(value=rv, resolution=replicate(length(rv), pxr[p]), original=orv)
     
     # remove temporary data from memory
-    rm(tmp, sp, rv, up)
+    rm(tmp, sp, rv, up, orv)
     
   }
+
+#---------------------------------------------------------------------------------------------------------------------#
+# 4. derive output statistics
+#---------------------------------------------------------------------------------------------------------------------#
   
-  # build shapefile if one is provided
+  # retrieve per-pixel values and determine optimal resolution
+  opr <- data.frame(lapply(out, function(x){x$original}))
+  opr <- setValues(img, apply(opr, 1, function(x) {max(pxr[which(x==min(x))])}))
+  
+  # derive raster stats
+  uv <- unique(opr)
+  nc <- ncell(opr)
+  cp <- data.frame(Resolution=uv, Percentage=sapply(uv, function(x) {cellStats(opr==x, sum)/nc *100}))
+  
+  # build output data frame
   if (!is.null(xy)) {
-    odf <- do.call(cbind, lapply(out, function(x) {x$value}))
-    colnames(odf) <- as.character(pxr) 
-  }
-  
-  # final data frame
-  odf <- data.frame(RMSE=unlist(sapply(out, function(x){x$value})), 
-                    Resolution=factor(unlist(sapply(out, function(x){x$resolution})), levels=as.character(pxr)))
-  
-  
-  # remove temporary data from memory
-  rm(xy, ext, rproj, out)
+    odf <- as.data.frame(do.call(cbind, lapply(out, function(x) {x$value})))
+    colnames(odf) <- c(as.character(pxr))
+    # optimal resolution per per sample / pixel
+    osr <- as.numeric(apply(odf, 1, function(x) {max(pxr[which(x==min(x))])}))
+    
+    # sort data frame (ggplot format)
+    out <- lapply(1:length(pxr), function(x) {
+      pr <- factor(replicate(length(odf[,x]), pxr[x]), 
+                   levels=as.character(pxr))
+      return(data.frame(MAE=odf[,x], Resolution=pr))})
+    out <- do.call(rbind, out) 
+    
+  } else {
+    
+    # sort data frame (ggplot format)
+    out <- data.frame(MAE=unlist(lapply(out, function(x) {x$value})), 
+                      resolution=unlist(lapply(out, function(x) {x$resolution})))}
   
 #---------------------------------------------------------------------------------------------------------------------#
-# 4. plot output
+# 5. plot output
 #---------------------------------------------------------------------------------------------------------------------#
-  
+
   # determine y scale range
-  mv = max(odf$RMSE)
+  mv = max(out$MAE)
   if (mv < 100) {
     mv <- mv / 10
     yr <- round(mv*2)/2
@@ -116,11 +143,13 @@ specVar <- function(img=img, p.res=T) {
     if (mv > yr) {yr <- (yr+0.5)*100} else {yr <- yr*100}}
   
   # build plot object
-  p <- ggplot(odf, aes(x=Resolution, y=RMSE)) + geom_boxplot() + ylim(0,yr)
+  p <- ggplot(out, aes(x=Resolution, y=MAE)) + geom_boxplot() + ylim(0,yr)
   
   if (p.res) {p} # plot on screen
   
   # return data frame and plot
-  return(list(stats=odf, plot=p))
+  if (!is.null(xy)) {
+    return(list(mae=odf, sample.optimal=osr, pixel.optimal=opr, pixel.optimal.stats=cp, plot=p))
+  } else {return(list(mae=out, pixel.optimal=opr, pixel.optimal.stats=cp, plot=p))}
   
 }
