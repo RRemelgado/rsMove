@@ -1,7 +1,7 @@
 
 # rsMove
 [![CRAN version](https://www.r-pkg.org/badges/version/rsMove)](https://CRAN.R-project.org/package=rsMove)
-[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=moveVis)
+[![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=rsMove)
 
 ### Why develop rsMove?
 
@@ -41,7 +41,7 @@ For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/tree/m
 The Department of Remote Sensing of the University of Würzburg has developed other R packages that might interest you:
 </p>
 
-* <a href="http://bleutner.github.io/RStoolbox/">RStookbox</a>
+* <a href="http://bleutner.github.io/RStoolbox/">RStoolbox</a>
 * <a href="https://github.com/cran/moveVis/">moveVis</a>
 
 <p align="justify">
