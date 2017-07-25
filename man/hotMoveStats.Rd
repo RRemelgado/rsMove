@@ -42,8 +42,6 @@ are in a cartesian coordinate system use \emph{m}.}
 \examples{
 {
 
-require(rgdal)
-require(raster)
 require(sp)
 
 # reference data

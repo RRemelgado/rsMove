@@ -58,6 +58,9 @@ If \emph{edata} is provided, \emph{img} will only be used as a reference grid as
 will contain the environmental data with each column representing a different variable.Otherwise, 
 this data will be retrieved from \emph{img}.}
 }
+\note{
+"xy" should be provided with a cartesian coordinate system (e.g. UTM).
+}
 \examples{
 {
  

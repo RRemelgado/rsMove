@@ -53,6 +53,9 @@ with these shapefiles reports on:
 If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} will 
 contain the environmental data. Otherwise, this will be retrieved from \emph{img}.}
 }
+\note{
+"xy" should be provided with a cartesian coordinate system (e.g. UTM).
+}
 \examples{
 {
  

@@ -40,9 +40,7 @@ from \emph{img}.}
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read movement data
  files <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")

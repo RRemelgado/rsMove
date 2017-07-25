@@ -43,9 +43,7 @@ a vector with ID's assigning each sample to its region. Samples filtered by
 \examples{
 {
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read example data
  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")

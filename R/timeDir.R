@@ -37,9 +37,8 @@
 #'  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
 #'  \item{\emph{stat}: statistical metric}}
 #' If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
-#' will contain the environmental data with each column representing a different variable.Otherwise, 
+#' will contain the environmental data with each column representing a different variable. Otherwise, 
 #' this data will be retrieved from \emph{img}.}
-#' @note "xy" should be provided with a cartesian coordinate system (e.g. UTM).
 #' @examples {
 #'  
 #'  require(raster)
@@ -116,63 +115,67 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
 # 2. summarize unique pixel segments
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  # raster dimensions
-  ext <- extent(img)
-  pxr <- res(img)
-  nr <- dim(img)[1]
-  sp <- sp <- (round((ext[4]-xy@coords[,2])/pxr)+1) + nr * round((xy@coords[,1]-ext[1])/pxr)
-  op <- crs(img)
-  
-  # search for segments and return median values
-  sp0 <- 1
-  li <- 1
-  ux <- list() # x coordinates
-  uy <- list() # y coordinates
-  ut <- list() # observation time
-  et <- list() # elapsed time
-  for (r in 2:length(sp)) {
-    if (sp[r]!=sp[r-1]) {
-      ep <- (r-1)
-      ux[[li]] <- mean(xy@coords[sp0:ep,1])
-      uy[[li]] <- mean(xy@coords[sp0:ep,2])
-      ut[[li]] <- mean(ot[sp0:ep])
-      et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
-      sp0 <- r
-      li <- li + 1
+  if (is.null(edata)) {
+    
+    # raster dimensions
+    ext <- extent(img)
+    pxr <- res(img)
+    nr <- dim(img)[1]
+    sp <- sp <- (round((ext[4]-xy@coords[,2])/pxr)+1) + nr * round((xy@coords[,1]-ext[1])/pxr)
+    op <- crs(img)
+    
+    # search for segments and return median values
+    sp0 <- 1
+    li <- 1
+    ux <- list() # x coordinates
+    uy <- list() # y coordinates
+    ut <- list() # observation time
+    et <- list() # elapsed time
+    for (r in 2:length(sp)) {
+      if (sp[r]!=sp[r-1]) {
+        ep <- (r-1)
+        ux[[li]] <- mean(xy@coords[sp0:ep,1])
+        uy[[li]] <- mean(xy@coords[sp0:ep,2])
+        ut[[li]] <- mean(ot[sp0:ep])
+        et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+        sp0 <- r
+        li <- li + 1
+      }
     }
+    
+    # convert to vector
+    ux <- unlist(ux)
+    uy <- unlist(uy)
+    ut <- do.call("c", ut)
+    et <- unlist(et)
+    
+    # build output
+    xy <- data.frame(x=ux, y=uy, timestamp=ut, stat=matrix(0, length(ux)), pixel.time=et)
+    xy <- SpatialPointsDataFrame(xy[,1:2], xy, proj4string=op)
+    
+    rm(ext, pxr, nr, op, sp, sp0, li, ot)
+    
+  #-------------------------------------------------------------------------------------------------------------------------------#
+  # 3. select query function
+  #-------------------------------------------------------------------------------------------------------------------------------#
+    
+    # retrieve environmental variables
+    ut <- as.Date(ut)
+    rt <- as.Date(rt)
+    ind <- which(rt%in%seq.Date(min(ut-mws), max(ut+mws), by=1))
+    edata <- extract(img[[ind]], xy@coords)
+    rt <- rt[ind]
+    
+    rm(img)
+    
   }
-  
-  # convert to vector
-  ux <- unlist(ux)
-  uy <- unlist(uy)
-  ut <- do.call("c", ut)
-  et <- unlist(et)
-  
-  # build output
-  xy <- data.frame(x=ux, y=uy, timestamp=ut, stat=matrix(0, length(ux)), pixel.time=et)
-  xy <- SpatialPointsDataFrame(xy[,1:2], xy, proj4string=op)
-  
-  rm(ext, pxr, nr, op, sp, sp0, li, ot)
-  
-#-------------------------------------------------------------------------------------------------------------------------------#
-# 3. select query function
-#-------------------------------------------------------------------------------------------------------------------------------#
-  
-  # retrieve environmental variables
-  ut <- as.Date(ut)
-  rt <- as.Date(rt)
-  ind <- which(rt%in%seq.Date(min(ut-mws), max(ut+mws), by=1))
-  envData <- extract(img[[ind]], xy@coords)
-  rt <- rt[ind]
-  
-  rm(img)
   
   # backwards sampling
   if (dir=='bwd') {
     f <- function(i) {
       ind <- which(rt >= (ut[i]-mws) & rt <= ut[i])
       x <- as.numeric(rt[ind])
-      y <- envData[i,]
+      y <- edata[i,]
       u <- !is.na(y)
       if (sum(u)>1) {return(fun(x[u],y[u]))} else {return(NA)}}}
   
@@ -181,7 +184,7 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
     f <- function(i) {
       ind <- which(rt >= ut & rt <= (ut[i]+mws))
       x <- as.numeric(rt[ind])
-      y <- envData[i,]
+      y <- edata[i,]
       u <- !is.na(y)
       if (sum(u)>1) {return(fun(x[u],y[u]))} else {return(NA)}}}
     
@@ -190,7 +193,7 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
   f <- function(i) {
     ind <- which(rt >= (ut[i]-mws) & rt <= (ut[i]+mws))
     x <- as.numeric(rt[ind])
-    y <- envData[i,]
+    y <- edata[i,]
     u <- !is.na(y)
     if (sum(u)>1) {return(fun(x[u],y[u]))} else {return(NA)}}}
   
@@ -198,7 +201,7 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
 # 4. query samples
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  xy@data$stat <- unlist(sapply(1:length(xy), f))
+  xy@data$stat <- unlist(sapply(1:length(xy), f))    
   return(xy)
  
 }
