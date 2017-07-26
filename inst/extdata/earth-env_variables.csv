@@ -109,4 +109,4 @@
 "http://data.earthenv.org/streams/soil_minimum.nc","Freshwater ecosystems","Upstream soil (average)"
 "http://data.earthenv.org/streams/soil_range.nc","Freshwater ecosystems","Upstream soil (distance-weighted average)"
 "http://data.earthenv.org/streams/soil_weighted_average.nc","Freshwater ecosystems","Quality control layers"
-"","",""
+"http://mirrors.iplantcollaborative.org/earthenv_dem_data/EarthEnv-DEM90/EarthEnv-DEM90_","DEM90","DEM90"

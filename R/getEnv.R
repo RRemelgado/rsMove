@@ -53,12 +53,29 @@ getEnv <- function(dpath=NULL, var=NULL) {
   # loop through each target variable
   for (i in 1:length(ind)) {
     
-    # specify output path
-    ofile <- file.path(dpath, basename(var.ls$link[ind[i]]))
-    
-    # download file
-    download.file(var.ls$link[ind[i]], ofile, mode="wb")
-    
+    if (var[ind[i]] != 'DEM90') {
+      
+      # specify output path
+      ofile <- file.path(dpath, basename(var.ls$link[ind[i]]))
+      
+      # download file
+      download.file(var.ls$link[ind[i]], ofile, mode="wb")
+      
+    } else {
+      
+      # read in shapefile with tiles
+      shp <- shapefile(system.file())
+      
+      # determine which tiles are required 
+      tiles <- crop(shp, extent(xy))@data$tile
+      
+      # retrieve data
+      for (x in 1:length((tiles))) {
+        ifile <- paste0(var.ls$link[ind[i]], tiles[x], '.tar.gz') # origin
+        ofile <- file.path(dpath, basename(var.ls$link[ind[i]])) # output
+        download.file(ifile, ofile, mode="wb")} # download file
+      
+    }
   }
   
 }
