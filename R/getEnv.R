@@ -5,7 +5,7 @@
 #' @param d.source Data source. One of "EarthEnv", "GFC" or "GSW".
 #' @param var Target variables.
 #' @param ref Object from which an extent can be derived.
-#' @import grDevices
+#' @import grDevices rgeos sp rgdal
 #' @importFrom utils download.file
 #' @return One or multiple raster objects.
 #' @details {Downloads data from earthenv.org. To check which variables can be downloaded, 
@@ -27,8 +27,10 @@
 #' @seealso \code{\link{sMoveRes}}
 #' @examples {
 #'  
-#'  # return table with variables
-#'  a.res <- getEnv(source="earthEnv")
+#'  # return list of variables
+#'  ee.var <- getEnv(source="earthEnv")
+#'  gfc.var <- getEnv(source="GFC")
+#'  gsw.var <- getEnv(source="GSW")
 #'  
 #' }
 #' @export
@@ -93,9 +95,7 @@ getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
       
       # determine which tiles are required 
       tiles <- as.character(crop(shp, ext)@data$tile)
-      
-      
-      
+  
       # retrieve data
       for (x in 1:length((tiles))) {
         if (d.source=='EarthEnv') {ifile <- paste0(var.ls$link[ind[i]], tiles[x], '.tar.gz')}
