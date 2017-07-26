@@ -26,12 +26,12 @@
 #'  
 #'  require(raster)
 #'  
-#'  # read movement data
-#'  file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
-#'  moveData <- shapefile(file)
-#'  
 #'  # read raster data
 #'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  
+#'  # read movement data
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # apply function
 #'  s.var <- specVar(img=r, xy=moveData, pxr=c(60, 90), p.res=F)

@@ -3,12 +3,14 @@
 #' @description Interface to download data from earthenv.org.
 #' @param dpath Output data path for downloaded data.
 #' @param var Target variables.
+#' @param ref Object from which an extent can be derived.
 #' @import grDevices
 #' @importFrom utils download.file
 #' @return One or multiple raster objects.
-#' @details {Downloads data from earthenv.org. To check which variables can 
-#' be downloaded, run the function without specifying \emph{var}. This will 
-#' return a table containing the codes for each existing variable. For details 
+#' @details {Downloads data from earthenv.org. To check which variables can be downloaded, 
+#' run the function without specifying \emph{var}. This will return a table containing the 
+#' codes for each existing variable. If \emph{var} contains \emph{"DEM90"}, \emph{ref} is 
+#' required. This will be used to determine which tiles should be downloaded. For details 
 #' on the specifications of these datasets please refer to the website of origin.}
 #' @references \url{http://www.earthenv.org/}
 #' @seealso \code{\link{sMoveRes}}
@@ -22,7 +24,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-getEnv <- function(dpath=NULL, var=NULL) {
+getEnv <- function(dpath=NULL, var=NULL, ext=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. load variable list  
@@ -42,6 +44,9 @@ getEnv <- function(dpath=NULL, var=NULL) {
   if (is.null(dpath)) {stop('"dpath" is missing')}
   if (dir.exists(dpath)) {stop('could not find "dpath" in the file system')}
   if (min(var%in%var.ls$code)=0) {stop('one or more elements in "var" not found')}
+  if ('DEM90'%in%var) {if (is.null(ext)) {
+    stop('"DEM90" was set in "var". "ref" is required')}
+    ext <- extent(ref)}
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 3. download each variable
@@ -64,10 +69,17 @@ getEnv <- function(dpath=NULL, var=NULL) {
     } else {
       
       # read in shapefile with tiles
-      shp <- shapefile(system.file())
+      file <- system.file('extdata', 'DEM90-tiles.shp', package="rsMove")
+      if (file=='') {
+        unzip(system.file('extdata', 'DEM90.zip', package="rsMove"), exdir=system.file('extdata', package="rsMove"))
+        file <- system.file('extdata', 'DEM90-tiles.shp', package="rsMove")}
+      shp <- shapefile(file)
+      
+      # project extent
+      ext <- projectExtent(ref, crs(shp))
       
       # determine which tiles are required 
-      tiles <- crop(shp, extent(xy))@data$tile
+      tiles <- as.character(intersect(shp, spTransform(moveData, crs(shp)))@data$tile)
       
       # retrieve data
       for (x in 1:length((tiles))) {

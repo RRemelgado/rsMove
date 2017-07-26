@@ -24,9 +24,12 @@
 #'  
 #'  require(raster)
 #'  
+#'  # read raster data
+#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  
 #'  # read movement data
-#'  file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
-#'  moveData <- shapefile(file)
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # test function for 5, 10 20 and 30 m
 #'  a.res <- tMoveRes(xy=moveData, dpath='.')

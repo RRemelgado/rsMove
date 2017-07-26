@@ -28,9 +28,9 @@
 #'  
 #'  require(raster)
 #'  
-#'  # read example data
-#'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
-#'  moveData <- shapefile(file)
+#'  # read movement data
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,])
 #'  
 #'  # derive region labels
 #'  labels <- labelSample(xy=moveData, rad=500, npx=2, pxr=250)

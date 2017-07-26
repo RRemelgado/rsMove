@@ -26,16 +26,16 @@
 #'  
 #'  require(raster)
 #'  
+#'  #'  # read remote sensing data
+#'  files <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+#'  rsStk <- stack(files)
+#'  
 #'  # read movement data
-#'  files <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
-#'  moveData <- shapefile(files)
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
 #'  
 #'  # find sample regions
 #'  label <- labelSample(xy=moveData, rad=500, npx=2, pxr=30)
-#'  
-#'  # read remote sensing data
-#'  files <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
-#'  rsStk <- stack(files)
 #'  
 #'  # select background samples
 #'  ind <- which(label>0) # selected samples

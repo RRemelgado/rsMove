@@ -24,17 +24,17 @@
 #'  require(raster)
 #'  require(sp)
 #'  
-#'  # read example data
-#'  file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
-#'  moveData <- shapefile(file)
+#'  # read remote sensing data
+#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+#'  rsStk <- stack(file)
+#'  
+#'  # read movement data
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 #'
 #'  # extract samples
 #'  ot = as.Date(moveData@data$date)
 #'  samples <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
-#'
-#'  # read remote sensing data
-#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
-#'  rsStk <- stack(file)
 #'  
 #'  # retrieve remote sensing data for samples
 #'  rsQuery <- dataQuery(xy=samples,img=rsStk, rd=TRUE)
