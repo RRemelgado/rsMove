@@ -35,8 +35,9 @@ convex hull of the samples within them (\emph{$polygons}).}
 require(raster)
 
 # reference data
-file <- system.file('extdata', 'latLon_example.shp', package="rsMove")
-moveData <- shapefile(file)
+sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
+moveData <- system.file('extdata', 'latlon_example.csv', package="rsMove")
+moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=sprj)
 
 # extract regions
 hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)

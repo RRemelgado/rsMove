@@ -51,14 +51,14 @@ Query environmental data for coordinate pairs.
  
  require(raster)
  
- # read movement data
- file <- system.file('extdata', 'konstanz_20130805-20130811.shp', package="rsMove")
- moveData <- shapefile(file)[1:10,]
- 
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ 
+ # read movement data
+ moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
+ moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
  
  # raster dates
  r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)

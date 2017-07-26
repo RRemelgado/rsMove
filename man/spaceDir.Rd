@@ -64,15 +64,15 @@ with these shapefiles reports on:
  
  require(raster)
  
+ # read raster data
+ r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+ 
  # read movement data
- file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
- moveData <- shapefile(file)
+ moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+ moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
  
  # observation time
  td <- as.Date(moveData@data$date)
- 
- # read raster data
- r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
  
  # perform directional sampling
  of <- function(x) {lm(1:lengh(x)~x)$coefficients[2]}

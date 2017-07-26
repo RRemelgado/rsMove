@@ -52,7 +52,7 @@ specVar <- function(img=img, xy=NULL, pxr=pxr, p.res=T) {
   if (!class(img)[1]=='RasterLayer') {stop('"img" is not of a valid class')}
   if (!is.null(xy)) {
     if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-    crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}}
+    if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}}
   
   # pixel resolution
   if (!is.numeric(pxr)) {stop('"pxr" is not numeric')}

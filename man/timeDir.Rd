@@ -62,15 +62,15 @@ this data will be retrieved from \emph{img}.}
 {
  
  require(raster)
- 
- # read movement data
- file <- system.file('extdata', 'konstanz_20130804.shp', package="rsMove")
- moveData <- shapefile(file)
- 
+
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ 
+ # read movement data
+ moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+ moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
  
  # raster dates
  rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)

@@ -55,15 +55,19 @@ function will assume the data is categorical and wil define segments whenever a 
 {
  
  require(raster)
- 
- # read movement data
- moveData <- shapefile(system.file('extdata', 'konstanz_20130804.shp', package="rsMove"))
- 
+
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
  
+ # read movement data
+ moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+ moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+ 
+ # observation time
+ o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ 
  # perform directional sampling
- seg <- moveSeg(xy=moveData, edata=r, type="cont", threshold=0.1)
+ seg <- moveSeg(xy=moveData, ot=o.time, edata=r, type="cont", threshold=0.1)
  
 }
 }
