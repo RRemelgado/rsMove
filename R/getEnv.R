@@ -1,8 +1,8 @@
 #' @title getEnv
 #'
-#' @description Interface to download data from earthenv.org.
+#' @description Interface to download ecologically relevant data.
 #' @param dpath Output data path for downloaded data.
-#' @param d.source Data source. One of "EarthEnv", "GFC" or "GSW".
+#' @param d.source Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".
 #' @param var Target variables.
 #' @param ref Object from which an extent can be derived.
 #' @import grDevices rgeos sp rgdal
@@ -16,14 +16,15 @@
 #' \itemize{
 #' \item{\emph{"EarthEnv"} - EarthEnv project.}
 #' \item{\emph{"GFC"} - Maryland University Global Forest Change.}
-#' \item{\emph{"GSW"} - JRC Global Surface Water.}}
+#' \item{\emph{"GSW"} - JRC Global Surface Water.}
+#' \item{\emph{"HSM"} - JRC Human Settlement map.}}
 #' If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
 #' or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
 #' be downloaded. For details on the specifications of the provided datasets please consult 
 #' the referenced websites.}
 #' @references {\url{http://www.earthenv.org/} 
 #' \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
-#' \url{https://global-surface-water.appspot.com//}}
+#' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}}
 #' @seealso \code{\link{sMoveRes}}
 #' @examples {
 #'  
@@ -31,6 +32,7 @@
 #'  ee.var <- getEnv(source="earthEnv")
 #'  gfc.var <- getEnv(source="GFC")
 #'  gsw.var <- getEnv(source="GSW")
+#'  hsm.var <- getEnv(source="hsm")
 #'  
 #' }
 #' @export
@@ -45,7 +47,7 @@ getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
   
   # check data source keyword
   if (is.null(d.source)) {stop('please assign a valid keyword to "d.source"')}
-  if (!d.source%in%c('EartEnv', 'GFC', 'GSW')) {stop('"d.source" is not a valid keyword')}
+  if (!d.source%in%c('EartEnv', 'GFC', 'GSW', 'HSM')) {stop('"d.source" is not a valid keyword')}
   
   # read variable list
   var.ls <- system.file('extdata', paste0(d.source, '_variables.csv'), package="rsMove")
