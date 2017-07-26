@@ -5,7 +5,7 @@
 \title{dataQuery}
 \usage{
 dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
-  type = NULL, bs = NULL, remove.dup = FALSE, fun = NULL)
+  bs = NULL, remove.dup = FALSE, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -62,7 +62,7 @@ Query environmental data for coordinate pairs.
  o.date <- as.Date(moveData@data$date)
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30), type='nearest')
+ rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30))
 
 }
 

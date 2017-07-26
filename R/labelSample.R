@@ -138,7 +138,11 @@ labelSample <- function(xy=xy, rad=rad, npt=NULL, npx=NULL, pxr=pxr) {
   for (p in 1:length(up)) {
     rp <- ((up[p]-1)%%nr) + 1
     cp <- ((up[p]-1)%/%nr) + 1
-    regions[(rp-rad):(rp+rad), (cp-rad):(cp+rad)]<-1}
+    if (cp > rad) {sc<-cp-rad} else {sc<-cp}
+    if (cp < (nc-rad)) {ec<-cp+rad} else {ec<-cp}
+    if (rp > rad) {sr<-rp-rad} else {sr<-rp}
+    if (rp < (nr-rad)) {er<-rp+rad} else {er<-rp}
+    regions[sr:er,sc:ec]<- 1}
   
   # dilated sample position
   upd <- which(regions==1)

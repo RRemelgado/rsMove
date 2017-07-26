@@ -42,7 +42,7 @@
 #'  o.date <- as.Date(moveData@data$date)
 #'  
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30), type='nearest')
+#'  rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30))
 #' 
 #' }
 #' 
@@ -50,7 +50,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, type=NULL, bs=NULL, remove.dup=FALSE, fun=NULL) {
+dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, remove.dup=FALSE, fun=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables

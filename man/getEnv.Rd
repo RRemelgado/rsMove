@@ -41,10 +41,10 @@ the referenced websites.}
 {
  
  # return list of variables
- ee.var <- getEnv(source="earthEnv")
- gfc.var <- getEnv(source="GFC")
- gsw.var <- getEnv(source="GSW")
- hsm.var <- getEnv(source="hsm")
+ ee.var <- getEnv(d.source="EarthEnv")
+ gfc.var <- getEnv(d.source="GFC")
+ gsw.var <- getEnv(d.source="GSW")
+ hsm.var <- getEnv(d.source="hsm")
  
 }
 }

@@ -5,7 +5,7 @@
 #' @param d.source Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".
 #' @param var Target variables.
 #' @param ref Object from which an extent can be derived.
-#' @import grDevices rgeos sp rgdal
+#' @import grDevices sp rgdal
 #' @importFrom utils download.file
 #' @return One or multiple raster objects.
 #' @details {Downloads data from earthenv.org. To check which variables can be downloaded, 
@@ -29,10 +29,10 @@
 #' @examples {
 #'  
 #'  # return list of variables
-#'  ee.var <- getEnv(source="earthEnv")
-#'  gfc.var <- getEnv(source="GFC")
-#'  gsw.var <- getEnv(source="GSW")
-#'  hsm.var <- getEnv(source="hsm")
+#'  ee.var <- getEnv(d.source="EarthEnv")
+#'  gfc.var <- getEnv(d.source="GFC")
+#'  gsw.var <- getEnv(d.source="GSW")
+#'  hsm.var <- getEnv(d.source="hsm")
 #'  
 #' }
 #' @export
@@ -47,7 +47,7 @@ getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
   
   # check data source keyword
   if (is.null(d.source)) {stop('please assign a valid keyword to "d.source"')}
-  if (!d.source%in%c('EartEnv', 'GFC', 'GSW', 'HSM')) {stop('"d.source" is not a valid keyword')}
+  if (!d.source%in%c('EarthEnv', 'GFC', 'GSW', 'HSM')) {stop('"d.source" is not a valid keyword')}
   
   # read variable list
   var.ls <- system.file('extdata', paste0(d.source, '_variables.csv'), package="rsMove")
