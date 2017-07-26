@@ -18,8 +18,6 @@ dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
 
 \item{tb}{Two element vector with temporal search buffer, expressed in days.}
 
-\item{type}{One of \emph{exact} or \emph{nearest}.}
-
 \item{bs}{Buffer size (unit depends on the raster projection).}
 
 \item{remove.dup}{Logical. Should the function ignore duplicated pixels? Default if FALSE.}
@@ -35,16 +33,13 @@ Query environmental data for coordinate pairs.
 \details{
 {Returns environmental variables from a raster object for a given set of x and y coordinates.
          A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample 
-         within an area. The defaut is to estimate a weighted mean. If acquisition times are provided 
-         (\emph{rt}) the raster data is treated as a time series. In this case, the function applies 
-         one of two sampling approaches: \emph{exact} or \emph{nearest}. If \emph{exact}, the function 
-         attempts to map the dates of the raster time series with the observation dates of the samples 
-         (\emph{ot}). If nearest, it searches for the nearest time step. In this case, a temporal buffer, 
-         defined by \emph{tb}, can be defined to restric the search. \emph{tb} passes two values which 
-         represent the size of the buffer in two directions: before and after the target date. This allows 
-         for bacward of forward sampling. If \emph{remove.dup} is set, the function will account for duplicated 
-         pixels. The samples will be transposed to pixel coordinates and, for each unique pixel, median 
-         coordinates will be estimated for each pixel and used to build the output shapefile.}
+         within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided 
+         (\emph{rt}) and the date of sampling (\emph{st}). In this case, the function will treat the raster 
+         data as a time series and search for clear pixel in time within the contraints of a temporal buffer 
+         defined by \emph{tb}. \emph{tb} passes two values which represent the size of the buffer in two 
+         directions: before and after the target date. This allows for bacward and forward sampling. If 
+         \emph{remove.dup} is set, the function will account for duplicated pixelsreturning the coordinates 
+         for the center of the pixel.}
 }
 \examples{
 {

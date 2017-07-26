@@ -1,11 +1,10 @@
 #' @title moveModel
 #' 
 #' @description Spatially stratified predictive modeling.
-#' @param pxy Object of class \emph{SpatialPoinsDataFrame} with presence environmental variables.
-#' @param axy Object of class \emph{SpatialPoinsDataFrame} with background environmental variables.
-#' @param label Region labels. If missing, "pxy" is assumed as one region.
-#' @param method Classification algorithm (see \url{http://topepo.github.io/caret/index.html}. Default is \emph{rf} (Radom Forest).
-#' @param control Object derived by \emph{trainControl} (see \code{\link[caret]{trainControl}}). Default used out-of-bag (\emph{oob}) accuracies.
+#' @param p.data Object of class \emph{data.frame} with environmental variables for presence samples.
+#' @param a.data Object of class \emph{data.frame} with environmental variables for background samples.
+#' @param label Region labels. If missing, "p.data" is assumed as one region.
+#' @param fun A function with the modeling algorithm to use.
 #' @param nruns Number of runs. Default is 1.
 #' @import caret raster rgdal
 #' @importFrom stats complete.cases
@@ -16,7 +15,9 @@
 #' iteration. The final accuracy, provided as a F1-score for both presence and 
 #' background sampels, is derived from the total of true and false positives 
 #' (\emph{$f1}). Additionaly, for each run, the function returns a model (\emph{$model}) 
-#' which is trained using all the samples. This output can be passed to modelApply().}
+#' which is trained using all the samples. This output can be passed to modelApply(). 
+#' By default, the function uses a Random Forest classifier. However, the a user specified 
+#' function can be passed using \emph{fun}.}
 #' @seealso \code{\link{sampleMove}} \code{\link{labelSample}} \code{\link{backSample}} \code{\link{modelApply}} \code{\link[caret]{train}}
 #' @examples \dontrun{
 #'  
@@ -32,63 +33,58 @@
 #'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 #'
-#'  # extract samples
-#'  ot = as.Date(moveData@data$date)
-#'  samples <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
-#'  
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=samples,img=rsStk, rd=TRUE)
+#'  rsQuery <- dataQuery(xy=moveData,img=rsStk, remove.dup=TRUE)
 #'  
 #'  # identify unique sample regions
-#'  label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStack)
+#'  label <- labelSample(xy=rsQuery, rad=3000, pxr=rsStk)
 #'  
 #'  # select background samples
 #'  ind <- which(label>0) # selected samples
 #'  bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='pca')
 #'  
 #'  # derive model predictions
-#'  out <- moveModel(pxy=rsQuery, axy=bSamples, label=label)
+#'  fun <- function(x,y) {train(x, y, method="rf", trControl=trainControl(method='oob'))}
+#'  out <- moveModel(p.data=rsQuery@data, a.data=bSamples@data, label=label, fun=fun, nruns=1)
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 
-moveModel <-function(pxy=pxy, axy=axy, label=NULL, method=NULL, control=NULL, nruns=1) {
+moveModel <-function(p.data=p.data, a.data=a.data, label=NULL, fun=fun, nruns=1) {
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables and define auxiliary functions
 #----------------------------------------------------------------------------------------------------------------------------------#
   
   # check variables in data frame
-  if (crs(pxy)@projargs!=crs(axy)@projargs) {stop('"pxy" and "axy" have different projections')}
-  if (ncol(pxy@data)!=ncol(axy@data)) {stop('variables in "pxy" and "axy" have different dimensions')}
-  if (min(colnames(pxy@data)==colnames(pxy@data))==0) {stop('one or more variables have different names')}
+  if (ncol(p.data)!=ncol(a.data)) {stop('different number of variables in "p.data" and "a.data"')}
+  if (min(colnames(p.data)==colnames(a.data))==0) {stop('column names of "p.data" and "a.data" differ')}
   
   # check labels
-  if (is.null(label)) {label <- vector('numeric', length(pxy))+1}
-  if (length(label)!=length(pxy)) {stop('"pxy" and "label" have different lengths')}
+  if (is.null(label)) {label <- vector('numeric', length(p.data))+1}
+  if (length(label)!=nrow(p.data)) {stop('"p.data" and "label" have different lengths')}
   
   # remove duplicates
-  cc <- complete.cases(pxy@data)
-  pxy <- pxy[cc,]
+  cc <- complete.cases(p.data)
+  p.data <- p.data[cc,]
   label <- label[cc]
-  axy <- axy[complete.cases(axy@data),]
+  a.data <- a.data[complete.cases(a.data),]
   
   # define modeling algorithm and model control method
-  if (!is.null(method)) {if (is.null(control)) {stop('"method" defined. Missing "control"')}}
-  if (!is.null(control)) {if (is.null(method)) {stop('"control" defined. Missing "method"')}}
-  if (is.null(method) & is.null(control)) {
-    method <- 'rf'
-    control <- trainControl(method='oob')}
-  if (!exists('nruns')) {nruns <- 1}
-
+  if (is.null(fun)) {fun <- function(x,y) {train(x, y, method="rf", trControl=trainControl(method='oob'))}}
+  if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a function')}}
+  
+  if (!is.numeric(nruns)) {stop('"nruns" is not numeric')}
+  if (length(nruns)>1) {stop('"nrus" should be a single numeric element')}
+  
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 2. define class codes
 #----------------------------------------------------------------------------------------------------------------------------------#
   
-  i1 <- vector('numeric', length(pxy))+1 # presence class code
-  i0 <- vector('numeric', length(axy))+2 # absence class code
+  i1 <- vector('numeric', nrow(p.data))+1 # presence class code
+  i0 <- vector('numeric', nrow(a.data))+2 # absence class code
   uv <- unique(label) # unique region id's
   
 #----------------------------------------------------------------------------------------------------------------------------------#
@@ -122,11 +118,11 @@ moveModel <-function(pxy=pxy, axy=axy, label=NULL, method=NULL, control=NULL, nr
       i0.v <- i0[si[seq(from=2, to=length(i0), by=2)]]
       
       # build model for training set
-      model <- train(rbind(pxy@data[i1.t,], axy@data[i0.t,]), as.factor(c(i1[i1.t],i0[i0.t])), method=method, trControl=control)
+      model <- fun(rbind(p.data[i1.t,], a.data[i0.t,]), as.factor(c(i1[i1.t],i0[i0.t])))
       
       # estimate/store accuracies
       vi <- c(i1[i1.v], i0[i0.v])
-      pred <- as.numeric(predict(model, rbind(pxy@data[i1.v,], axy@data[i0.v,])))
+      pred <- as.numeric(predict(model, rbind(p.data[i1.v,], a.data[i0.v,])))
       pp <- pp + sum(pred == 1)
       cp <- cp + sum(pred == 1 & vi == 1)
       tp <- tp + sum(vi==1)
@@ -148,7 +144,7 @@ moveModel <-function(pxy=pxy, axy=axy, label=NULL, method=NULL, control=NULL, nr
     mean.acc$background[n] = 2 * ((p * r) / (p + r))
     
     # update model list
-    m.ls[[n]] <- train(rbind(pxy@data, axy@data), as.factor(c(i1,i0)), method=method, trControl=control)
+    m.ls[[n]] <- fun(rbind(p.data, a.data), as.factor(c(i1,i0)))
     
     # remove temporary variables
     rm(p, r, cp, pp, tp, ca, pa, ta)

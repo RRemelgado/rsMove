@@ -4,12 +4,14 @@
 \alias{modelApply}
 \title{modelApply}
 \usage{
-modelApply(model, img)
+modelApply(model, img, fun = NULL)
 }
 \arguments{
 \item{model}{List object as provided by \emph{moveModel()}.}
 
 \item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+
+\item{fun}{Function that specifies how the model should be applied.}
 }
 \value{
 A \emph{Raster}.
@@ -27,9 +29,7 @@ samples in each iteration.}
 \examples{
 \dontrun{
  
- require(rgdal)
  require(raster)
- require(sp)
  
  # read remote sensing data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
@@ -38,26 +38,24 @@ samples in each iteration.}
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
-
- # extract samples
- ot = as.Date(moveData@data$date)
- samples <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
  
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=samples,img=rsStk, rd=TRUE)
+ rsQuery <- dataQuery(xy=moveData,img=rsStk, remove.dup=TRUE)
  
  # identify unique sample regions
- label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStack)
+ label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStk)
  
  # select background samples
  ind <- which(label>0) # selected samples
- bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='pca')
+ bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, nb=4000, method='pca')
  
  # derive model predictions
- p.model <- moveModel(pxy=rsQuery, axy=bSamples, label=label)
- 
+ fun <- function(x,y) {train(x, y, method="rf", trControl=trainControl(method='oob'))}
+ p.model <- moveModel(p.data=rsQuery@data, a.data=bSamples@data, label=label, fun=fun, nruns=1)
+
  # derive prediction from model ensemble
- prob <- modelApply(p.model, rsStack)
+ fun <- function(x,y) {predict(x, y, type='prob')[[1]]$`1`}
+ prob <- modelApply(p.model, rsStk, fun=fun)
  
  # see output
  plot(prob)

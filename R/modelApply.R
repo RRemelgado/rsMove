@@ -3,6 +3,7 @@
 #' @description Apply a model or an ensemble of models to raster data.
 #' @param model List object as provided by \emph{moveModel()}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
+#' @param fun Function that specifies how the model should be applied.
 #' @import raster sp caret rgdal
 #' @importFrom stats complete.cases
 #' @return A \emph{Raster}.
@@ -14,9 +15,7 @@
 #' @seealso \code{\link{segRaster}} \code{\link{moveModel}}
 #' @examples \dontrun{
 #'  
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'  
 #'  # read remote sensing data
 #'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
@@ -25,26 +24,24 @@
 #'  # read movement data
 #'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
-#'
-#'  # extract samples
-#'  ot = as.Date(moveData@data$date)
-#'  samples <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
 #'  
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=samples,img=rsStk, rd=TRUE)
+#'  rsQuery <- dataQuery(xy=moveData,img=rsStk, remove.dup=TRUE)
 #'  
 #'  # identify unique sample regions
-#'  label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStack)
+#'  label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStk)
 #'  
 #'  # select background samples
 #'  ind <- which(label>0) # selected samples
-#'  bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='pca')
+#'  bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, nb=4000, method='pca')
 #'  
 #'  # derive model predictions
-#'  p.model <- moveModel(pxy=rsQuery, axy=bSamples, label=label)
-#'  
+#'  fun <- function(x,y) {train(x, y, method="rf", trControl=trainControl(method='oob'))}
+#'  p.model <- moveModel(p.data=rsQuery@data, a.data=bSamples@data, label=label, fun=fun, nruns=1)
+#'
 #'  # derive prediction from model ensemble
-#'  prob <- modelApply(p.model, rsStack)
+#'  fun <- function(x,y) {predict(x, y, type='prob')[[1]]$`1`}
+#'  prob <- modelApply(p.model, rsStk, fun=fun)
 #'  
 #'  # see output
 #'  plot(prob)
@@ -54,7 +51,7 @@
 
 #--------------------------------------------------------------------------------#
 
-modelApply <- function(model, img) {
+modelApply <- function(model, img, fun=NULL) {
   
 #--------------------------------------------------------------------------------#
 # 1. check input variables
@@ -66,6 +63,8 @@ modelApply <- function(model, img) {
   if (is.null(model$model)) {stop('error: "model" is not a valid input')}
   if (!class(img)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
     stop('error: "img" is not a valid raster layer')}
+  if (is.null(fun)) {fun <- function(x,y) {predict(x, y, type='prob')[[1]]$`1`}}
+  if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a function')}}
   
 #---------------------------------------------------------------------------------------#
 # 2. read/prepare raster data
@@ -82,7 +81,7 @@ modelApply <- function(model, img) {
 #---------------------------------------------------------------------------------------#
   
   for (m in 1:length(model$model)) {
-    tmp[cc] <- predict(model$model[m], idata[cc,], type='prob')[[1]]$`1` # presence prob.
+    tmp[cc] <- fun(model$model[m], idata[cc,]) # presence prob.
     rb[[m]] <- setValues(img[[1]], tmp) # translate prediction into a raster
   }
   

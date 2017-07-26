@@ -26,13 +26,13 @@
 #'  
 #'  require(raster)
 #'  
-#'  #'  # read remote sensing data
-#'  files <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
-#'  rsStk <- stack(files)
+#'  # read raster data
+#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+#'  rsStk <- stack(file)
 #'  
 #'  # read movement data
 #'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
+#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 #'  
 #'  # find sample regions
 #'  label <- labelSample(xy=moveData, rad=500, npx=2, pxr=30)
@@ -62,13 +62,6 @@ backSample <- function(xy=xy, rid=rid, method=method, img=img, nb=NULL) {
   if (!exists('img')) {stop('"img" is missing')}
   if (!class(img)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
   if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}   
-  pxr <- res(img)[1] # pixel resolution
-  ar <- pxr / 2 # half the resolution
-  nr <- dim(img)[1] # numer of rows
-  ext0 <- extent(img) # sampling extent
-  ext1 <- ext0 # extent used to find positions
-  ext1[c(1,3)] <- ext1[c(1,3)] + ar
-  ext1[c(2,4)] <- ext1[c(2,4)] - ar
   np <- ncell(img[[1]]) # number of pixels
   op <- crs(img) # output projection
   if (!is.null(nb)) {if (!is.numeric(nb) | length(nb)!=1) {stop('"nb" is not a valid input')}}
@@ -77,19 +70,21 @@ backSample <- function(xy=xy, rid=rid, method=method, img=img, nb=NULL) {
 # 2. extract random background samples
 #-------------------------------------------------------------------------------------------------------------------------------#  
   
-  # derive coordinates for background samples
-  sp <- (round((ext1[4]-xy@coords[,2])/pxr)+1) + nr * round((xy@coords[,1]-ext1[1])/pxr)
-  dr <- !duplicated(sp) # find duplicates
+  # convert presences to pixel positions
+  sp <- cellFromXY(img[[1]], xy@coords)
+  
+  # remove duplicated records
+  dr <- !duplicated(sp)
   sp <- sp[dr]
   rid <- rid[dr]
-  ind <- which(!(1:np)%in%sp) # pixels with no samples
-  if (!is.null(nb)) {ind <- ind[sample(1:length(ind), nb, replace=T)]}
-  sp <- cbind((ext1[1]+(((sp-1) %/% nr)+1)*pxr), (ext1[4]-(((sp-1) %% nr)+1)*pxr))
-  bc <- cbind((ext1[1]+(((ind-1) %/% nr)+1)*pxr), (ext1[4]-(((ind-1) %% nr)+1)*pxr))
-  xy <- rbind(sp, bc)
-  rid <- c(rid, matrix(0, nrow(bc)))
   
-  rm(sp, bc, ind, dr)
+  # derice background samples
+  ind <- which(!(1:np)%in%sp) 
+  if (!is.null(nb)) {ind <- ind[sample(1:length(ind), nb, replace=T)]}
+  xy <- rbind(xyFromCell(img[[1]], sp), xyFromCell(img[[1]], ind))
+  rid <- c(rid, replicate(length(ind), 0))
+  
+  rm(sp, ind)
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 3. select background samples
@@ -98,12 +93,11 @@ backSample <- function(xy=xy, rid=rid, method=method, img=img, nb=NULL) {
   if (method=='pca') {
     
     # extract environmental information
-    nl <- nlayers(img) # number of layers in "img"
-    if (nl>1) {edata <- extract(img, xy)}
-    if (nl==1) {edata <- extract(img, xy)}
+    edata <- as.data.frame(extract(img, xy))
     cc <- complete.cases(edata) # index to remove NA's
-    if (nl>1) {edata <- edata[cc,]} else {edata <- edata[cc]}
+    edata <- edata[cc,]
     rid <- rid[cc]
+    xy <- xy[cc,]
     
     # kaiser rule
     pcf = function(x) {which((x$sdev^2) > 1)}

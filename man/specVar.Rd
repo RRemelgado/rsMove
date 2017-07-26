@@ -47,7 +47,7 @@ If \emph{xy} is set, the output will contain a vector with the optimal resolutio
  
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+ moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=crs(r))
  
  # apply function
  s.var <- specVar(img=r, xy=moveData, pxr=c(60, 90), p.res=F)

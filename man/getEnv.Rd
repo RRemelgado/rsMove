@@ -9,7 +9,7 @@ getEnv(dpath = NULL, d.source = NULL, var = NULL, ref = NULL)
 \arguments{
 \item{dpath}{Output data path for downloaded data.}
 
-\item{d.source}{Data source. One of "EarthEnv", "GFC" or "GSW".}
+\item{d.source}{Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".}
 
 \item{var}{Target variables.}
 
@@ -19,7 +19,7 @@ getEnv(dpath = NULL, d.source = NULL, var = NULL, ref = NULL)
 One or multiple raster objects.
 }
 \description{
-Interface to download data from earthenv.org.
+Interface to download ecologically relevant data.
 }
 \details{
 {Downloads data from earthenv.org. To check which variables can be downloaded, 
@@ -30,7 +30,8 @@ the function through \emph{var}. The keywords recognized by \emph{d.source} are:
 \itemize{
 \item{\emph{"EarthEnv"} - EarthEnv project.}
 \item{\emph{"GFC"} - Maryland University Global Forest Change.}
-\item{\emph{"GSW"} - JRC Global Surface Water.}}
+\item{\emph{"GSW"} - JRC Global Surface Water.}
+\item{\emph{"HSM"} - JRC Human Settlement map.}}
 If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
 or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
 be downloaded. For details on the specifications of the provided datasets please consult 
@@ -39,15 +40,18 @@ the referenced websites.}
 \examples{
 {
  
- # return table with variables
- a.res <- getEnv(source="earthEnv")
+ # return list of variables
+ ee.var <- getEnv(source="earthEnv")
+ gfc.var <- getEnv(source="GFC")
+ gsw.var <- getEnv(source="GSW")
+ hsm.var <- getEnv(source="hsm")
  
 }
 }
 \references{
 {\url{http://www.earthenv.org/} 
 \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
-\url{https://global-surface-water.appspot.com//}}
+\url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}}
 }
 \seealso{
 \code{\link{sMoveRes}}

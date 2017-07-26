@@ -4,19 +4,17 @@
 \alias{moveModel}
 \title{moveModel}
 \usage{
-moveModel(pxy = pxy, axy = axy, label = NULL, method = NULL,
-  control = NULL, nruns = 1)
+moveModel(p.data = p.data, a.data = a.data, label = NULL, fun = fun,
+  nruns = 1)
 }
 \arguments{
-\item{pxy}{Object of class \emph{SpatialPoinsDataFrame} with presence environmental variables.}
+\item{p.data}{Object of class \emph{data.frame} with environmental variables for presence samples.}
 
-\item{axy}{Object of class \emph{SpatialPoinsDataFrame} with background environmental variables.}
+\item{a.data}{Object of class \emph{data.frame} with environmental variables for background samples.}
 
-\item{label}{Region labels. If missing, "pxy" is assumed as one region.}
+\item{label}{Region labels. If missing, "p.data" is assumed as one region.}
 
-\item{method}{Classification algorithm (see \url{http://topepo.github.io/caret/index.html}. Default is \emph{rf} (Radom Forest).}
-
-\item{control}{Object derived by \emph{trainControl} (see \code{\link[caret]{trainControl}}). Default used out-of-bag (\emph{oob}) accuracies.}
+\item{fun}{A function with the modeling algorithm to use.}
 
 \item{nruns}{Number of runs. Default is 1.}
 }
@@ -33,7 +31,9 @@ are used for training. The background samples are split randomly at each
 iteration. The final accuracy, provided as a F1-score for both presence and 
 background sampels, is derived from the total of true and false positives 
 (\emph{$f1}). Additionaly, for each run, the function returns a model (\emph{$model}) 
-which is trained using all the samples. This output can be passed to modelApply().}
+which is trained using all the samples. This output can be passed to modelApply(). 
+By default, the function uses a Random Forest classifier. However, the a user specified 
+function can be passed using \emph{fun}.}
 }
 \examples{
 \dontrun{
@@ -50,22 +50,19 @@ which is trained using all the samples. This output can be passed to modelApply(
  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 
- # extract samples
- ot = as.Date(moveData@data$date)
- samples <- sampleMove(xy=moveData, ot=ot, error=10, method='m')
- 
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=samples,img=rsStk, rd=TRUE)
+ rsQuery <- dataQuery(xy=moveData,img=rsStk, remove.dup=TRUE)
  
  # identify unique sample regions
- label <- labelSample(xy=rsQuery, rad=90, npx=1, pxr=rsStack)
+ label <- labelSample(xy=rsQuery, rad=3000, pxr=rsStk)
  
  # select background samples
  ind <- which(label>0) # selected samples
  bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='pca')
  
  # derive model predictions
- out <- moveModel(pxy=rsQuery, axy=bSamples, label=label)
+ fun <- function(x,y) {train(x, y, method="rf", trControl=trainControl(method='oob'))}
+ out <- moveModel(p.data=rsQuery@data, a.data=bSamples@data, label=label, fun=fun, nruns=1)
 
 }
 }
