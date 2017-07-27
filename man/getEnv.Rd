@@ -44,7 +44,7 @@ the referenced websites.}
  ee.var <- getEnv(d.source="EarthEnv")
  gfc.var <- getEnv(d.source="GFC")
  gsw.var <- getEnv(d.source="GSW")
- hsm.var <- getEnv(d.source="hsm")
+ hsm.var <- getEnv(d.source="HSM")
  
 }
 }

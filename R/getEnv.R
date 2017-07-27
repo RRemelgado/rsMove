@@ -6,7 +6,7 @@
 #' @param var Target variables.
 #' @param ref Object from which an extent can be derived.
 #' @import grDevices sp rgdal
-#' @importFrom utils download.file
+#' @importFrom utils download.file read.csv unzip
 #' @return One or multiple raster objects.
 #' @details {Downloads data from earthenv.org. To check which variables can be downloaded, 
 #' run the function without specifying \emph{var} and specifying \emph{d.source}. This will 
@@ -32,7 +32,7 @@
 #'  ee.var <- getEnv(d.source="EarthEnv")
 #'  gfc.var <- getEnv(d.source="GFC")
 #'  gsw.var <- getEnv(d.source="GSW")
-#'  hsm.var <- getEnv(d.source="hsm")
+#'  hsm.var <- getEnv(d.source="HSM")
 #'  
 #' }
 #' @export

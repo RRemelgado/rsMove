@@ -45,9 +45,9 @@ are in a cartesian coordinate system use \emph{m}.}
 require(sp)
 
 # reference data
-sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
-moveData <- system.file('extdata', 'latlon_example.csv', package="rsMove")
-moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=sprj)
+sprj <- CRS("+proj=longlat +ellps=WGS84 +no_defs")
+moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
+moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 
 # extract regions
 hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)

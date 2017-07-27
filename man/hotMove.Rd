@@ -36,8 +36,8 @@ require(raster)
 
 # reference data
 sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
-moveData <- system.file('extdata', 'latlon_example.csv', package="rsMove")
-moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=sprj)
+moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
+moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 
 # extract regions
 hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
@@ -46,7 +46,7 @@ hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
 plot(hm$polygons, col=hm$indices)
 
 # add new information to original shapefile
-moveData@data <- cbind(moveData@data, hm$indices)
+moveData@data$indices <- hm$indices
 
 }
 }

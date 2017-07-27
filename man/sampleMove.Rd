@@ -38,10 +38,10 @@ of observations per sample ('count').}
  
  require(raster)
  
- # reference data
- sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
- moveData <- system.file('extdata', 'latlon_example.csv', package="rsMove")
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=sprj)
+# reference data
+sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
+moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
+moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 
  # sampling without reference grid
  ot = strptime(moveData$timestamp, "\%Y-\%m-\%d \%H:\%M:\%S")
