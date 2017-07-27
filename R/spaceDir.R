@@ -64,7 +64,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL) {
+spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', fun=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -73,13 +73,12 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
   # samples
   if (!exists('xy')) {stop('"xy" is missing')}
   if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  rProj <- crs(xy)
   
   # sample dates
-  if (!exists('ot')) {stop('"ot" is missing')}
-  if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
-  if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}
-  
+  if (!is.null(ot)) {
+    if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
+    if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}}
+
   # raster
   if (!exists('img')) {stop('"img" is missing')}
   if (!class(img)[1]=='RasterLayer') {stop('"img" is not of a valid class')}
@@ -104,10 +103,9 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # convert xy to single pixels
-  ext <- extent(img)
   pxr <- res(img)
-  nr <- dim(img)[1]
-  sp <- sp <- ((ext[4]-xy@coords[,2])%/%pxr) + nr * (((xy@coords[,1]-ext[1])%/%pxr)-1)
+  sp <- cellFromXY(img, xy@coords)
+  rProj <- crs(xy)
   
   # search for segments and return median values
   sp0 <- 1
@@ -122,8 +120,12 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
       ep <- (r-1)
       ux[[li]] <- mean(xy@coords[sp0:ep,1])
       uy[[li]] <- mean(xy@coords[sp0:ep,2])
-      ut[[li]] <- mean(ot[sp0:ep])
-      et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+      if (!is.null(ot)) {
+        ut[[li]] <- mean(ot[sp0:ep])
+        et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+      } else {
+        ut[[li]] <- NA
+        et[[li]] <- NA}
       sg[[li]] <- li
       sp0 <- r
       li <- li + 1
@@ -137,7 +139,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
   et <- unlist(et)
   sg <- unlist(sg)
   
-  rm(ext, sp, sp0, li, ot)
+  rm(sp, sp0, li)
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 3. select pixels between consecutive points
@@ -149,7 +151,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
       si <- i-1
       ei <- i
       d0 <- sqrt((ux[si]-ux[ei])^2 + (uy[si]-uy[ei])^2)
-      t0 <- difftime(ut[ei], ut[si], units='mins')
+      if (!is.null(ot)) {t0 <- difftime(ut[ei], ut[si], units='mins')} else {t0 <- NA}
       x0 <- ux[si:ei]
       y0 <- uy[si:ei]
       if((d0 > (pxr[1]*2))) {
@@ -184,7 +186,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
       si <- i
       ei <- i+1
       d0 <- sqrt((ux[si]-ux[ei])^2 + (uy[si]-uy[ei])^2)
-      t0 <- difftime(ut[ei], ut[si], units='mins')
+      if (!is.null(ot)) {t0 <- difftime(ut[ei], ut[si], units='mins')} else {t0 <- NA}
       x0 <- ux[si:ei]
       y0 <- uy[si:ei]
       if((d0 > (pxr[1]*2))) {
@@ -219,7 +221,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
       si <- i-1
       ei <- i+1
       d0 <- sqrt((ux[si]-ux[ei])^2 + (uy[si]-uy[ei])^2)
-      t0 <- difftime(ut[si], ut[ei], units='mins')
+      if (!is.null(ot)) {t0 <- difftime(ut[ei], ut[si], units='mins')} else {t0 <- NA}
       x0 <- ux[si:ei]
       y0 <- uy[si:ei]
       if((d0 > (pxr[1]*2))) {
@@ -267,14 +269,34 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
   us <- unlist(sapply(op, function(i){i$p}))
     
   rm(op)
-    
+  
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 4. query samples
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  # retrieve environmental variables
-  edata <- extract(img, cbind(xc,yc))
+  # I. apply spatial buffer (if prompted)
+  # II. retrieve environmental variables
+  if (!is.null(b.size)) {
+    
+    # dilate pixel coordinates
+    tmp <- lapply(sg, function(x) {
+      ind <- which(us==x)
+      ind <- do.call(rbind, lapply(ind, function(y) {
+        xyFromCell(raster(extent((xc[y]-b.size), (xc[y]+b.size), 
+          (yc[y]-b.size), (yc[y]+b.size)), res=pxr[1], crs=rProj))}))
+      return(list(c=ind, s=replicate(nrow(ind), x)))})
+    
+    # update sample indices
+    us <- unlist(lapply(tmp, function(x) {x$s}))
+    
+    # retrieve environmental data
+    edata <- extract(img, do.call(rbind, lapply(tmp, function(x) {x$c})))
+  } else {edata <- extract(img, cbind(xc,yc))}
   
+  
+#-------------------------------------------------------------------------------------------------------------------------------#
+# 5. analyze samples
+#-------------------------------------------------------------------------------------------------------------------------------#
   
   if (type=='cont') {
     
@@ -316,7 +338,7 @@ spaceDir <- function(xy=xy, ot=ot, img=img, dir=dir, type=type, dm='m', fun=NULL
   }
   
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 5. derive output
+# 6. derive output
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # build dara table
