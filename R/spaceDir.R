@@ -284,20 +284,24 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   if (!is.null(b.size)) {
     
     # dilate pixel coordinates
-    tmp <- lapply(sg, function(x) {
+    tmp <- lapply(unique(us), function(x) {
       ind <- which(us==x)
       ind <- do.call(rbind, lapply(ind, function(y) {
         xyFromCell(raster(extent((xc[y]-b.size), (xc[y]+b.size), 
-          (yc[y]-b.size), (yc[y]+b.size)), res=pxr[1], crs=rProj))}))
+          (yc[y]-b.size), (yc[y]+b.size)), res=pxr[1], crs=rProj), 1:ncell(r0))}))
       return(list(c=ind, s=replicate(nrow(ind), x)))})
     
     # update sample indices
-    us <- unlist(lapply(tmp, function(x) {x$s}))
+    us1 <- unlist(lapply(tmp, function(x) {x$s}))
     
     # retrieve environmental data
     edata <- extract(img, do.call(rbind, lapply(tmp, function(x) {x$c})))
-  } else {edata <- extract(img, cbind(xc,yc))}
-  
+    
+    rm(tmp)
+    
+  } else {
+    us1 <- us
+    edata <- extract(img, cbind(xc,yc))}
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 5. analyze samples
@@ -307,15 +311,12 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     
     # query function
     f2 <- function(i) {
-      ind <- which(us==i)
+      ind <- which(us1==i)
       u <- which(!is.na(edata[ind]))
       if (sum(u)>1) {return(as.numeric(fun(as.numeric(edata[ind[u]]))))} else {return(NA)}}
     
     # apply user provided functon
-    if(dir=='bwd') {ov <- sapply(2:length(sg), f2)}
-    if(dir=='fwd') {ov <- sapply(1:(length(sg)-1), f2)}
-    if(dir=='both') {ov <- sapply(2:(length(sg)-1), f2)}
-    ov <- data.frame(stat=ov)
+    ov <- data.frame(stat=sapply(unique(us1), f2))
   
   }
   
@@ -325,19 +326,20 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     
     # function to sumarize class composition
     f2 <- function(i) {
-      ind <- which(us==i)
+      ind <- which(us1==i)
       return(sapply(uc, function(y) {sum(edata[ind]==uc[y], na.rm=T)}))}
-    
-    if(dir=='bwd') {ov <- do.call(rbind, lapply(2:length(sg), f2))}
-    if(dir=='fwd') {ov <- do.call(rbind, lapply(1:(length(sg)-1), f2))}
-    if(dir=='both') {ov <- do.call(rbind, lapply(2:(length(sg)-1), f2))}
+    ov <- do.call(rbind, lapply(unique(us1), f2))
     
     # derive additional statistics
-    dc <- apply(ov, 1, function(x) {uc[which(x==max(x))]})
-    si <- apply(ov, 1, function(x) {-sum((x/sum(x))*log(x/sum(x)))})
+    dc <- apply(ov, 1, function(x) {(uc[which(x==max(x))])[1]})
+    ind <- !is.na(uc) # avoid NA values are used in calculation
+    si <- apply(ov[,ind], 1, function(x) {
+      ind <- which(x>0)
+      x[ind] <- (x[ind]/sum(x[ind]))*log(x[ind]/sum(x[ind]))
+      return(-sum(x))})
     
     # update output table
-    ov <- data.frame(ov, dc, si, stringsAsFactors=F)
+    ov <- as.data.frame(cbind(ov, dc, si))
     colnames(ov) <- c(as.character(uc), 'main', 'shannon')
     
   }
@@ -347,7 +349,8 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # build dara table
-  ind <- which(sg %in%us) # used positions
+  # subset variables (depends on sampling strategy)
+  ind <- which(sg %in%us)
   df <- data.frame(x=ux[ind], y=uy[ind], timestamp=ut[ind], pixel.time=et[ind], travel.distance=pd, travel.time=td, sid=sg[ind])
   df <- cbind(df, ov)
   
@@ -358,7 +361,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   f <- function(x) {
     loc <- which(us==sg[ind[x]])
     return(Lines(list(Line(cbind(xc[loc],yc[loc]))), x))}
-  l.shp = SpatialLinesDataFrame(SpatialLines(lapply(1:length(ind), f), proj4string=rProj), df)
+  l.shp = SpatialLinesDataFrame(SpatialLines(lapply(1:length(sg[ind]), f), proj4string=rProj), df)
   
   # output
   return(list(endpoints=p.shp, segments=l.shp))
