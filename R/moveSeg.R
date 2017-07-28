@@ -2,11 +2,11 @@
 #'
 #' @description Remote sensing based point segmentation
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param edata Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
+#' @param edata Object of class \emph{RasterLayer} or \emph{data.frame}.
 #' @param type Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).
-#' @param threshold Change threshold.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates. 
-#' @param r.fun Raster summary function. Default is pca.
+#' @param threshold Change threshold.
+#' @param b.size Buffer size expressed in the map units.
 #' @param s.fun Output summary function. Default is mean.
 #' @import raster rgdal
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
@@ -54,7 +54,7 @@
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, threshold=0.1, r.fun=NULL, s.fun=NULL) {
+moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, threshold=NULL, s.fun=NULL) {
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables  
@@ -71,44 +71,68 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, threshold=0.1, r.f
     if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}}
   
   # environmental data
-  if (class(edata)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
+  if (class(edata)[1]=='RasterLayer') {
     if (crs(xy)@projargs!=crs(edata)@projargs) {stop('"xy" and "edata" have different projections')}
-    nvar <- nlayers(edata)
+    prd <- TRUE
     } else {
-    if (!class(edata)[1]%in%c('data.frame')) {stop('"edata" is neither a raster or a data frame')}
-    if (nrow(edata)!=length(xy)) {stop('number of elements in "xy" and "edata" do not match')}
-      nvar <- ncol(edata)}
-  if (type=='cat' & nvar>1) {stop(paste0('type was set to ', type, '. raster should be a single layer'))}
+      if (!class(edata)[1]%in%c('data.frame')) {stop('"edata" is neither a raster or a data frame')}
+      if (nrow(edata)!=length(xy)) {stop('number of elements in "xy" and "edata" do not match')}
+      prd=FALSE}
   
   # check threshold
-  if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}
+  if (!is.null(threshold)) {if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}}
   
   # check query type
-  if (!type%in%c('cont', 'cat')) {stop('type is not  avalid keyword')}
+  if (!type%in%c('cont', 'cat')) {stop('"type" is not  avalid keyword')}
   if (type=='cont') {
-    if(nvar>1) {
-      if (is.null(r.fun)) {r.fun <- 'pca'}
-      if (!is.null(r.fun) & r.fun!='pca') {if (!is.function(r.fun)){stop('"r.fun" is not a valid keyword or function')}}}
     if (!is.null(s.fun)) {if (!is.function(s.fun)){stop('"s.fun" is not a valid keyword or function')}}
     if (is.null(s.fun)) {s.fun <- function(x) {return(mean(x, na.rm=T))}}}
-  if (type=='cat') {
-    threshold <- 1
-    s.fun <- function(x){return(x[1])}}
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. identify segments
 #---------------------------------------------------------------------------------------------------------------------#
   
-  # read rs data
-  if (class(edata)[1]!='data.frame') {edata <- as.data.frame(extract(edata, xy))}
-  
-  # summarize data (if needed)
-  if (nvar>1) {
-    if (is.function(r.fun)) {edata <- as.data.frame(apply(edata, 1, r.fun))}
-    if (r.fun=='pca') {
-      edata <- prcomp(edata, scale=T, center=T)
-      threshold <- edata$sdev[1]
-      edata <- as.data.frame(edata$x[,1])}}
+  if (prd) {
+    
+    # apply buffer if required
+    if (!is.null(b.size)) {
+      
+      # average samples within buffer
+      if (type=='cont') {edata <- extract(img, xy@coords, buffer=b.size, fun=s.fun, na.rm=T)}
+      
+      # determine main class within the buffer
+      if (type=='cat') {
+        
+        # dilate samples
+        tmp <- lapply(1:length(xy), function(x) {
+          ind <- raster(extent((xy@coords[x,1]-b.size), (xy@coords[x,1]+b.size), 
+                              (xy@coords[x,2]-b.size), (xy@coords[x,2]+b.size)), crs=rProj)
+          ind <- xyFromCell(ind, 1:ncell(ind))
+          return(list(c=ind, s=replicate(nrow(ind), x)))})
+        si <- unlist(lapply(tmp, function(x) {x$s}))
+        tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
+        
+        # extract values
+        edata <- extract(img, tmp)
+        
+        # sumarize data (extract dominant class)
+        edata <- sapply(1:length(tmp), function(x) {
+          ind <- which(si==x)
+          r0 <- as.vector(edata[ind[!duplicated(cellFromXY(img, tmp[ind,]))]])
+          uc <- unique(r0)
+          uc <- uc[!is.na(uc)]
+          if (length(uc)>0) {
+            count <- sapply(uc, function(x) {sum(r0==x)})
+            return(uc[which(count==max(count))[1]])
+          } else {return(NA)}})
+          
+          
+          (x[which(x==max(x))])[1]})
+        
+      }
+      
+      # simple query
+    } else {edata <- extract(img, xy@coords)}}
   
   # search for segments
   r0 <- 1

@@ -283,19 +283,24 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   # II. retrieve environmental variables
   if (!is.null(b.size)) {
     
-    # dilate pixel coordinates
+    # dilate samples and update sample indices
     tmp <- lapply(unique(us), function(x) {
       ind <- which(us==x)
-      ind <- do.call(rbind, lapply(ind, function(y) {
-        xyFromCell(raster(extent((xc[y]-b.size), (xc[y]+b.size), 
-          (yc[y]-b.size), (yc[y]+b.size)), res=pxr[1], crs=rProj), 1:ncell(r0))}))
+      ind <- lapply(ind, function(y) {
+        ind <- raster(extent((xc[y]-b.size), (xc[y]+b.size), (yc[y]-b.size), 
+                             (yc[y]+b.size)), res=pxr[1], crs=rProj)
+        ind <- xyFromCell(r0, 1:ncell(ind))
       return(list(c=ind, s=replicate(nrow(ind), x)))})
-    
-    # update sample indices
     us1 <- unlist(lapply(tmp, function(x) {x$s}))
+    tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
+    
+    # remove duplicates
+    ind <- !duplicated(cellFromXY(img, tmp))
+    tmp <- tmp[ind,]
+    us1 <- us1[ind]
     
     # retrieve environmental data
-    edata <- extract(img, do.call(rbind, lapply(tmp, function(x) {x$c})))
+    edata <- extract(img, tmp)
     
     rm(tmp)
     
@@ -322,7 +327,8 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   if (type=='cat') {
     
-    uc <- unique(img) # unique classes
+    # unique classes
+    uc <- unique(img)
     
     # function to sumarize class composition
     f2 <- function(i) {
