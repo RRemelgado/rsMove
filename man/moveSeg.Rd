@@ -5,20 +5,20 @@
 \title{moveSeg}
 \usage{
 moveSeg(xy = xy, edata = edata, type = "cont", ot = NULL,
-  threshold = 0.1, r.fun = NULL, s.fun = NULL)
+  b.size = NULL, threshold = NULL, s.fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{edata}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+\item{edata}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
 \item{type}{Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).}
 
 \item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
-\item{threshold}{Change threshold.}
+\item{b.size}{Buffer size expressed in the map units.}
 
-\item{r.fun}{Raster summary function. Default is pca.}
+\item{threshold}{Change threshold.}
 
 \item{s.fun}{Output summary function. Default is mean.}
 }

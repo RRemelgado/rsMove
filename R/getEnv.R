@@ -1,7 +1,7 @@
 #' @title getEnv
 #'
 #' @description Interface to download ecologically relevant data.
-#' @param dpath Output data path for downloaded data.
+#' @param d.path Output data path for downloaded data.
 #' @param d.source Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".
 #' @param var Target variables.
 #' @param ref Object from which an extent can be derived.
@@ -39,7 +39,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
+getEnv <- function(d.path=NULL, d.source=NULL, var=NULL, ref=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. load variable list  
@@ -60,8 +60,8 @@ getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
 # 2. check parameters
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  if (is.null(dpath)) {stop('"dpath" is missing')}
-  if (dir.exists(dpath)) {stop('could not find "dpath" in the file system')}
+  if (is.null(d.path)) {stop('"d.path" is missing')}
+  if (!dir.exists(d.path)) {stop('could not find "d.path" in the file system')}
   if (min(var%in%var.ls$code)==0) {stop('one or more elements in "var" not found')}
   if ('DEM90'%in%var) {if (is.null(ref)) {
     stop('"DEM90" was set in "var". "ref" is required')}
@@ -78,8 +78,8 @@ getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
   for (i in 1:length(ind)) {
     
     # simple download
-    if (var[ind[i]] != 'DEM90' & !d.source%in%c('GFC', 'GSW')) {
-      ofile <- file.path(dpath, basename(var.ls$link[ind[i]]))
+    if (var.ls$code[ind[i]] != 'DEM90' & !d.source%in%c('GFC', 'GSW')) {
+      ofile <- file.path(d.path, basename(var.ls$link[ind[i]]))
       download.file(var.ls$link[ind[i]], ofile, mode="wb")}
     
     # DEM download
@@ -103,7 +103,7 @@ getEnv <- function(dpath=NULL, d.source=NULL, var=NULL, ref=NULL) {
         if (d.source=='EarthEnv') {ifile <- paste0(var.ls$link[ind[i]], tiles[x], '.tar.gz')}
         if (d.source=='GFC') {ifile <- paste0(var.ls$link[ind[i]], '_', var.ls$code[ind[i]], '_', tiles[x], '.tif')}
         if (d.source=='GSW') {ifile <- paste0(var.ls$link[ind[i]], var.ls$code[ind[i]], '_', tiles[x], '.tif')}
-        ofile <- file.path(dpath, basename(ifile)) # output
+        ofile <- file.path(d.path, basename(ifile)) # output
         download.file(ifile, ofile, mode="wb")} # download file
       
     }

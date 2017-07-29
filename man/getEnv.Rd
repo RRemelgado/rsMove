@@ -4,10 +4,10 @@
 \alias{getEnv}
 \title{getEnv}
 \usage{
-getEnv(dpath = NULL, d.source = NULL, var = NULL, ref = NULL)
+getEnv(d.path = NULL, d.source = NULL, var = NULL, ref = NULL)
 }
 \arguments{
-\item{dpath}{Output data path for downloaded data.}
+\item{d.path}{Output data path for downloaded data.}
 
 \item{d.source}{Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".}
 

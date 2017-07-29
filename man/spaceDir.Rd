@@ -4,8 +4,8 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(xy = xy, ot = ot, img = img, dir = dir, type = type,
-  dm = "m", fun = NULL)
+spaceDir(xy = xy, ot = NULL, img = img, dir = dir, type = type,
+  dm = "m", b.size = NULL, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -19,6 +19,8 @@ spaceDir(xy = xy, ot = ot, img = img, dir = dir, type = type,
 \item{type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
 
 \item{dm}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
+
+\item{b.size}{Buffer size expressed in the map units.}
 
 \item{fun}{Summary function.}
 }
@@ -57,7 +59,11 @@ with these shapefiles reports on:
  \emph{type} is set to '\emph{'cat'}, the function will assume the data is categorical. As a result,
  the keyword \emph{fun} is ignored. Instead, the function will return the proportion of pixels occupied 
  by each class for each segment. In addition, the dominant class (\emph{'main'}) and the shannon index 
- (\emph{'shannon'}) will be returned for each segment within the output data frame.}
+ (\emph{'shannon'}) will be returned for each segment within the output data frame. In order to include 
+ the area surrounding the sample points in this analysis, \emph{d.buffer} can be used. This keyword 
+ dilates the interpolated sample points by a given distance transforming the initial line into a polygon.}
+ @note {If \emph{d.buffer} is used, the default \emph{fun} (the slope) is not adequate given that spatial 
+ order of the samples is not preserved. This should be considered when using these keywords simulaneously,}
 }
 \examples{
 {

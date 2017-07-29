@@ -8,7 +8,7 @@
 #' @param threshold Change threshold.
 #' @param b.size Buffer size expressed in the map units.
 #' @param s.fun Output summary function. Default is mean.
-#' @import raster rgdal
+#' @import raster rgdal ggplot2
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list}.
 #' @details {Segmentation of a point shapefile based on the spatial variability 
@@ -80,7 +80,10 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
       prd=FALSE}
   
   # check threshold
-  if (!is.null(threshold)) {if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}}
+  if (type=='cont') {
+    if (!is.null(threshold)) {stop('"type" is set to "cat". Please define "threshold"')}
+    if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}}
+  if (type=='cat') {threshold <- 1}
   
   # check query type
   if (!type%in%c('cont', 'cat')) {stop('"type" is not  avalid keyword')}
@@ -89,7 +92,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
     if (is.null(s.fun)) {s.fun <- function(x) {return(mean(x, na.rm=T))}}}
   
 #---------------------------------------------------------------------------------------------------------------------#
-# 2. identify segments
+# 2. query data
 #---------------------------------------------------------------------------------------------------------------------#
   
   if (prd) {
@@ -116,7 +119,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
         edata <- extract(img, tmp)
         
         # sumarize data (extract dominant class)
-        edata <- sapply(1:length(tmp), function(x) {
+        edata <- sapply(1:length(xy), function(x) {
           ind <- which(si==x)
           r0 <- as.vector(edata[ind[!duplicated(cellFromXY(img, tmp[ind,]))]])
           uc <- unique(r0)
@@ -126,13 +129,16 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
             return(uc[which(count==max(count))[1]])
           } else {return(NA)}})
           
-          
-          (x[which(x==max(x))])[1]})
+          rm(tmp, si)
         
       }
       
       # simple query
     } else {edata <- extract(img, xy@coords)}}
+  
+#---------------------------------------------------------------------------------------------------------------------#
+# 3. identify segments
+#---------------------------------------------------------------------------------------------------------------------#
   
   # search for segments
   r0 <- 1
@@ -141,26 +147,26 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
   rv <- list() # segment value
   
   for (r in 2:length(xy)) {
-    diff <- abs(edata[r,1]-edata[(r-1),1])
+    diff <- abs(edata[r]-edata[(r-1)])
     if (!is.na(diff)) {
       if (diff >= threshold) {
         ep <- r-1
-        rv[[li]] <- s.fun(edata[c(r0:ep),1])
+        rv[[li]] <- mean(edata[c(r0:ep)])
         id[[li]] <- replicate(length(c(r0:ep)), li)
         r0 <- r
         li <- li + 1
         if (r==length(xy)) {
           id[[li]] <- li
-          rv[[li]] <- edata[r,1]}
+          rv[[li]] <- edata[r]}
       } else {if (r==length(xy)) {
         ep <- r
-        rv[[li]] <- s.fun(edata[c(r0:ep),1])
+        rv[[li]] <- mean(edata[c(r0:ep)])
         id[[li]] <- replicate(length(c(r0:ep)), li)}}}}
   rv <- unlist(rv)
   id <- unlist(id)
  
 #---------------------------------------------------------------------------------------------------------------------#
-# 3. build/return output
+# 4. derive statistics
 #---------------------------------------------------------------------------------------------------------------------#
 
   # update original shapefile
@@ -179,7 +185,98 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
           time=sapply(sstat, function(x) {x$time}), value=rv)
   } else {df <- data.frame(sid=uid, count=sapply(uid, function(x){sum(id==x)}))}
   
-  # derive output
-  return(list(points=p.shp, report=df))
+#---------------------------------------------------------------------------------------------------------------------#
+# 5. build plot
+#---------------------------------------------------------------------------------------------------------------------#
+  
+  if (type=='cont') {
+    
+    # determine fill scale range
+    mv <- round(max(df$time))
+    nc <- nchar(as.character(mv))
+    m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+    mv <- mv / m
+    fr <- round(mv)
+    if (mv > fr) {fr <- (fr+0.5)*m} else {fr <- fr*m}
+    
+    # plot with time
+    if (!is.null(ot)) {
+      
+      # determine y scale range
+      mv <- max(df$time)
+      nc <- nchar(as.character(mv))
+      m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+      mv <- mv / m
+      yr <- round(mv)
+      if (mv > yr) {yr <- (yr+0.2)*m} else {yr <- yr*m}
+      
+      # buid plot object
+      p <- ggplot(df, aes(x=as.factor(sid), y=time, fill=as.factor(value))) + geom_bar(stat="identity") +
+        xlab('') + ylab('Time Spent (minutes)') + scale_fill_discrete(breaks=c(0.0, (fr/2), fr), limits=c(0,fr)) + 
+        scale_y_continuous(breaks=c(0.0, (yr/2), yr), limits=c(0,yr)) + 
+        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12), 
+              axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))
+      
+      # plot without time  
+    } else {
+      
+      # determine y range scale range
+      mv <- max(df$count)
+      nc <- nchar(as.character(mv))
+      m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+      mv <- mv / m
+      yr <- round(mv)
+      if (mv > yr) {yr <- (yr+0.2)*m} else {yr <- yr*m}
+      
+      # buid plot object
+      p <- ggplot(df, aes(x=as.factor(sid), y=time, fill=count)) + geom_bar(stat="identity") +
+        xlab('') + ylab('Segment length') + scale_fill_discrete(breaks=c(0.0, (fr/2), fr), limits=c(0,fr)) +
+        scale_y_continuous(breaks=c(0.0, (yr/2), yr), limits=c(0,yr)) + 
+        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12), 
+              axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
+  
+  if (type=='cat') {
+    
+    # plot with time
+    if (!is.null(ot)) {
+      
+      # determine y range scale range
+      mv <- round(max(df$time))
+      nc <- nchar(as.character(mv))
+      m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+      mv <- mv / m
+      yr <- round(mv)
+      if (mv > yr) {yr <- (yr+0.5)*m} else {yr <- yr*m}
+      
+      # buid plot object
+      p <- ggplot(df, aes(x=as.factor(sid), y=time, fill=as.factor(value))) + geom_bar(stat="identity") +
+        xlab('') + ylab('Time Spent (minutes)') + scale_fill_discrete(name="Class") + 
+        scale_y_continuous(breaks=c(0.0, (yr/2), yr), limits=c(0,yr)) + 
+        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12), 
+              axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))
+    
+    # plot without time  
+    } else {
+      
+      # determine yscale range
+      mv <- max(df$count)
+      nc <- nchar(as.character(mv))
+      m1 <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+      m2 <- as.numeric(paste0(2, paste0(replicate((nc-2), '0'), collapse='')))
+      mv <- mv / m1
+      yr <- round(mv)
+      if (mv > yr) {yr <- (yr+0.5)*m1} else {yr <- yr*m1}
+      
+      # buid plot object
+      p <- ggplot(df, aes(x=as.factor(sid), y=time, fill=count)) + geom_bar(stat="identity") +
+        xlab('') + ylab('Segment length') + scale_fill_discrete(name="Class") +
+        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12), 
+              axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
+  
+#---------------------------------------------------------------------------------------------------------------------#
+# 6. return output
+#---------------------------------------------------------------------------------------------------------------------#
+  
+  return(list(points=p.shp, report=df, plot=p))
   
 }

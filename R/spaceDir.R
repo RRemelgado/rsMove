@@ -290,7 +290,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
         ind <- raster(extent((xc[y]-b.size), (xc[y]+b.size), (yc[y]-b.size), 
                              (yc[y]+b.size)), res=pxr[1], crs=rProj)
         ind <- xyFromCell(r0, 1:ncell(ind))
-      return(list(c=ind, s=replicate(nrow(ind), x)))})
+      return(list(c=ind, s=replicate(nrow(ind), x)))})})
     us1 <- unlist(lapply(tmp, function(x) {x$s}))
     tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
     
