@@ -9,7 +9,7 @@ getEnv(d.path = NULL, d.source = NULL, var = NULL, ref = NULL)
 \arguments{
 \item{d.path}{Output data path for downloaded data.}
 
-\item{d.source}{Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".}
+\item{d.source}{Data source. One of "EarthEnv", "GFC", "GSW", "CCI" or "HSM".}
 
 \item{var}{Target variables.}
 
@@ -31,6 +31,7 @@ the function through \emph{var}. The keywords recognized by \emph{d.source} are:
 \item{\emph{"EarthEnv"} - EarthEnv project.}
 \item{\emph{"GFC"} - Maryland University Global Forest Change.}
 \item{\emph{"GSW"} - JRC Global Surface Water.}
+\item{\emph{"CCI"} - ESA CCI Global land cover.}
 \item{\emph{"HSM"} - JRC Human Settlement map.}}
 If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
 or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
@@ -44,6 +45,7 @@ the referenced websites.}
  ee.var <- getEnv(d.source="EarthEnv")
  gfc.var <- getEnv(d.source="GFC")
  gsw.var <- getEnv(d.source="GSW")
+ cci.var <- getEnv(d.source="CCI")
  hsm.var <- getEnv(d.source="HSM")
  
 }
@@ -51,7 +53,8 @@ the referenced websites.}
 \references{
 {\url{http://www.earthenv.org/} 
 \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
-\url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}}
+\url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/} 
+\url{http://maps.elie.ucl.ac.be/CCI/viewer/}}
 }
 \seealso{
 \code{\link{sMoveRes}}

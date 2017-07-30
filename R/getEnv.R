@@ -2,7 +2,7 @@
 #'
 #' @description Interface to download ecologically relevant data.
 #' @param d.path Output data path for downloaded data.
-#' @param d.source Data source. One of "EarthEnv", "GFC", "GSW" or "HSM".
+#' @param d.source Data source. One of "EarthEnv", "GFC", "GSW", "CCI" or "HSM".
 #' @param var Target variables.
 #' @param ref Object from which an extent can be derived.
 #' @import grDevices sp rgdal
@@ -17,6 +17,7 @@
 #' \item{\emph{"EarthEnv"} - EarthEnv project.}
 #' \item{\emph{"GFC"} - Maryland University Global Forest Change.}
 #' \item{\emph{"GSW"} - JRC Global Surface Water.}
+#' \item{\emph{"CCI"} - ESA CCI Global land cover.}
 #' \item{\emph{"HSM"} - JRC Human Settlement map.}}
 #' If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
 #' or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
@@ -24,7 +25,8 @@
 #' the referenced websites.}
 #' @references {\url{http://www.earthenv.org/} 
 #' \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
-#' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}}
+#' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/} 
+#' \url{http://maps.elie.ucl.ac.be/CCI/viewer/}}
 #' @seealso \code{\link{sMoveRes}}
 #' @examples {
 #'  
@@ -32,6 +34,7 @@
 #'  ee.var <- getEnv(d.source="EarthEnv")
 #'  gfc.var <- getEnv(d.source="GFC")
 #'  gsw.var <- getEnv(d.source="GSW")
+#'  cci.var <- getEnv(d.source="CCI")
 #'  hsm.var <- getEnv(d.source="HSM")
 #'  
 #' }
@@ -47,7 +50,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, var=NULL, ref=NULL) {
   
   # check data source keyword
   if (is.null(d.source)) {stop('please assign a valid keyword to "d.source"')}
-  if (!d.source%in%c('EarthEnv', 'GFC', 'GSW', 'HSM')) {stop('"d.source" is not a valid keyword')}
+  if (!d.source%in%c('EarthEnv', 'GFC', 'GSW', 'CCI', 'HSM')) {stop('"d.source" is not a valid keyword')}
   
   # read variable list
   var.ls <- system.file('extdata', paste0(d.source, '_variables.csv'), package="rsMove")

@@ -14,12 +14,7 @@
 #' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list}.
 #' @details {This function evaluates how do environmental conditions change in space 
-#' along a movement track. Before an output is returned, the function looks for segments 
-#' of consecutive samples that appear within the same pixel and provides mean values for 
-#' their coordinates and observation times as well as the corresponding pixel value and 
-#' the elapsed time during the segment (in minutes). this step avoids the replication of 
-#' samples while preserving observation related to revisits to the same pixels. Then, for 
-#' each observation, the function looks at it imediate neighbors to define spatial segments. 
+#' along a movement track. First, it looks at consectuve observations to define spatial segments. 
 #' All the pixels between the two endpoints of the segment are considered in this process. 
 #' The user can use the argument \emph{dir} to prompt the function to focus on previous 
 #' (\emph{bwd}) or following (\emph{fwd}) observations or to look in both directions (\emph{both}) 
@@ -102,63 +97,24 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   # check/define input metrics
   if (is.null(fun)) {fun <- function(x,y) {lm(y~x)$coefficients[2]}} else {
     if(!is.function(fun)) {stop('"fun" is not a valid function')}}
-  
-#-------------------------------------------------------------------------------------------------------------------------------#
-# 2. summarize unique pixel segments
-#-------------------------------------------------------------------------------------------------------------------------------#
-  
-  # convert xy to single pixels
-  pxr <- res(img)
-  sp <- cellFromXY(img, xy@coords)
-  rProj <- crs(xy)
-  
-  # search for segments and return median values
-  sp0 <- 1
-  li <- 1
-  ux <- list() # x coordinates
-  uy <- list() # y coordinates
-  ut <- list() # observation time
-  et <- list() # elapsed time
-  sg <- list() # segment position
-  for (r in 2:length(sp)) {
-    if (sp[r]!=sp[r-1]) {
-      ep <- (r-1)
-      ux[[li]] <- mean(xy@coords[sp0:ep,1])
-      uy[[li]] <- mean(xy@coords[sp0:ep,2])
-      if (!is.null(ot)) {
-        ut[[li]] <- mean(ot[sp0:ep])
-        et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
-      } else {
-        ut[[li]] <- NA
-        et[[li]] <- NA}
-      sg[[li]] <- li
-      sp0 <- r
-      li <- li + 1
-    }
-  }
-  
-  # convert to vector
-  ux <- unlist(ux)
-  uy <- unlist(uy)
-  ut <- do.call("c", ut)
-  et <- unlist(et)
-  sg <- unlist(sg)
-  
-  rm(sp, sp0, li)
 
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 3. select pixels between consecutive points
+# 2. select pixels between consecutive points
 #-------------------------------------------------------------------------------------------------------------------------------#
+  
+  # base raster info
+  rProj <- crs(img)
+  pxr <- res(img)
   
   # backward sampling
   if (dir=='bwd') {
     f1 <- function(i) {
       si <- i-1
       ei <- i
-      d0 <- sqrt((ux[si]-ux[ei])^2 + (uy[si]-uy[ei])^2)
-      if (!is.null(ot)) {t0 <- difftime(ut[ei], ut[si], units='mins')} else {t0 <- NA}
-      x0 <- ux[si:ei]
-      y0 <- uy[si:ei]
+      d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
+      if (!is.null(ot)) {t0 <- difftime(ot[ei], ot[si], units='mins')} else {t0 <- NA}
+      x0 <- xy@coords[si:ei,1]
+      y0 <- xy@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
         dx <- x0[1]-x0[2]
         dy <- y0[1]-y0[2]
@@ -173,8 +129,8 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
           y0 <- (y0[1]+cm)
           x0 <- m[1] + y0 * m[2]}}
       if (dm=='deg') {
-        x00 <- ux[si:ei]*pi/180
-        y00 <- uy[si:ei]*pi/180
+        x00 <- xy@coords[si:ei,1]*pi/180
+        y00 <- xy@coords[si:ei,2]*pi/180
         sf <- function(o) {
           xDiff <- abs(x00[(o-1)]-x00[o])
           yDiff <- abs(y00[(o-1)]-y00[o])
@@ -182,34 +138,34 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
           cCoef <- 2 * atan2(sqrt(aCoef), sqrt(1.-aCoef))
           return(6371000 * cCoef)}
         d0 <- sum(sapply(2:length(x00), sf))}
-      return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), sg[i])))}
-    op <- lapply(2:length(sg), f1)}
+      return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), i)))}
+    op <- lapply(2:length(xy), f1)}
   
   # forward sampling
   if (dir=='fwd') {
     f1 <- function(i) {
       si <- i
       ei <- i+1
-      d0 <- sqrt((ux[si]-ux[ei])^2 + (uy[si]-uy[ei])^2)
-      if (!is.null(ot)) {t0 <- difftime(ut[ei], ut[si], units='mins')} else {t0 <- NA}
-      x0 <- ux[si:ei]
-      y0 <- uy[si:ei]
+      d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
+      if (!is.null(ot)) {t0 <- difftime(ot[ei], ot[si], units='mins')} else {t0 <- NA}
+      x0 <- xy@coords[si:ei,1]
+      y0 <- xy@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
         dx <- x0[1]-x0[2]
         dy <- y0[1]-y0[2]
         if (abs(dx)>abs(dy)) {
           m <- lm(y0~x0)$coefficients
-          if (dx>0) {cm<- -((0:round(abs(dx)/pxr[1]))*pxr[1])} else {cm<- ((0:round(abs(dx)/pxr[1]))*pxr[1])}
+          if (dx>0) {cm<- -((0:round(abs(dx)/pxr[1]))*pxr[1])} else {cm<-((0:round(abs(dx)/pxr[1]))*pxr[1])}
           x0 <- (x0[1]+cm)
           y0 <- m[1] + x0 * m[2]
         } else {
           m <- lm(x0~y0)$coefficients
-          if (dy>0) {cm<- -((0:round(abs(dy)/pxr[1]))*pxr[1])} else {cm<- ((0:round(abs(dy)/pxr[1]))*pxr[1])}
+          if (dy>0) {cm<- -((0:round(abs(dy)/pxr[1]))*pxr[1])} else {cm<-((0:round(abs(dy)/pxr[1]))*pxr[1])}
           y0 <- (y0[1]+cm)
           x0 <- m[1] + y0 * m[2]}}
       if (dm=='deg') {
-        x00 <- ux[si:ei]*pi/180
-        y00 <- uy[si:ei]*pi/180
+        x00 <- xy@coords[si:ei,1]*pi/180
+        y00 <- xy@coords[si:ei,2]*pi/180
         sf <- function(o) {
           xDiff <- abs(x00[(o-1)]-x00[o])
           yDiff <- abs(y00[(o-1)]-y00[o])
@@ -217,18 +173,18 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
           cCoef <- 2 * atan2(sqrt(aCoef), sqrt(1.-aCoef))
           return(6371000 * cCoef)}
         d0 <- sum(sapply(2:length(x00), sf))}
-      return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), sg[i])))}
-    op <- lapply(1:(length(sg)-1), f1)}
+      return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), i)))}
+    op <- lapply(1:(length(xy)-1), f1)}
   
   # backward-forward sampling
   if (dir=='both') {
     f1 <- function(i) {
       si <- i-1
       ei <- i+1
-      d0 <- sqrt((ux[si]-ux[ei])^2 + (uy[si]-uy[ei])^2)
-      if (!is.null(ot)) {t0 <- difftime(ut[ei], ut[si], units='mins')} else {t0 <- NA}
-      x0 <- ux[si:ei]
-      y0 <- uy[si:ei]
+      d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
+      if (!is.null(ot)) {t0 <- difftime(ot[ei], ot[si], units='mins')} else {t0 <- NA}
+      x0 <- xy@coords[si:ei,1]
+      y0 <- xy@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
         x00 <- vector('list', 2)
         y00 <- vector('list', 2)
@@ -254,8 +210,8 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
         x0 <- unlist(x00)
         y0 <- unlist(y00)}
       if (dm=='deg') {
-        x00 <- ux[si:ei]*pi/180
-        y00 <- uy[si:ei]*pi/180
+        x00 <- xy@coords[si:ei,1]*pi/180
+        y00 <- xy@coords[si:ei,2]*pi/180
         sf <- function(o) {
           xDiff <- abs(x00[(o-1)]-x00[o])
           yDiff <- abs(y00[(o-1)]-y00[o])
@@ -263,20 +219,20 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
           cCoef <- 2 * atan2(sqrt(aCoef), sqrt(1.-aCoef))
           return(6371000 * cCoef)}
         d0 <- sum(sapply(1:length(x00), sf))}
-      return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), sg[i])))}
-    op <- lapply(2:(length(sg)-1), f1)}
+      return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), i)))}
+    op <- lapply(2:(length(xy)-1), f1)}
     
   # retrieve x, y and p
-  xc <- unlist(sapply(op, function(i){i$x}))
-  yc <- unlist(sapply(op, function(i){i$y}))
-  pd <- unlist(sapply(op, function(i){i$d}))
-  td <- unlist(sapply(op, function(i){i$t}))
-  us <- unlist(sapply(op, function(i){i$p}))
+  xc <- unlist(lapply(op, function(i){i$x}))
+  yc <- unlist(lapply(op, function(i){i$y}))
+  pd <- unlist(lapply(op, function(i){i$d}))
+  td <- unlist(lapply(op, function(i){i$t}))
+  us <- unlist(lapply(op, function(i){i$p}))
     
   rm(op)
   
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 4. query samples
+# 3. query samples
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # I. apply spatial buffer (if prompted)
@@ -286,42 +242,37 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     # dilate samples and update sample indices
     tmp <- lapply(unique(us), function(x) {
       ind <- which(us==x)
-      ind <- lapply(ind, function(y) {
-        ind <- raster(extent((xc[y]-b.size), (xc[y]+b.size), (yc[y]-b.size), 
-                             (yc[y]+b.size)), res=pxr[1], crs=rProj)
-        ind <- xyFromCell(r0, 1:ncell(ind))
-      return(list(c=ind, s=replicate(nrow(ind), x)))})})
-    us1 <- unlist(lapply(tmp, function(x) {x$s}))
+      ind <- do.call(rbind, lapply(ind, function(y) {
+        r0 <- raster(extent((xc[y]-b.size), (xc[y]+b.size), 
+                            (yc[y]-b.size), (yc[y]+b.size)), 
+                     res=pxr[1], crs=rProj)
+        return(xyFromCell(r0, 1:ncell(r0)))}))
+      ind <- ind[!duplicated(cellFromXY(img, ind)),]
+      return(list(c=ind, s=replicate(nrow(ind), x)))})
+    us <- unlist(lapply(tmp, function(x) {x$s}))
     tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
-    
-    # remove duplicates
-    ind <- !duplicated(cellFromXY(img, tmp))
-    tmp <- tmp[ind,]
-    us1 <- us1[ind]
     
     # retrieve environmental data
     edata <- extract(img, tmp)
     
     rm(tmp)
     
-  } else {
-    us1 <- us
-    edata <- extract(img, cbind(xc,yc))}
+  } else {edata <- extract(img, cbind(xc,yc))}
   
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 5. analyze samples
+# 4. analyze samples
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   if (type=='cont') {
     
     # query function
     f2 <- function(i) {
-      ind <- which(us1==i)
+      ind <- which(us==i)
       u <- which(!is.na(edata[ind]))
       if (sum(u)>1) {return(as.numeric(fun(as.numeric(edata[ind[u]]))))} else {return(NA)}}
     
     # apply user provided functon
-    ov <- data.frame(stat=sapply(unique(us1), f2))
+    ov <- data.frame(stat=sapply(unique(us), f2))
   
   }
   
@@ -332,9 +283,9 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     
     # function to sumarize class composition
     f2 <- function(i) {
-      ind <- which(us1==i)
-      return(sapply(uc, function(y) {sum(edata[ind]==uc[y], na.rm=T)}))}
-    ov <- do.call(rbind, lapply(unique(us1), f2))
+      ind <- which(us==i)
+      return(sapply(uc, function(y) {sum(edata[ind]==y, na.rm=T)}))}
+    ov <- do.call(rbind, lapply(unique(us), f2))
     
     # derive additional statistics
     dc <- apply(ov, 1, function(x) {(uc[which(x==max(x))])[1]})
@@ -351,13 +302,14 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   }
   
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 6. derive output
+# 5. derive output
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # build dara table
+  us0 <- unique(us)
+  
   # subset variables (depends on sampling strategy)
-  ind <- which(sg %in%us)
-  df <- data.frame(x=ux[ind], y=uy[ind], timestamp=ut[ind], pixel.time=et[ind], travel.distance=pd, travel.time=td, sid=sg[ind])
+  df <- data.frame(x=xy@coords[us0,1], y=xy@coords[us0,2], timestamp=ot[us0], travel.distance=pd, travel.time=td, sid=us0)
   df <- cbind(df, ov)
   
   # build segment endpoint shapefile
@@ -365,9 +317,9 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   # build segment path shapefile
   f <- function(x) {
-    loc <- which(us==sg[ind[x]])
+    loc <- which(us==us0)
     return(Lines(list(Line(cbind(xc[loc],yc[loc]))), x))}
-  l.shp = SpatialLinesDataFrame(SpatialLines(lapply(1:length(sg[ind]), f), proj4string=rProj), df)
+  l.shp = SpatialLinesDataFrame(SpatialLines(lapply(us0, f), proj4string=rProj), df)
   
   # output
   return(list(endpoints=p.shp, segments=l.shp))

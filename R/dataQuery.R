@@ -7,8 +7,7 @@
 #' @param rt Object of class \emph{Date} with \emph{img} observation dates.
 #' @param tb Two element vector with temporal search buffer, expressed in days.
 #' @param bs Buffer size (unit depends on the raster projection).
-#' @param remove.dup Logical. Should the function ignore duplicated pixels? Default if FALSE.
-#' @param fun Passes an external function.
+#'  @param fun Passes an external function.
 #' @import raster rgdal
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
@@ -19,9 +18,7 @@
 #'          (\emph{rt}) and the date of sampling (\emph{st}). In this case, the function will treat the raster 
 #'          data as a time series and search for clear pixel in time within the contraints of a temporal buffer 
 #'          defined by \emph{tb}. \emph{tb} passes two values which represent the size of the buffer in two 
-#'          directions: before and after the target date. This allows for bacward and forward sampling. If 
-#'          \emph{remove.dup} is set, the function will account for duplicated pixelsreturning the coordinates 
-#'          for the center of the pixel.}
+#'          directions: before and after the target date. This allows for bacward and forward sampling.}
 #' @examples {
 #'  
 #'  require(raster)
@@ -50,7 +47,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, remove.dup=FALSE, fun=NULL) {
+dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, fun=NULL) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
@@ -83,38 +80,19 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, remove
     if (!is.numeric(tb)) {stop('"tb" is not numeric')}
     if (length(tb)!=2) {stop('"tb" should be a two element vector')}}
   
-  # duplicate removal
-  if (!is.logical(remove.dup)) {stop('"remove.dup" is not a valid logical argument')}
-  if (remove.dup) {
-    ext <- extent(img)
-    nr <- dim(img)[1]
-    pxr <- res(img)[1]
-    sp <- (round((ext[4]-xy@coords[,2])/pxr)+1) + nr * round((xy@coords[,1]-ext[1])/pxr)
-    dr <- !duplicated(sp)
-    op <- crs(xy)
-    up <- sp[dr]
-    xr <- vector('numeric', length(up))
-    yr <- vector('numeric', length(up))
-    for (r in 1:length(up)) {
-      ind <- which(sp==up[r])
-      xr[r] <- median(xy@coords[ind,1])
-      yr[r] <- median(xy@coords[ind,2])
-    }
-    xy <- cbind(xr, yr)
-  } else {
-    op <- crs(xy)
-    xy <- xy@coords}
-  
 #-------------------------------------------------------------------------------------------------------------------------------#
   
+  # output projection
+  op <- crs(xy)
+  
   # read data
-  edata <- as.data.frame(extract(img, xy, buffer=NULL, fun=fun, na.rm=T))
+  edata <- as.data.frame(extract(img, xy@coords, buffer=NULL, fun=fun, na.rm=T))
   
   # extract environmental data
   if (processTime) {
     
     # number of samples
-    ns <- nrow(xy)
+    ns <- nrow(xy@coords)
     
     # function to select pixels
     if (is.null(tb)) {
@@ -143,12 +121,12 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, remove
     ord <- do.call('c', lapply(edata, function(x) {x$date}))
     
     # derive shapefile
-    return(SpatialPointsDataFrame(xy, data.frame(value=orv, date=ord), proj4string=op))
+    return(SpatialPointsDataFrame(xy@coords, data.frame(value=orv, date=ord), proj4string=op))
       
   } else {
     
     # simple query
-    return(SpatialPointsDataFrame(xy, as.data.frame(edata), proj4string=op))
+    return(SpatialPointsDataFrame(xy@coords, as.data.frame(edata), proj4string=op))
     
   }
 }
