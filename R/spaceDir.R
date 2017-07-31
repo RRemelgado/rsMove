@@ -249,15 +249,18 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
         return(xyFromCell(r0, 1:ncell(r0)))}))
       ind <- ind[!duplicated(cellFromXY(img, ind)),]
       return(list(c=ind, s=replicate(nrow(ind), x)))})
-    us <- unlist(lapply(tmp, function(x) {x$s}))
+    us1 <- unlist(lapply(tmp, function(x) {x$s}))
     tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
     
     # retrieve environmental data
     edata <- extract(img, tmp)
-    
+  
     rm(tmp)
     
-  } else {edata <- extract(img, cbind(xc,yc))}
+  } else {
+    us1 = us
+    edata <- extract(img, cbind(xc,yc))
+  }
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 4. analyze samples
@@ -267,12 +270,12 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     
     # query function
     f2 <- function(i) {
-      ind <- which(us==i)
+      ind <- which(us1==i)
       u <- which(!is.na(edata[ind]))
       if (sum(u)>1) {return(as.numeric(fun(as.numeric(edata[ind[u]]))))} else {return(NA)}}
     
     # apply user provided functon
-    ov <- data.frame(stat=sapply(unique(us), f2))
+    ov <- data.frame(stat=sapply(unique(us1), f2))
   
   }
   
@@ -283,9 +286,9 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     
     # function to sumarize class composition
     f2 <- function(i) {
-      ind <- which(us==i)
+      ind <- which(us1==i)
       return(sapply(uc, function(y) {sum(edata[ind]==y, na.rm=T)}))}
-    ov <- do.call(rbind, lapply(unique(us), f2))
+    ov <- do.call(rbind, lapply(unique(us1), f2))
     
     # derive additional statistics
     dc <- apply(ov, 1, function(x) {(uc[which(x==max(x))])[1]})
@@ -302,7 +305,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   }
   
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 5. derive output
+# 5. build shapefiles
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # build dara table
@@ -317,11 +320,63 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   # build segment path shapefile
   f <- function(x) {
-    loc <- which(us==us0)
+    loc <- which(us==us0[x])
     return(Lines(list(Line(cbind(xc[loc],yc[loc]))), x))}
-  l.shp = SpatialLinesDataFrame(SpatialLines(lapply(us0, f), proj4string=rProj), df)
+  l.shp = SpatialLinesDataFrame(SpatialLines(lapply(1:length(us0), f), proj4string=rProj), df)
+  
+  #-------------------------------------------------------------------------------------------------------------------------------#
+  # 5. build plot
+  #-------------------------------------------------------------------------------------------------------------------------------#
+  
+  df <- data.frame(df, id=1:nrow(df))
+  fl <- fortify(l.shp)
+  fl <- merge(fl, df, by.x="id", by.y="id")
+  
+  cr <- colorRampPalette(c("khaki2", "forestgreen"))
+  
+  if (type=="cont") {
+    
+    mv <- round(max(df$stat))
+    nc <- nchar(as.character(mv))
+    m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+    mv <- mv / m
+    vl <- round(mv)
+    if (mv > vl) {vl <- (vl+0.2)*m} else {tb <- vl*m}
+    
+    p <- ggplot(fl, aes(x=long, y=lat, color=stat)) + theme_bw() + 
+      geom_line(size=2) + xlab("X") + ylab("Y") + 
+      theme(legend.text=element_text(size=10), 
+            axis.text=element_text(size=10),
+            panel.grid.major=element_blank(), 
+            panel.grid.minor=element_blank()) +
+      scale_color_gradientn(colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
+    
+  }
+  
+  if (type=="cat") {
+    
+    mv <- round(max(df$shannon))
+    nc <- nchar(as.character(mv))
+    m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+    mv <- mv / m
+    vl <- round(mv)
+    if (mv > vl) {vl <- (vl+0.2)*m} else {tb <- vl*m}
+    
+    p <- ggplot(fl, aes(x=long, y=lat, color=shannon)) + theme_bw() + 
+      geom_line(size=2) + xlab("X") + ylab("Y") + 
+      theme(legend.text=element_text(size=10), 
+            axis.text=element_text(size=10),
+            panel.grid.major=element_blank(), 
+                  panel.grid.minor=element_blank()) +
+      scale_color_gradientn(colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
+    
+  }
+  
+  #-------------------------------------------------------------------------------------------------------------------------------#
+  # 7. derive output
+  #-------------------------------------------------------------------------------------------------------------------------------#
   
   # output
-  return(list(endpoints=p.shp, segments=l.shp))
+  return(list(endpoints=p.shp, segments=l.shp, plot=p))
   
 }

@@ -168,7 +168,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
 #---------------------------------------------------------------------------------------------------------------------#
 # 4. derive statistics
 #---------------------------------------------------------------------------------------------------------------------#
-
+  
   # update original shapefile
   p.shp <- SpatialPointsDataFrame(xy@coords, data.frame(sid=id), proj4string=rProj)
   
@@ -184,6 +184,9 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
     df <- data.frame(sid=uid, count=sapply(sstat, function(x) {x$count}), 
           time=sapply(sstat, function(x) {x$time}), value=rv)
   } else {df <- data.frame(sid=uid, count=sapply(uid, function(x){sum(id==x)}))}
+  
+  # estimate relative time
+  df$rel.time <- time / diffTime(max(ot), min(ot), units='mins') * 100
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 5. build plot

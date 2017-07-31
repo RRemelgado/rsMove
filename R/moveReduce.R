@@ -1,6 +1,6 @@
 #' @title moveReduce
 #'
-#' @description Remote sensing based point segmentation
+#' @description Remote sensing based point segmentation.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param edata Object of class \emph{RasterLayer} or \emph{data.frame}.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates. 
@@ -11,8 +11,8 @@
 #' within a reference raster (\emph{img}). The function looks at consecutive points ordered by time 
 #' (\emph{ot}) and aggregates samples if they remain within the same pixel. If the same pixel is 
 #' revisited on a later time, that observation is kept as a separate occurrence. For each temporal 
-#' segment, the function returns mean x and y coordinates, mean timestamp and the elapsed time. 
-#' Additionaly, for each unique pixel position, the elapsed time is summer and provided as a raster.}
+#' segment, the function returns mean x and y coordinates, the start and end timestamps, the mean 
+#' timestamp and the elapsed time.}
 #' @examples {
 #'  
 #'  require(raster)
@@ -27,8 +27,8 @@
 #'  # observation time
 #'  o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'  
-#'  # perform directional sampling
-#'  seg <- moveReduce(xy=moveData, ot=o.time, img=r)
+#'  # reduce amount of samples
+#'  move.reduce <- moveReduce(xy=moveData, ot=o.time, img=r)
 #'  
 #' }
 #' @export
@@ -128,6 +128,6 @@ moveReduce <- function(xy=xy, ot=ot, img=img) {
   df <- data.frame(x=ux, y=uy, timestamp=ut, start.time=ft, end.time=lt, elapsed.time=et)
   r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(xy))
   
-  return(points=r.shp, total.time=t.sum.r)
+  return(list(points=r.shp, total.time=t.sum.r))
   
 }

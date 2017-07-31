@@ -158,6 +158,26 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
 # 4. query samples
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  return(unlist(lapply(1:length(xy), f)))
+  df <- data.frame(value=unlist(lapply(1:length(xy), f)))
+  
+#-------------------------------------------------------------------------------------------------------------------------------#
+# 5. build plot
+#-------------------------------------------------------------------------------------------------------------------------------#
+  
+  
+  # determine y scale range
+  mv <- max(df$value)
+  nc <- nchar(as.character(mv))
+  m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+  mv <- mv / m
+  yr <- round(mv)
+  if (mv > yr) {yr <- (yr+0.2)*m} else {yr <- yr*m}
+  
+  # build plot object
+  p <- ggplot(df, aes(y=value)) + geom_bar(stat='identity') +  ylim(0,yr) + 
+    xlab('') + theme(axis.text.x=element_blank())
+  
+  
+  return(list(stats=df, plot=p))
  
 }

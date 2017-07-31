@@ -11,7 +11,7 @@
 #' @import raster rgdal
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
-#' @return A SpatialPointsDataDataFrame.
+#' @return A n object of class \emph{vector} or \emph{data.frame}.
 #' @details {Returns environmental variables from a raster object for a given set of x and y coordinates.
 #'          A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample 
 #'          within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided 
@@ -86,7 +86,7 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, fun=NU
   op <- crs(xy)
   
   # read data
-  edata <- as.data.frame(extract(img, xy@coords, buffer=NULL, fun=fun, na.rm=T))
+  edata <- as.data.frame(extract(img, xy@coords, buffer=bs, fun=fun, na.rm=T))
   
   # extract environmental data
   if (processTime) {
@@ -121,12 +121,12 @@ dataQuery <- function(xy=xy, st=NULL, img=img, rt=NULL, tb=NULL, bs=NULL, fun=NU
     ord <- do.call('c', lapply(edata, function(x) {x$date}))
     
     # derive shapefile
-    return(SpatialPointsDataFrame(xy@coords, data.frame(value=orv, date=ord), proj4string=op))
+    return(data.frame(value=orv, date=ord))
       
   } else {
     
     # simple query
-    return(SpatialPointsDataFrame(xy@coords, as.data.frame(edata), proj4string=op))
+    return(edata)
     
   }
 }
