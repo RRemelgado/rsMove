@@ -349,7 +349,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
             axis.text=element_text(size=10),
             panel.grid.major=element_blank(), 
             panel.grid.minor=element_blank()) +
-      scale_color_gradientn(colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
+      scale_color_gradientn(name="Stat\n", colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
     
   }
   
@@ -368,7 +368,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
             axis.text=element_text(size=10),
             panel.grid.major=element_blank(), 
                   panel.grid.minor=element_blank()) +
-      scale_color_gradientn(colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
+      scale_color_gradientn(name="Shannon\n", colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
     
   }
   
