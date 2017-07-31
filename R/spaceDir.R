@@ -332,7 +332,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   fl <- fortify(l.shp)
   fl <- merge(fl, df, by.x="id", by.y="id")
   
-  cr <- colorRampPalette(c("khaki2", "forestgreen"))
+  cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
   
   if (type=="cont") {
     
