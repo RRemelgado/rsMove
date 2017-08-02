@@ -5,7 +5,7 @@
 \title{dataQuery}
 \usage{
 dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
-  bs = NULL, remove.dup = FALSE, fun = NULL)
+  bs = NULL, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -18,14 +18,11 @@ dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
 
 \item{tb}{Two element vector with temporal search buffer, expressed in days.}
 
-\item{bs}{Buffer size (unit depends on the raster projection).}
-
-\item{remove.dup}{Logical. Should the function ignore duplicated pixels? Default if FALSE.}
-
-\item{fun}{Passes an external function.}
+\item{bs}{Buffer size (unit depends on the raster projection).
+@param fun Passes an external function.}
 }
 \value{
-A SpatialPointsDataDataFrame.
+A n object of class \emph{vector} or \emph{data.frame}.
 }
 \description{
 Query environmental data for coordinate pairs.
@@ -37,9 +34,7 @@ Query environmental data for coordinate pairs.
          (\emph{rt}) and the date of sampling (\emph{st}). In this case, the function will treat the raster 
          data as a time series and search for clear pixel in time within the contraints of a temporal buffer 
          defined by \emph{tb}. \emph{tb} passes two values which represent the size of the buffer in two 
-         directions: before and after the target date. This allows for bacward and forward sampling. If 
-         \emph{remove.dup} is set, the function will account for duplicated pixelsreturning the coordinates 
-         for the center of the pixel.}
+         directions: before and after the target date. This allows for bacward and forward sampling.}
 }
 \examples{
 {

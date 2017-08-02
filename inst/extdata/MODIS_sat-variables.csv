@@ -1,0 +1,5 @@
+"link.terra","link.aqua","type","variable","space.res..m."
+"ftp://ladsweb.nascom.nasa.gov/../allData/6/MOD09GQ/","ftp://ladsweb.nascom.nasa.gov/../allData/6/MYD09GQ/","Land","ndvi",250
+"https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/6/MOD11A1/?process=ftpAsHttp&path=allData%2f6%2fMOD11A1/","https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/6/MYD11A1/?process=ftpAsHttp&path=allData%2f6%2fMOD11A1/","Land","lst",1000
+"https://oceandata.sci.gsfc.nasa.gov/MODIS-Terra/Mapped/Daily/4km/chlor_a/","https://oceandata.sci.gsfc.nasa.gov/MODIS-Aqua/Mapped/Daily/4km/chlor_a/","Ocean","chlorofile",4000
+"https://oceandata.sci.gsfc.nasa.gov/MODIS-Terra/Mapped/Daily/4km/SST/","https://oceandata.sci.gsfc.nasa.gov/MODIS-Aqua/Mapped/Daily/4km/SST/","Ocean","sst",4000

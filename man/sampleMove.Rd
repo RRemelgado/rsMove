@@ -30,8 +30,8 @@ based on GPS tracking data. It looks at the distance among consecutive samples (
 for the temporal segments where the animal moved less than the defined distance from the first location of the segment. 
 The user should selected \emph{method} in accordance with the projection system associated to the data. If 'm' it estimates 
 the ecludian distance. If 'deg' it uses the haversine formula. The output reports on the mean sample coordinates for 
-the sample locations ('x' and 'y'), the total time spent per sample ('time' expressed in minutes) and the total number 
-of observations per sample ('count').}
+the sample locations ('x' and 'y'), the start, end and total time spent per sample ('time' expressed in minutes) and the 
+total number of observations per sample ('count').}
 }
 \examples{
 {

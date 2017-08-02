@@ -25,19 +25,14 @@ timeDir(xy = xy, ot = ot, img = img, edata = NULL, rt = rt,
 \item{fun}{Summary function.}
 }
 \value{
-A \emph{SpatialPointsDataFrame}.
+A \emph{vector}.
 }
 \description{
 Temporal directional raster analysis.
 }
 \details{
 {This function evaluates how do environmental conditions change in time 
-along a movement track. Before an output is returned, the function looks for 
-segments of consecutive samples that appear within the same pixel and provides 
-mean values for their coordinates and observation times as well as the corresponding 
-pixel value and the elapsed time during the segment (in minutes). this step avoids 
-the replication of samples while preserving observation related to revisits 
-to the same pixels. Then, the function compares the observation times (\emph{ot}) 
+along a movement track. First, it compares the observation times (\emph{ot}) 
 of \emph{xy} against the acquisition times (\emph{rt}) of \emph{img} to search for relevant 
 information within a pre-defined temporal window (\emph{mws}). The user can chose to 
 only consider time steps before (\emph{bwd}) or after (\emph{fwd} the target observation 

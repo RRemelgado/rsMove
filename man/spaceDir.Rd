@@ -32,12 +32,7 @@ Spatial directional raster analysis.
 }
 \details{
 {This function evaluates how do environmental conditions change in space 
-along a movement track. Before an output is returned, the function looks for segments 
-of consecutive samples that appear within the same pixel and provides mean values for 
-their coordinates and observation times as well as the corresponding pixel value and 
-the elapsed time during the segment (in minutes). this step avoids the replication of 
-samples while preserving observation related to revisits to the same pixels. Then, for 
-each observation, the function looks at it imediate neighbors to define spatial segments. 
+along a movement track. First, it looks at consectuve observations to define spatial segments. 
 All the pixels between the two endpoints of the segment are considered in this process. 
 The user can use the argument \emph{dir} to prompt the function to focus on previous 
 (\emph{bwd}) or following (\emph{fwd}) observations or to look in both directions (\emph{both}) 

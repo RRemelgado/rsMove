@@ -27,7 +27,7 @@
 #' \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
 #' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/} 
 #' \url{http://maps.elie.ucl.ac.be/CCI/viewer/}}
-#' @seealso \code{\link{sMoveRes}}
+#' @seealso \code{\link{dataQuery}} \code{\link{spaceDir}}
 #' @examples {
 #'  
 #'  # return list of variables
