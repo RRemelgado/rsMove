@@ -26,7 +26,7 @@
 #'  The output will also contain a plot provide information on the distance between the observation 
 #'  dates and the closest date with the lowest cloud cover.}
 #' @references \url{https://cneos.jpl.nasa.gov/}
-#' @seealso \code{\link{sMoveRes}}
+#' @seealso \code{\link{sMoveRes}} \code{\link{tMoveRes}}
 #' @examples \dontrun{
 #'  
 #'  require(raster)

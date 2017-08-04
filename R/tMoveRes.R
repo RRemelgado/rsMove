@@ -9,7 +9,7 @@
 #' @importFrom utils download.file
 #' @return A \emph{list}.
 #' @details {Given a vector of temporal resolutions (\emph{t.res}), the function determines 
-#' the number of unique pixels and unique pixel groups after their remporal agggation. The 
+#' the number of unique pixels and unique pixel groups after their temporal agggation. The 
 #' function returns the corresponding pixel indices per resolution showing which 
 #' samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats}) 
 #' and a plot (\emph{$plot}) with the statistics per temporal resolution.}
@@ -90,10 +90,10 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
   st <- min(o.time) # start time
   et <- max(o.time) # end time
   
-  id <- 0 # reference sample ID
   out <- list() # output variable
   for (r in 1:length(t.res)) {
     
+    id <- 0 # reference sample ID
     ind <- vector('numeric', length(xy)) # position index
     nw <- as.numeric(((et - st) / t.res[r]) + 1) # number of temporal windows
     nr <- vector('numeric', length(nw)) # number of regions
@@ -122,12 +122,12 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
   # output data frame with statistics
   out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}), 
                      n.regions=sapply(out, function(x) {x$regions}))
-  row.names(out1) <- as.character(pxr)
+  row.names(out1) <- as.character(t.res)
   
   # output data frame with sample indices
   out <- lapply(out, function(x) {x$indices})
   out2 <- do.call(cbind, lapply(out, data.frame, stringsAsFactors=FALSE))
-  colnames(out2) <- as.character(pxr)
+  colnames(out2) <- as.character(t.res)
   
   #---------------------------------------------------------------------------------------------------------------------#
   # 4. plot output
@@ -160,9 +160,9 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
   
   # build plot object
-  p <- ggplot(out1, aes(x=factor(pxr), y=n.pixels, fill=n.regions)) + 
+  p <- ggplot(out1, aes(x=factor(t.res), y=n.pixels, fill=n.regions)) + 
     scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr), 
-                         limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution") + 
+                         limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (days)") + 
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") + 
     theme(axis.text.x=element_text(size=12), 
           axis.title.x =element_text(size=14), 
