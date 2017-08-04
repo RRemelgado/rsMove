@@ -22,9 +22,11 @@
 #'  \item{\emph{p.day.before}: date before the obsertation date with the lowest cloud cover}
 #'  \item{\emph{p.cover.before}: cloud cover for \emph{p.day.before}}
 #'  \item{\emph{p.day.after}: date after the obsertation date with the lowest cloud cover}
-#'  \item{\emph{p.cover.after}: cloud cover for \emph{p.day.after}}
-#'  The output will also contain a plot provide information on the distance between the observation 
-#'  dates and the closest date with the lowest cloud cover.}
+#'  \item{\emph{p.cover.after}: cloud cover for \emph{p.day.after}}}
+#'  The output will also contain a two plots with information on the distance between the 
+#'  observation dates and the closest date with the lowest cloud cover. The plots show the 
+#'  amount of samples that are covered in each of the target dates for the best dates before 
+#'  (\emph{$plot.before}) and after (\emph{$plot.after}) the observation dates.}
 #' @references \url{https://cneos.jpl.nasa.gov/}
 #' @seealso \code{\link{sMoveRes}} \code{\link{tMoveRes}}
 #' @examples \dontrun{
@@ -183,20 +185,17 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   # make color ramp
   cr = colorRampPalette(c("forestgreen", "khaki2", "darkred"))
   
-  # data frame used for plotting
-  odf <- data.frame(dd=c(d.df.b, d.df.a), 
-                    cc=c(p.cc.b, p.cc.a))
-  
   # build plot
-  p <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
-    scale_x_continuous(limits=c(-b.size, b.size)) + 
+  odf <- data.frame(dd=d.df.b, cc=p.cc.b)
+  p1 <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
+    scale_x_continuous(limits=c(-b.size, 0)) + 
     scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0,100), breaks=c(0, 50, 100)) +
     xlab("Day Difference") + ylab("Number of Samples") + 
     theme(axis.text=element_text(size=10), 
           axis.title=element_text(size=12))
   
   # determine optimal y range
-  mv <- max(ggplot_build(p)$data[[1]]$count)
+  mv <- max(ggplot_build(p1)$data[[1]]$count)
   nc <- nchar(as.character(mv))
   m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
   mv <- mv / m
@@ -204,7 +203,27 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   if (mv > yr) {yr <- (yr+0.05)*m} else {yr <- yr*m}
   
   # update plot
-  p <- p + scale_y_continuous(limits=c(0, yr))
+  p1 <- p1 + scale_y_continuous(limits=c(0, yr))
+  
+  # build plot
+  odf <- data.frame(dd=d.df.a, cc=p.cc.a)
+  p2 <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
+    scale_x_continuous(limits=c(0, b.size)) + 
+    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0,100), breaks=c(0, 50, 100)) +
+    xlab("Day Difference") + ylab("Number of Samples") + 
+    theme(axis.text=element_text(size=10), 
+          axis.title=element_text(size=12))
+  
+  # determine optimal y range
+  mv <- max(ggplot_build(p2)$data[[1]]$count)
+  nc <- nchar(as.character(mv))
+  m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
+  mv <- mv / m
+  yr <- round(mv)
+  if (mv > yr) {yr <- (yr+0.05)*m} else {yr <- yr*m}
+  
+  # update plot
+  p2 <- p2 + scale_y_continuous(limits=c(0, yr))
   
   if (p.res) {p} # plot raster on screen
   
@@ -213,6 +232,6 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   #---------------------------------------------------------------------------------------------------------------------#
   
   # return data frame and plot
-  return(list(stats=df, plot.data=odf, plot=p))
+  return(list(stats=df, plot.data=odf, plot.before=p1, plot.after=p2))
   
 }
