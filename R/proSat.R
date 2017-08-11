@@ -94,12 +94,18 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
   potential.doa <- seq(1, 361, t.res)
   
   # update doa
-  doa <- unlist(sapply(doa, function(x) {
-    diff <- abs(potential.doa-x)
-    potential.doa[which(diff==min(diff))]}))
+  tmp <- lapply(1:length(ud), function(x) {
+    diff <- abs(potential.doa-doa[x])
+    pd <- potential.doa[which(diff==min(diff))]
+    d <- as.Date(paste0(yrs[x], "-01-01")) + (pd-1)
+    return(list(date=d, doa=pd, year=replicate(length(pd), yrs[x])))})
   
-  # update unique dates
-  ud <- as.Date(paste0(yrs, "-01-01")) + (doa-1)
+  # update temporal information
+  ud <- do.call('c', sapply(tmp, function(x) {x$date}))
+  doa <- unlist(sapply(tmp, function(x) {x$pd}))
+  yrs <- unlist(sapply(tmp, function(x) {x$year}))
+  
+  rm(tmp)
   
 #-----------------------------------------------------------------------------------------------------------------#
 # 3. download functions
