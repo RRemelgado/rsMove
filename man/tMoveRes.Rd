@@ -4,12 +4,15 @@
 \alias{tMoveRes}
 \title{tMoveRes}
 \usage{
-tMoveRes(xy = xy, dpath = dpath, p.res = T)
+tMoveRes(xy = xy, o.time = o.time, t.res = t.res, s.res = s.res,
+  p.res = T)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{dpath}{Output data path for downloaded data.}
+\item{t.res}{Temporal resolution.}
+
+\item{s.res}{Spatial resolution.}
 
 \item{p.res}{Should the output be ploted on screen? Default is TRUE.}
 }
@@ -20,17 +23,11 @@ A \emph{list}.
 Provides historical information on cloud cover.
 }
 \details{
-{This function makes use of the global cloud cover statistics provided 
-through EarthEnv (\url{http://www.earthenv.org/cloud}) to extract base statistics 
-for a shapefile containing GPS tracking data. The function starts by downloading 
-monthly means of fractional cloud cover. This requires 9.63 Gb of space on the disk. 
-If the data already exists in \emph{dpath} this step will ignored. If the data 
-already exists, please assure it has not been modified. Then, the values for each 
-point are extracted (\emph{$point.data}) and used to derive the min, max, mean and 
-sd for each month (\emph{$stats}). This statistics are then used to build a plot 
-with ggplot expressing the mean and maximum cloud cover fraction per month. This 
-plot will be added to the output (\emph{$plot}). If \emph{p.res} is TRUE, it is 
-also ploted on screen.}
+{Given a vector of temporal resolutions (\emph{t.res}), the function determines 
+the number of unique pixels and unique pixel groups after their temporal agggation. The 
+function returns the corresponding pixel indices per resolution showing which 
+samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats}) 
+and a plot (\emph{$plot}) with the statistics per temporal resolution.}
 }
 \examples{
 \dontrun{
@@ -48,9 +45,6 @@ also ploted on screen.}
  a.res <- tMoveRes(xy=moveData, dpath='.')
  
 }
-}
-\references{
-\url{https://doi.org/10.1371/journal.pbio.1002415}
 }
 \seealso{
 \code{\link{sMoveRes}}

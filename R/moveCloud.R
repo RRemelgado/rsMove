@@ -2,18 +2,20 @@
 #'
 #' @description Provides historical information on cloud cover.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
+#' @param o.time Object of class \emph{Date}.
 #' @param d.path Output data path for downloaded data.
-#' @param d.buffer
-#' @param remove.files
+#' @param d.buffer Temporal buffer (expressed in days).
+#' @param remove.files Logical. Should the files be deleted after usage?
 #' @param p.res Should the output be ploted on screen? Default is TRUE.
 #' @import ggplot2 sp rgdal grDevices
 #' @importFrom utils download.file
+#' @importFrom RCurl url.exists
 #' @return A \emph{list}.
 #' @details {This function makes uses daily cloud fraction data from NASA's NEO service. 
-#' For each observation date, the function downloads the correspondent image and extracts 
-#' the percent of cloud cover for the samples acquired at the target date. If \emph{d.path} 
-#' is specified, the function will look within the provided directory if the required files 
-#' are already. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each 
+#' For each observation date (\emph{o.time}), the function downloads the correspondent image 
+#' and extracts the percent of cloud cover for the samples acquired at the target date. If 
+#' \emph{d.path} is specified, the function will look within the provided directory for the 
+#' required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each 
 #' date, the function will consider images before and after within a temporal buffer. These 
 #' new images will be used to report on the closest time step with the lowest possible cloud 
 #' cover. The final report provides information on:
@@ -41,14 +43,14 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # test function for 5, 10 20 and 30 m
-#'  a.res <- tMoveRes(xy=moveData, dpath='.')
+#'  c.cover <- moveCloud(xy=moveData, o.time=as.Date(moveData@data$date), d.path="D:/05_TMP/", b.size=30)
 #'  
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T) {
+moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T) {
   
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
@@ -56,7 +58,7 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   
   # input keywords
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  if (is.na(rr@projargs)) {stop('"xy" does not have a valid projection')}
+  if (is.na(crs(xy))) {stop('"xy" does not have a valid projection')}
   if (is.null(d.path)) {
     d.path <- tempdir()
     remove.file <- TRUE
@@ -75,8 +77,8 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
 #---------------------------------------------------------------------------------------------------------------------#
   
   # target dates
-  ot <- as.Date(ot)
-  ud <- unique(ot)
+  o.time <- as.Date(o.time)
+  ud <- unique(o.time)
   
   # output variables
   d.cc <- vector('numeric', length(xy))
@@ -89,10 +91,13 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   p.dt.a <- p.dt.b
   d.df.a <- d.cc
   
+  # table that will contain full data frame of cloud cover
+  if (apply.buffer) {o.cc <- vector('list', length(ud))}
+  
   for (d in 1:length(ud)) {
     
     # target observations
-    loc <- which(ot==ud[d])
+    loc <- which(o.time==ud[d])
     
     # set file name
     ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", ud[d], ".FLOAT.TIFF")
@@ -144,12 +149,12 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
         ind <- which(diff0 < 0)
         bv <- min(f.cc[x,ind])
         diff1 <- abs(diff0[ind])
-        ind <- ind[which(f.cc[x,ind]==av)]
+        ind <- ind[which(f.cc[x,ind]==bv)]
         ind <- ind[which(diff0[ind]==min(diff0[ind]))]
         db <- diff0[ind]
         bd <- day.ls[ind]
         ind <- which(diff0 > 0)
-        bv <- min(f.cc[x,ind])
+        av <- min(f.cc[x,ind])
         diff1 <- abs(diff0[ind])
         ind <- ind[which(f.cc[x,ind]==av)]
         ind <- ind[which(diff0[ind]==min(diff0[ind]))]
@@ -164,6 +169,10 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
       p.dt.a[loc] <- do.call('c', lapply(dq, function(x) {x$ad}))
       p.cc.a[loc] <- unlist(lapply(dq, function(x) {x$av}))
       d.df.a[loc] <- unlist(lapply(dq, function(x) {x$da}))
+      
+      # raw cloud cover information
+      f.cc[f.cc > 1] <- NA
+      o.cc[[d]] <- data.frame(value=apply(z, 2, mean, na.rm=T), date=day.ls)
       
       rm(f.cc)
       
@@ -189,7 +198,7 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   odf <- data.frame(dd=d.df.b, cc=p.cc.b)
   p1 <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
     scale_x_continuous(limits=c(-b.size, 0)) + 
-    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0,100), breaks=c(0, 50, 100)) +
+    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0.0,1.0), breaks=c(0.0, 0.5, 1.0)) +
     xlab("Day Difference") + ylab("Number of Samples") + 
     theme(axis.text=element_text(size=10), 
           axis.title=element_text(size=12))
@@ -200,7 +209,7 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
   mv <- mv / m
   yr <- round(mv)
-  if (mv > yr) {yr <- (yr+0.05)*m} else {yr <- yr*m}
+  if (mv > yr) {yr <- (yr+0.5)*m} else {yr <- yr*m}
   
   # update plot
   p1 <- p1 + scale_y_continuous(limits=c(0, yr))
@@ -209,7 +218,7 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   odf <- data.frame(dd=d.df.a, cc=p.cc.a)
   p2 <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
     scale_x_continuous(limits=c(0, b.size)) + 
-    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0,100), breaks=c(0, 50, 100)) +
+    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0.0,1.0), breaks=c(0.0, 0.5, 1.0)) +
     xlab("Day Difference") + ylab("Number of Samples") + 
     theme(axis.text=element_text(size=10), 
           axis.title=element_text(size=12))
@@ -220,18 +229,29 @@ moveCloud <- function(xy=xy, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T
   m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
   mv <- mv / m
   yr <- round(mv)
-  if (mv > yr) {yr <- (yr+0.05)*m} else {yr <- yr*m}
+  if (mv > yr) {yr <- (yr+0.5)*m} else {yr <- yr*m}
   
   # update plot
   p2 <- p2 + scale_y_continuous(limits=c(0, yr))
   
-  if (p.res) {p} # plot raster on screen
+  if (p.res) {p1} # plot on screen (before)
+  if (p.res) {p2} # plot on screen (after)
+  
+  # build plot with extended cloud cover information
+  if (apply.buffer) {
+    df0 <- do.call(rbind, o.cc)
+    ud <- unique(df0$date)
+    df0 <- data.frame(date=ud, cover=sapply(ud, function(x) {df0$value[which(ud==x)]}))
+    p3 <- ggplot(df0, aes(x=date, y=cover)) + theme_bw() + geom_bar(stat="identity", colour="black", fill="grey80") + 
+      theme(axis.title=element_text(size=12), axis.text=element_text(size=10)) + xlab("Date") + ylab("Cloud Cover (%)")
+    if (p.res) {p3}}
   
   #---------------------------------------------------------------------------------------------------------------------#
   #  7. derive output
   #---------------------------------------------------------------------------------------------------------------------#
   
   # return data frame and plot
-  return(list(stats=df, plot.data=odf, plot.before=p1, plot.after=p2))
+  if (apply.buffer) {return(list(stats=df, plot.data=odf, plot.before=p1, plot.after=p2, daily.cover=df0, daily.cover.plot=p3))}
+  if (!apply.buffer) {return(list(stats=df, plot.data=odf, plot.before=p1, plot.after=p2))}
   
 }

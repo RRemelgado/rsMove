@@ -4,54 +4,57 @@
 \alias{proSat}
 \title{proSat}
 \usage{
-proSat(sensor = sensor, var = NULL, dpath = NULL, ref = NULL)
+proSat(var = NULL, xy = NULL, o.time = NULL, d.path = NULL,
+  p.raster = FALSE, p.res = NULL, user.cred = NULL)
 }
 \arguments{
 \item{var}{Target variables.}
 
-\item{ref}{Object from which an extent can be derived.}
+\item{xy}{Object from which an extent can be derived.}
 
 \item{d.path}{Output data path for downloaded data.}
 
-\item{d.source}{Data source. One of "EarthEnv", "GFC", "GSW", "CCI" or "HSM".}
+\item{p.raster}{Logical. Should the output be re-projected?}
+
+\item{p.res}{Target pixel resolution (if p.raster is TRUE).}
+
+\item{user.cred}{Two element character vector containing username and password.}
 }
 \value{
 One or multiple raster objects.
 }
 \description{
-Interface to download ecologically relevant data.
+Interface to download and process satelite data.
 }
 \details{
-{Downloads data from earthenv.org. To check which variables can be downloaded, 
-run the function without specifying \emph{var} and specifying \emph{d.source}. This will 
-return a data frame list the existing variables for a given data source. Here, the user 
-can refer to the column \emph{"code"} to retrieve the keywords that can be passed to 
-the function through \emph{var}. The keywords recognized by \emph{d.source} are:
-\itemize{
-\item{\emph{"EarthEnv"} - EarthEnv project.}
-\item{\emph{"GFC"} - Maryland University Global Forest Change.}
-\item{\emph{"GSW"} - JRC Global Surface Water.}
-\item{\emph{"CCI"} - ESA CCI Global land cover.}
-\item{\emph{"HSM"} - JRC Human Settlement map.}}
-If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
-or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
-be downloaded. For details on the specifications of the provided datasets please consult 
-the referenced websites.}
+{Downloads and pre-processes pre-selected satellite datasets That provide ecologically 
+meaningful variables. \emph{xy} is required to define a reference extent for which the data will 
+be downloaded and croped. If \emph{p.raster} is TRUE, the function will also re-project the output 
+to the projection of \emph{xy}. Note that \emph{xy} does not required reprojection a priori. The 
+function will find the approapriate projection to use when deriving a reference extent. If \emph{p.raster} 
+is TRUE \emph{p.res} is also required to determine the output pixel resolution. The outputs are presented 
+in GTiff format and are croped and masked by default. Note that the download files might not correspond to 
+the dates supplied through \emph{o.time}. The function will consider the temporal resolution of the target 
+dataset and compare the possible and the requested dates. If a requested date is not found, the 
+function will instead provide the closest image time. As a consequence, the number of downloaded 
+files might be lesser than the number of dates. The function will inform the user on this by providing 
+a list object which contains the downloaded dates (\emph{$date}) as well as the path for the correspondent 
+image (\emph{$path}).}
+}
+\note{
+{To consult the list of provided variables, run the function without specifying any input.
+This will provide information on the variables, variable codes (used in \emph{var}), temporal and 
+spatial resolution and the sensor of origin. Some variables might require login credentials. Check 
+the table to know which credentials to use and assign them through \emph{user.cred}.}
 }
 \examples{
 {
  
  # return list of variables
- modis.var <- getEnv(d.source="EarthEnv")
+ modis.var <- proSat(sensor="MODIS")
  
 }
 }
-\references{
-{\url{http://www.earthenv.org/} 
-\url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
-\url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/} 
-\url{http://maps.elie.ucl.ac.be/CCI/viewer/}}
-}
 \seealso{
-\code{\link{getEnv}}
+\code{\link{getEnv}} \code{\link{imgInt}} \code{\link{dataQuery}}
 }

@@ -26,7 +26,7 @@ Plots per pixel time and value.
 \details{
 {This function plots a provided set of x and y coordinates adding information on the elapsed time 
 at each coordinate (\emph{e.time}) and/or a given environmental variable (\emph{value}). If only \emph{time} 
-or \emp{value} are set, the function builds a scatterplot where the size of the points is defined by the input 
+or \emph{value} are set, the function builds a scatterplot where the size of the points is defined by the input 
 variables. If both are provided, the size of the points is defined by the elapsed time and the raster value is 
 used to build a color scheme for the points. When \emph{value} is provided, the keyword \emph{type} is required. 
 It will influence how the plots are built. The breaks a limits for the point size and colors is define automatically.}
