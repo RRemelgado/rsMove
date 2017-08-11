@@ -8,9 +8,9 @@
 #' @param p.res Target pixel resolution (if p.raster is TRUE).
 #' @param user.cred Two element character vector containing username and password.
 #' @import grDevices sp rgdal ncdf4
-#' @importFrom curl curl curl_download
-#' @importFrom XML xmlRoot readHTMLTable htmlParse
+#' @importFrom XML htmlParse readHTMLTable
 #' @importFrom httr GET write_disk
+#' @importFrom RCurl getURL
 #' @importFrom gdalUtils gdal_translate
 #' @return One or multiple raster objects.
 #' @details {Downloads and pre-processes pre-selected satellite datasets That provide ecologically 
@@ -55,6 +55,7 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
   if (is.null(var)) {return(var.ls)}
   if (length(var)>1) {stop('"var" has more than 1 element')}
   loc <- which(var.ls$code==var)
+  if (length(loc)==0) {stop('"var" is not a recognized variable')}
   sensor <- var.ls$sensor[loc]
   t.res <- var.ls$temporal.resolution..days.[loc]
   
@@ -93,10 +94,10 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
   potential.doa <- seq(1, 361, t.res)
   
   # update doa
-  doa <- sapply(doa, function(x) {
+  doa <- unlist(sapply(doa, function(x) {
     diff <- abs(potential.doa-x)
-    potential.doa[which(diff==min(diff))[1]]})
-
+    potential.doa[which(diff==min(diff))]}))
+  
   # update unique dates
   ud <- as.Date(paste0(yrs, "-01-01")) + (doa-1)
   
@@ -612,23 +613,17 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       if (var.ls$type[loc]=="tile") {
         if (var!="snow" & var!="ice") {
           server <- paste0(var.ls[loc,1], yrs[d], '/', doa[d], '/')
-          h = new_handle(dirlistonly=TRUE)
-          con = curl(paste0(server, '.csv'), "r", h)
-          tbl = read.table(con, stringsAsFactors=TRUE, fill=TRUE, skip=1, sep=",")
-          close(con)
+          tbl = readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1
           file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl$V1),1])}))}
         if (var=="snow" | var=="ice") {
           server <- paste0(var.ls[loc,1], paste0(strsplit(as.character(ud[d]), '-')[[1]], collapse='.'), '/')
           tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server, authenticate(user.cred[1], user.cred[2])))))$V2)
           file <- as.character(sapply(tiles, function(x) {
-            paste0(server, tbl[grep(paste0(x, ".*.hdf$"), tbl)])}))}
-      } else {
+            paste0(server, tbl[grep(paste0(x, ".*.hdf$"), tbl)])}))}}
+      if (var=="chlorofile" | var=="sst") {
         server <- paste0(var.ls[loc,1], yrs[d], '/')
-        h = new_handle(dirlistonly=TRUE)
-        con = curl(server, "r", h)
-        tbl = read.table(con, stringsAsFactors=TRUE, fill=TRUE)
-        close(con)
-        file <- as.character(sapply(paste0(yrs[d], doa[d]), function(x) {paste0(server, tbl[grep(x, tbl$V1),1])}))}
+        tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1)
+        file <- tbl[grep(paste0(yrs[d], doa[d]), tbl)]}
       
       # download data (aqua)
       if (var=="ndvi") {r.data[[1]] <- crop(dwnVI(file), ref)}
@@ -640,13 +635,22 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       if (var=="ice") {r.data[[1]] <- crop(dwnICE(file), ref)}
       if (var=="chlorofile") {
         tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
-        curl_download(file, tmp, quiet=TRUE, mode="wb")
-        r.data[[1]] <- crop(brick(tmp, var="chlor_a"), ref)}
+        GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file), write_disk(tmp, overwrite=T))
+        r.data[[1]] <- crop(brick(tmp, var="chlor_a")[[1]], ref)}
       if (var=="sst") {
-        tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
-        curl_download(file, tmp, quiet=TRUE, mode="wb")
-        r.data[[1]] <- crop(brick(tmp, var="sst"), ref)}
+        tmp1 <- tempfile(pattern="tmp1", tmpdir=tempdir(), fileext=".nc")
+        GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file[grep("_SST", file)]), write_disk(tmp1, overwrite=T))
+        r1 <- crop(brick(tmp1, var="sst")[[1]], ref)
+        tmp2 <- tempfile(pattern="tmp2", tmpdir=tempdir(), fileext=".nc")
+        GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file[grep("_NSST", file)]), write_disk(tmp2, overwrite=T))
+        r2 <- crop(brick(tmp2, var="sst")[[1]], ref)
+        r0 <- stack(r1, r2)
+        names(r0) <- c('day', 'night')
+        r.data[[1]] <- r0
+        rm(r1, r2, r0)}
       if (var=="cw") {
+        tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".tif")
+        GET(paste0(var.ls[loc,1], "MODAL2_D_CLD_WP_", as.character(ud[d]), ".FLOAT.TIFF"), write_disk(tmp, overwrite=T))
         r0 <- crop(brick(tmp), ref)
         r0[r0>1000] <- NA
         r.data[[1]] <- r0
@@ -658,23 +662,17 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       if (var.ls$type[loc]=="tile") {
         if (var!="snow" & var!="ice") {
           server <- paste0(var.ls[loc,2], yrs[d], '/', doa[d], '/')
-          h = new_handle(dirlistonly=TRUE)
-          con = curl(paste0(server, '.csv'), "r", h)
-          tbl = read.table(con, stringsAsFactors=TRUE, fill=TRUE, skip=1, sep=",")
-          close(con)
+          tbl = readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1
           file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl$V1),1])}))}
         if (var=="snow" | var=="ice") {
           server <- paste0(var.ls[loc,2], paste0(strsplit(as.character(ud[d]), '-')[[1]], collapse='.'), '/')
           tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server, authenticate(user.cred[1], user.cred[2])))))$V2)
           file <- as.character(sapply(tiles, function(x) {
-            paste0(server, tbl[grep(paste0(x, ".*.hdf$"), tbl)])}))}
-      } else {
+            paste0(server, tbl[grep(paste0(x, ".*.hdf$"), tbl)])}))}}
+      if (var=="chlorofile" | var=="sst") {
         server <- paste0(var.ls[loc,2], yrs[d], '/')
-        h = new_handle(dirlistonly=TRUE)
-        con = curl(server, "r", h)
-        tbl = read.table(con, stringsAsFactors=TRUE, fill=TRUE)
-        close(con)
-        file <- as.character(sapply(paste0(yrs[d], doa[d]), function(x) {paste0(server, tbl[grep(x, tbl$V1),1])}))}
+        tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1)
+        file <- tbl[grep(paste0(yrs[d], doa[d]), tbl)]}
       
       # download data (aqua)
       if (var=="ndvi") {r.data[[2]] <- crop(dwnVI(file), ref)}
@@ -686,15 +684,22 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       if (var=="ice") {r.data[[2]] <- crop(dwnICE(file), ref)}
       if (var=="chlorofile") {
         tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
-        curl_download(file, tmp, quiet=TRUE, mode="wb")
-        r.data[[2]] <- crop(brick(tmp, var="chlor_a"), ref)}
+        GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file), write_disk(tmp, overwrite=T))
+        r.data[[2]] <- crop(brick(tmp, var="chlor_a")[[1]], ref)}
       if (var=="sst") {
-        tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
-        curl_download(file, tmp, quiet=TRUE, mode="wb")
-        r.data[[2]] <- crop(brick(tmp, var="sst"), ref)}
+        tmp1 <- tempfile(pattern="tmp1", tmpdir=tempdir(), fileext=".nc")
+        GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file[grep("_SST", file)]), write_disk(tmp1, overwrite=T))
+        r1 <- crop(brick(tmp1, var="sst")[[1]], ref)
+        tmp2 <- tempfile(pattern="tmp2", tmpdir=tempdir(), fileext=".nc")
+        GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file[grep("_NSST", file)]), write_disk(tmp2, overwrite=T))
+        r2 <- crop(brick(tmp2, var="sst")[[1]], ref)
+        r0 <- stack(r1, r2)
+        names(r0) <- c('day', 'night')
+        r.data[[2]] <- r0
+        rm(r1, r2, r0)}
       if (var=="cw") {
-        tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
-        curl_download(file, tmp, quiet=TRUE, mode="wb")
+        tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".tif")
+        GET(paste0(var.ls[loc,2], "MYDAL2_D_CLD_WP_", as.character(ud[d]), ".FLOAT.TIFF"), write_disk(tmp, overwrite=T))
         r0 <- crop(brick(tmp), ref)
         r0[r0>1000] <- NA
         r.data[[2]] <- r0

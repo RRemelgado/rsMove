@@ -18,15 +18,16 @@
 #' \item{\emph{"GFC"} - Maryland University Global Forest Change.}
 #' \item{\emph{"GSW"} - JRC Global Surface Water.}
 #' \item{\emph{"CCI"} - ESA CCI Global land cover.}
-#' \item{\emph{"HSM"} - JRC Human Settlement map.}}
+#' \item{\emph{"HSM"} - JRC Human Settlement map.}
+#' \item{\emph{"NEO"} - NASA Earth Observations.}}
 #' If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
 #' or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
 #' be downloaded. For details on the specifications of the provided datasets please consult 
 #' the referenced websites.}
 #' @references {\url{http://www.earthenv.org/} 
 #' \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
-#' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/} 
-#' \url{http://maps.elie.ucl.ac.be/CCI/viewer/}}
+#' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}
+#' \url{http://maps.elie.ucl.ac.be/CCI/viewer/} \url{https://neo.sci.gsfc.nasa.gov/}}
 #' @seealso \code{\link{dataQuery}} \code{\link{spaceDir}}
 #' @examples {
 #'  
@@ -36,6 +37,7 @@
 #'  gsw.var <- getEnv(d.source="GSW")
 #'  cci.var <- getEnv(d.source="CCI")
 #'  hsm.var <- getEnv(d.source="HSM")
+#'  neo.var <- getEnv(d.source="NEO")
 #'  
 #' }
 #' @export
@@ -50,7 +52,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, var=NULL, ref=NULL) {
   
   # check data source keyword
   if (is.null(d.source)) {stop('please assign a valid keyword to "d.source"')}
-  if (!d.source%in%c('EarthEnv', 'GFC', 'GSW', 'CCI', 'HSM')) {stop('"d.source" is not a valid keyword')}
+  if (!d.source%in%c('EarthEnv', 'GFC', 'GSW', 'CCI', 'HSM', 'NEO')) {stop('"d.source" is not a valid keyword')}
   
   # read variable list
   var.ls <- system.file('extdata', paste0(d.source, '_variables.csv'), package="rsMove")
