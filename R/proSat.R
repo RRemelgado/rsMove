@@ -209,10 +209,10 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
         
         # read raster (2)
         tmp3 <- tempfile(pattern="tmp3", tmpdir=tempdir(), fileext=".tif")
-        gdal_translate(ofile[f], tmp3, sd_index=7)
+        gdal_translate(ofile[f], tmp3, sd_index=5)
         r2 <- raster(tmp3)
         tmp4 <- tempfile(pattern="tmp4", tmpdir=tempdir(), fileext=".tif")
-        gdal_translate(ofile[f], tmp4, sd_index=8)
+        gdal_translate(ofile[f], tmp4, sd_index=6)
         qc <- raster(tmp4)
         qc <- ((qc %% b[1])>=a[1])^2 + ((qc %% b[2])>=a[2])^2
         r2[qc>0] <- NA
@@ -246,10 +246,10 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       
       # read raster (2)
       tmp3 <- tempfile(pattern="tmp3", tmpdir=tempdir(), fileext=".tif")
-      gdal_translate(ofile, tmp3, sd_index=7)
+      gdal_translate(ofile, tmp3, sd_index=5)
       r2 <- raster(tmp3)
       tmp4 <- tempfile(pattern="tmp4", tmpdir=tempdir(), fileext=".tif")
-      gdal_translate(ofile, tmp4, sd_index=8)
+      gdal_translate(ofile, tmp4, sd_index=6)
       qc <- raster(tmp4)
       qc <- ((qc %% b[1])>=a[1])^2 + ((qc %% b[2])>=a[2])^2
       r2[qc>0] <- NA
@@ -705,7 +705,7 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       bn <- names(r.data[[1]]) # band names
       r.data <- lapply(1:nb, function(x) {calc(do.call(stack, lapply(1:2, function(y) {(r.data[[y]])[[x]]})), mean, na.rm=T)})
       if (nb > 0) {r.data <- do.call(stack, r.data)} else {r.data <- r.data[[1]]}
-      names(r.data) <-
+      names(r.data) <- bn
       if (p.raster) {r.data <- projectRaster(r.data, rr)}
       ofile <- paste0(file.path(d.path, fsep=.Platform$file.sep), .Platform$file.sep, as.character(ud[d]), '_', var, '.tif')
       writeRaster(r.data, ofile, driver="GTiff", datatype=dataType(r.data), overwrite=T)
