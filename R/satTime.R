@@ -15,7 +15,7 @@
 #' @examples {
 #'  
 #'  # return list of variables
-#'  var.ls <- satTime(o.time=as.Date("2013-02-25", t.var="ndvi"))
+#'  var.ls <- satTime(o.time=as.Date("2013-08-04"), t.var="ndvi")
 #'  
 #' }
 #' @export
@@ -29,7 +29,7 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=T) {
 #-----------------------------------------------------------------------------------------------------------------#
   
   if (class(o.time)[1] != 'Date') {stop('"o.time" is not of class "Date"')}
-  if (!is.character(t.vas)) {stop('"t.vas" is not a "character"')}
+  if (!is.character(t.var)) {stop('"t.var" is not a "character"')}
   if (length(t.var)>1) {stop('"t.var" has more than 1 element')}
   
   # read variable list
@@ -79,31 +79,30 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=T) {
   uy <- sort(unique(yrs))
   gg <- do.call(rbind, lapply(uy, function(x) {
     ind <- which(o.yrs==x)
-    td <- as.Date(paste0(x, '-01-01')) + (s.doa-1)
-    od <- unique(sort(c(o.time[ind], td)))
+    od <- unique(sort(c(o.doa[ind], s.doa)))
     yc <- vector('character', length(od))
-    yc[which(od%in%o.time[ind] & od%in%td)] <- 'Satellite/Observed' # obs. dates with sat. data
-    yc[which(!od%in%o.time[ind] & od%in%td)] <- 'Satellite' # sat. dates not covering obs.
-    yc[which(od%in%o.time[ind] & !od%in%td)] <- 'Observed' # obs. dates not covering sat.
-    yc[yc%in%o.time[ind]] <- yc[yd%in%o.time[ind]]
-    return(data.frame(class=yc, date=od, code=1, year=x, stringsAsFactors=F))}))
+    yc[which(od%in%o.doa[ind] & od%in%s.doa)] <- 'Satellite/Observed' # obs. dates with sat. data
+    yc[which(!od%in%o.doa[ind] & od%in%s.doa)] <- 'Satellite' # sat. dates not covering obs.
+    yc[which(od%in%o.doa[ind] & !od%in%s.doa)] <- 'Observed' # obs. dates not covering sat.
+    yc[yc%in%o.doa[ind]] <- yc[yd%in%o.doa[ind]]
+    return(data.frame(class=yc, doy=od, code=1, year=x, stringsAsFactors=F))}))
   
   # define color/class scheme
   uc <- unique(gg$class)
   cn <- c("Observed", "Satellite", "Satellite/Observed")
-  cc <- c("firebrick3", "lightblue2", "green3")
+  cc <- c("firebrick3", "dodgerblue4", "green3")
   ind <- which(cn%in%uc)
   cn <- cn[ind]
   cc <- cc[ind]
   
   # build plot
-  p <- ggplot(gg, aes(x=as.character(date), y=code, fill=factor(class, levels=cn))) + 
-    theme_bw() + geom_bar(stat="identity", width=1) + ylab("") + xlab("Date") + 
+  p <- ggplot(gg, aes(x=doy, y=code, fill=factor(class, levels=cn))) + 
+    theme_bw() + geom_bar(stat="identity", width=1) + ylab("") + xlab("Day of Year") + 
     theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
-          axis.text.x=element_text(size=8, angle=90, vjust=1), 
+          axis.text.x=element_text(size=12, vjust=1), 
           legend.title=element_blank(), legend.position="bottom", 
           legend.text=element_text(size=12)) + 
-    scale_x_discrete(expand=c(0, 0)) + 
+    scale_x_continuous(breaks=seq(0, 370, 50), lim=c(1, 366), expand=c(0, 0)) + 
     scale_y_continuous(expand=c(0, 0)) + 
     scale_fill_manual(values=cc, labels=cn) + 
     facet_wrap(~factor(year, levels=uy), nrow=length(uy))
