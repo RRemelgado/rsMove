@@ -71,7 +71,7 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
   
   # time breaks
   if (!is.null(o.time)) {
-    mv <- round(max(o.time))
+    mv <- round(max(o.time, na.rm=T))
     nc <- nchar(as.character(mv))
     m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
     mv <- mv / m
@@ -82,7 +82,7 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
   # value limit
   if (!is.null(value)) {
     if (type=='cont') {
-      mv <- round(max(df$value))
+      mv <- round(max(value, na.rm=T))
       nc <- nchar(as.character(mv))
       m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
       mv <- mv / m
@@ -101,12 +101,12 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
     
     # build plot
     if (type=="cont") {
-      p <- ggplot(df, aes(x=x, y=y, color=value, size=time)) + theme_bw() + geom_point() + 
+      p <- ggplot(df) + theme_bw() + geom_point(aes(x=x, y=y, size=time, fill=value), color="black", pch=21) + 
         guides(col=guide_legend(override.aes = list(shape=15, size=6))) + 
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
               panel.grid.minor=element_blank()) + 
         scale_size_continuous(name="Elapsed Time", breaks=tb, range=c(2,12)) + 
-        scale_color_continuous(breaks=c(0, (vl/2), vl), limits=c(0,vl))}
+        scale_fill_gradientn(name="Value", breaks=c(0, (vl/2), vl), limits=c(0,vl))}
     if (type=="cat") {
       df$value <- factor(df$value)
       p <- ggplot(df, aes(x=x, y=y, color=value, size=time)) + theme_bw() + geom_point() + 
@@ -144,11 +144,12 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
     
     # build plot
     if (type=="cont") {
-      p <- ggplot(df) + theme_bw() + geom_point(aes(x=x, y=y, size=value, fill="red"), color="black", pch=21) + 
-        guides(fill=FALSE, col=guide_legend(override.aes = list(shape=15, size=6))) + 
+      p <- ggplot(df) + theme_bw() + geom_point(aes(x=x, y=y, size=time, fill=value), color="black", pch=21) + 
+        guides(col=guide_legend(override.aes = list(shape=15, size=6))) + 
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
               panel.grid.minor=element_blank()) + 
-        scale_size_continuous(breaks=c(0, (vl/2), vl), range=c(2,12))}
+        scale_size_continuous(name="Elapsed Time", breaks=tb, range=c(2,12)) + 
+        scale_fill_gradientn(name="Value", breaks=c(0, (vl/2), vl), limits=c(0,vl))}
     if (type=="cat") {
       df$value <- factor(df$value)
       ggplot(df, aes(x=x, y=y, color=factor(value))) + theme_bw() + geom_point() + 

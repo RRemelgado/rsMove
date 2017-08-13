@@ -1,9 +1,10 @@
 #' @title proSat
 #'
 #' @description Interface to download and process satelite data.
-#' @param var Target variables.
-#' @param d.path Output data path for downloaded data.
+#' @param t.var Target variable.
 #' @param xy Object from which an extent can be derived.
+#' @param o.time Object of class \emph{Date}.
+#' @param d.path Output data path for downloaded data.
 #' @param p.raster Logical. Should the output be re-projected?
 #' @param p.res Target pixel resolution (if p.raster is TRUE).
 #' @param user.cred Two element character vector containing username and password.
@@ -27,7 +28,7 @@
 #' a list object which contains the downloaded dates (\emph{$date}) as well as the path for the correspondent 
 #' image (\emph{$path}).}
 #' @note {To consult the list of provided variables, run the function without specifying any input.
-#' This will provide information on the variables, variable codes (used in \emph{var}), temporal and 
+#' This will provide information on the variables, variable codes (used in \emph{t.var}), temporal and 
 #' spatial resolution and the sensor of origin. Some variables might require login credentials. Check 
 #' the table to know which credentials to use and assign them through \emph{user.cred}.}
 #' @seealso \code{\link{getEnv}} \code{\link{imgInt}} \code{\link{dataQuery}}
@@ -41,7 +42,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, p.res=NULL, user.cred=NULL) {
+proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, p.res=NULL, user.cred=NULL) {
   
   #-----------------------------------------------------------------------------------------------------------------#
   # 1. check input variables  
@@ -52,10 +53,10 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
   var.ls <- var.ls <- read.csv(var.ls, stringsAsFactors=F)
   
   # if no variable is selected return list of variables
-  if (is.null(var)) {return(var.ls)}
-  if (length(var)>1) {stop('"var" has more than 1 element')}
-  loc <- which(var.ls$code==var)
-  if (length(loc)==0) {stop('"var" is not a recognized variable')}
+  if (is.null(t.var)) {return(var.ls)}
+  if (length(t.var)>1) {stop('"var" has more than 1 element')}
+  loc <- which(var.ls$code==t.var)
+  if (length(loc)==0) {stop('"t.var" is not a recognized variable')}
   sensor <- var.ls$sensor[loc]
   t.res <- var.ls$temporal.resolution..days.[loc]
   
@@ -93,17 +94,13 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
   # check which dates can be downloaded
   potential.doa <- seq(1, 361, t.res)
   
-  # update doa
-  tmp <- lapply(1:length(ud), function(x) {
-    diff <- abs(potential.doa-doa[x])
-    pd <- potential.doa[which(diff==min(diff))]
-    d <- as.Date(paste0(yrs[x], "-01-01")) + (pd-1)
-    return(list(date=d, doa=pd, year=replicate(length(pd), yrs[x])))})
   
   # update temporal information
   ud <- do.call('c', sapply(tmp, function(x) {x$date}))
-  doa <- unlist(sapply(tmp, function(x) {x$pd}))
-  yrs <- unlist(sapply(tmp, function(x) {x$year}))
+  ind <- !duplicated(ud)
+  ud <- ud[ind]
+  doa <- unlist(sapply(tmp, function(x) {x$doa}))[ind]
+  yrs <- unlist(sapply(tmp, function(x) {x$year}))[ind]
   
   rm(tmp)
   
@@ -594,7 +591,10 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
 #-----------------------------------------------------------------------------------------------------------------#
 # 4. download/mosaic/crop/write raster data
 #-----------------------------------------------------------------------------------------------------------------#
-    
+  
+  # output file list
+  f.ls <- vector("list", length(ud))
+  
   if (sensor=="MODIS") {
     
     # format doa
@@ -617,33 +617,33 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       
       # build file path (terra)
       if (var.ls$type[loc]=="tile") {
-        if (var!="snow" & var!="ice") {
+        if (t.var!="snow" & t.var!="ice") {
           server <- paste0(var.ls[loc,1], yrs[d], '/', doa[d], '/')
           tbl = readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1
-          file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl$V1),1])}))}
-        if (var=="snow" | var=="ice") {
+          file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl)])}))}
+        if (t.var=="snow" | t.var=="ice") {
           server <- paste0(var.ls[loc,1], paste0(strsplit(as.character(ud[d]), '-')[[1]], collapse='.'), '/')
           tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server, authenticate(user.cred[1], user.cred[2])))))$V2)
           file <- as.character(sapply(tiles, function(x) {
             paste0(server, tbl[grep(paste0(x, ".*.hdf$"), tbl)])}))}}
-      if (var=="chlorofile" | var=="sst") {
+      if (t.var=="chlorofile" | t.var=="sst") {
         server <- paste0(var.ls[loc,1], yrs[d], '/')
         tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1)
         file <- tbl[grep(paste0(yrs[d], doa[d]), tbl)]}
       
       # download data (aqua)
-      if (var=="ndvi") {r.data[[1]] <- crop(dwnVI(file), ref)}
-      if (var=="lst") {r.data[[1]] <- crop(dwnLST(file), ref)}
-      if (var=="lai") {r.data[[1]] <- crop(dwnLAI(file), ref)}
-      if (var=="fpar") {r.data[[1]] <- crop(dwnFPAR(file), ref)}
-      if (var=="fire") {r.data[[1]] <- crop(dwnFIRE(file), ref)}
-      if (var=="snow") {r.data[[1]] <- crop(dwnSNW(file), ref)}
-      if (var=="ice") {r.data[[1]] <- crop(dwnICE(file), ref)}
-      if (var=="chlorofile") {
+      if (t.var=="ndvi") {r.data[[1]] <- crop(dwnVI(file), ref)}
+      if (t.var=="lst") {r.data[[1]] <- crop(dwnLST(file), ref)}
+      if (t.var=="lai") {r.data[[1]] <- crop(dwnLAI(file), ref)}
+      if (t.var=="fpar") {r.data[[1]] <- crop(dwnFPAR(file), ref)}
+      if (t.var=="fire") {r.data[[1]] <- crop(dwnFIRE(file), ref)}
+      if (t.var=="snow") {r.data[[1]] <- crop(dwnSNW(file), ref)}
+      if (t.var=="ice") {r.data[[1]] <- crop(dwnICE(file), ref)}
+      if (t.var=="chlorofile") {
         tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
         GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file), write_disk(tmp, overwrite=T))
         r.data[[1]] <- crop(brick(tmp, var="chlor_a")[[1]], ref)}
-      if (var=="sst") {
+      if (t.var=="sst") {
         tmp1 <- tempfile(pattern="tmp1", tmpdir=tempdir(), fileext=".nc")
         GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file[grep("_SST", file)]), write_disk(tmp1, overwrite=T))
         r1 <- crop(brick(tmp1, var="sst")[[1]], ref)
@@ -654,7 +654,7 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
         names(r0) <- c('day', 'night')
         r.data[[1]] <- r0
         rm(r1, r2, r0)}
-      if (var=="cw") {
+      if (t.var=="cw") {
         tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".tif")
         GET(paste0(var.ls[loc,1], "MODAL2_D_CLD_WP_", as.character(ud[d]), ".FLOAT.TIFF"), write_disk(tmp, overwrite=T))
         r0 <- crop(brick(tmp), ref)
@@ -666,33 +666,33 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       
       # build file path (aqua)
       if (var.ls$type[loc]=="tile") {
-        if (var!="snow" & var!="ice") {
+        if (t.var!="snow" & t.var!="ice") {
           server <- paste0(var.ls[loc,2], yrs[d], '/', doa[d], '/')
           tbl = readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1
-          file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl$V1),1])}))}
-        if (var=="snow" | var=="ice") {
+          file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl)])}))}
+        if (t.var=="snow" | t.var=="ice") {
           server <- paste0(var.ls[loc,2], paste0(strsplit(as.character(ud[d]), '-')[[1]], collapse='.'), '/')
           tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server, authenticate(user.cred[1], user.cred[2])))))$V2)
           file <- as.character(sapply(tiles, function(x) {
             paste0(server, tbl[grep(paste0(x, ".*.hdf$"), tbl)])}))}}
-      if (var=="chlorofile" | var=="sst") {
+      if (t.var=="chlorofile" | t.var=="sst") {
         server <- paste0(var.ls[loc,2], yrs[d], '/')
         tbl <- as.character(readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1)
         file <- tbl[grep(paste0(yrs[d], doa[d]), tbl)]}
       
       # download data (aqua)
-      if (var=="ndvi") {r.data[[2]] <- crop(dwnVI(file), ref)}
-      if (var=="lst") {r.data[[2]] <- crop(dwnLST(file), ref)}
-      if (var=="lai") {r.data[[2]] <- crop(dwnLAI(file), ref)}
-      if (var=="fpar") {r.data[[2]] <- crop(dwnFPAR(file), ref)}
-      if (var=="fire") {r.data[[2]] <- crop(dwnFIRE(file), ref)}
-      if (var=="snow") {r.data[[2]] <- crop(dwnSNW(file), ref)}
-      if (var=="ice") {r.data[[2]] <- crop(dwnICE(file), ref)}
-      if (var=="chlorofile") {
+      if (t.var=="ndvi") {r.data[[2]] <- crop(dwnVI(file), ref)}
+      if (t.var=="lst") {r.data[[2]] <- crop(dwnLST(file), ref)}
+      if (t.var=="lai") {r.data[[2]] <- crop(dwnLAI(file), ref)}
+      if (t.var=="fpar") {r.data[[2]] <- crop(dwnFPAR(file), ref)}
+      if (t.var=="fire") {r.data[[2]] <- crop(dwnFIRE(file), ref)}
+      if (t.var=="snow") {r.data[[2]] <- crop(dwnSNW(file), ref)}
+      if (t.var=="ice") {r.data[[2]] <- crop(dwnICE(file), ref)}
+      if (t.var=="chlorofile") {
         tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".nc")
         GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file), write_disk(tmp, overwrite=T))
         r.data[[2]] <- crop(brick(tmp, var="chlor_a")[[1]], ref)}
-      if (var=="sst") {
+      if (t.var=="sst") {
         tmp1 <- tempfile(pattern="tmp1", tmpdir=tempdir(), fileext=".nc")
         GET(paste0("https://oceandata.sci.gsfc.nasa.gov/cgi/getfile/", file[grep("_SST", file)]), write_disk(tmp1, overwrite=T))
         r1 <- crop(brick(tmp1, var="sst")[[1]], ref)
@@ -703,7 +703,7 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
         names(r0) <- c('day', 'night')
         r.data[[2]] <- r0
         rm(r1, r2, r0)}
-      if (var=="cw") {
+      if (t.var=="cw") {
         tmp <- tempfile(pattern="tmp", tmpdir=tempdir(), fileext=".tif")
         GET(paste0(var.ls[loc,2], "MYDAL2_D_CLD_WP_", as.character(ud[d]), ".FLOAT.TIFF"), write_disk(tmp, overwrite=T))
         r0 <- crop(brick(tmp), ref)
@@ -718,7 +718,7 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       if (nb > 0) {r.data <- do.call(stack, r.data)} else {r.data <- r.data[[1]]}
       names(r.data) <- bn
       if (p.raster) {r.data <- projectRaster(r.data, rr)}
-      ofile <- paste0(file.path(d.path, fsep=.Platform$file.sep), .Platform$file.sep, as.character(ud[d]), '_', var, '.tif')
+      ofile <- paste0(file.path(d.path, fsep=.Platform$file.sep), .Platform$file.sep, as.character(ud[d]), '_', t.var, '.tif')
       writeRaster(r.data, ofile, driver="GTiff", datatype=dataType(r.data), overwrite=T)
       
       # update file list
@@ -728,4 +728,8 @@ proSat <- function(var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, 
       
     }
   }
+  
+  # return information on downloaded files
+  return(list(path=unlist(f.ls), date=ud))
+  
 }
