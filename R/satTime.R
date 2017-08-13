@@ -22,7 +22,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-satTime <- function(o.time=o.time, t.var=t.var, p.res=T) {
+satTime <- function(o.time=o.time, t.var=t.var, p.res=TRUE) {
   
 #-----------------------------------------------------------------------------------------------------------------#
 # 1. check input variables  
@@ -68,8 +68,8 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=T) {
   
   # output data frame
   df <- data.frame(original=o.time, 
-                   best.before=do.call('c', lapply(tmp, function(x) {x$bd})), 
-             best.after=do.call('c', lapply(tmp, function(x) {x$ad})))
+                   closest.before=do.call('c', lapply(tmp, function(x) {x$bd})), 
+             closest.after=do.call('c', lapply(tmp, function(x) {x$ad})))
   
 #-----------------------------------------------------------------------------------------------------------------#
 # 4. build plot per year
