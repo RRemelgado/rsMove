@@ -97,7 +97,7 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=T) {
   
   # build plot
   p <- ggplot(gg, aes(x=doy, y=code, fill=factor(class, levels=cn))) + 
-    theme_bw() + geom_bar(stat="identity", width=1) + ylab("") + xlab("Day of Year") + 
+    theme_bw() + geom_bar(stat="identity") + ylab("") + xlab("Day of Year") + 
     theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
           axis.text.x=element_text(size=12, vjust=1), 
           legend.title=element_blank(), legend.position="bottom", 
