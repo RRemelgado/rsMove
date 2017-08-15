@@ -337,20 +337,14 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   if (type=="cont") {
     
-    mv <- round(max(df$stat, na.rm=T))
-    nc <- nchar(as.character(mv))
-    m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
-    mv <- mv / m
-    vl <- round(mv)
-    if (mv > vl) {vl <- (vl+0.2)*m} else {tb <- vl*m}
-    
     p <- ggplot(fl, aes(x=long, y=lat, color=stat)) + theme_bw() + 
       geom_line(size=2) + xlab("X") + ylab("Y") + 
       theme(legend.text=element_text(size=10), 
             axis.text=element_text(size=10),
             panel.grid.major=element_blank(), 
             panel.grid.minor=element_blank()) +
-      scale_color_gradientn(name="Stat\n", colors=cr(10), breaks=c(0.0, (vl/2), vl), limits=c(0.0, vl))
+      scale_color_gradientn(name="Stat\n", colors=cr(10), 
+                            limits=c(min(df$stat), max((df$stat))))
     
   }
   

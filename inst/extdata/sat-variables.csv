@@ -1,5 +1,5 @@
 "variable","code","spatial resolution (meters)","temporal resolution (days)","sensor","login"
-"Normalized Difference Vegetation Index","ndvi",250,8,"MODIS",NA
+"Normalized Difference Vegetation Index","ndvi",231.6564,8,"MODIS",NA
 "Leaf Area Index (mean / sd)","lai",1000,8,"MODIS",NA
 "Fraction of photosynthetically active radiation (mean / sd)","fpar",1000,8,"MODIS",NA
 "Land Surface Temperature (day / night)","lst",1000,1,"MODIS",NA

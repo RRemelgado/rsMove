@@ -4,13 +4,15 @@
 \alias{proSat}
 \title{proSat}
 \usage{
-proSat(var = NULL, xy = NULL, o.time = NULL, d.path = NULL,
-  p.raster = FALSE, p.res = NULL, user.cred = NULL)
+proSat(t.var = NULL, xy = NULL, o.time = NULL, d.path = NULL,
+  p.raster = FALSE, p.res = NULL, user.cred = NULL, pad = 10)
 }
 \arguments{
-\item{var}{Target variables.}
+\item{t.var}{Target variable.}
 
 \item{xy}{Object from which an extent can be derived.}
+
+\item{o.time}{Object of class \emph{Date}.}
 
 \item{d.path}{Output data path for downloaded data.}
 
@@ -19,6 +21,8 @@ proSat(var = NULL, xy = NULL, o.time = NULL, d.path = NULL,
 \item{p.res}{Target pixel resolution (if p.raster is TRUE).}
 
 \item{user.cred}{Two element character vector containing username and password.}
+
+\item{pad}{Padding expressed in number of pixels. Used when re-projecting and resampling.}
 }
 \value{
 One or multiple raster objects.
@@ -43,7 +47,7 @@ image (\emph{$path}).}
 }
 \note{
 {To consult the list of provided variables, run the function without specifying any input.
-This will provide information on the variables, variable codes (used in \emph{var}), temporal and 
+This will provide information on the variables, variable codes (used in \emph{t.var}), temporal and 
 spatial resolution and the sensor of origin. Some variables might require login credentials. Check 
 the table to know which credentials to use and assign them through \emph{user.cred}.}
 }

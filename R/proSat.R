@@ -60,6 +60,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   if (length(loc)==0) {stop('"t.var" is not a recognized variable')}
   sensor <- var.ls$sensor[loc]
   t.res <- var.ls$temporal.resolution..days.[loc]
+  s.res <- var.ls$spatial.resolution..meters.[loc]
   
   # read var list for target sensor
   var.ls <- system.file('extdata', paste0(sensor, '_sat-variables.csv'), package="rsMove")
@@ -78,14 +79,12 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   # build reference file (cropping extent)
   if (is.null(xy)) {stop('please provide "xy"')}
   ref <- projectExtent(xy, crs(var.ls$crs[loc])) 
-  pxr <- res(ref)[1]
   ext <- extent(xy)
-  ext@xmin <- (ext@xmin-pxr*pad)
-  ext@xmax <- (ext@xmax+pxr*pad)
-  ext@ymin <- (ext@ymin-pxr*pad)
-  ext@ymax <- (ext@ymax+pxr*pad)
-  ref <- raster(ext, res=pxr, crs=crs(xy))
-  ref <- projectExtent(xy, crs(var.ls$crs[loc]))
+  ext@xmin <- (ext@xmin-s.res*pad)
+  ext@xmax <- (ext@xmax+s.res*pad)
+  ext@ymin <- (ext@ymin-s.res*pad)
+  ext@ymax <- (ext@ymax+s.res*pad)
+  ref <- raster(ext, res=s.res, crs=crs(ref))
   
   # re-projection parameters
   if (p.raster) {

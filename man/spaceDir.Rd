@@ -5,7 +5,7 @@
 \title{spaceDir}
 \usage{
 spaceDir(xy = xy, ot = NULL, img = img, dir = dir, type = type,
-  dm = "m", b.size = NULL, fun = NULL)
+  dm = "m", b.size = NULL, fun = NULL, npx = 2)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -23,6 +23,8 @@ spaceDir(xy = xy, ot = NULL, img = img, dir = dir, type = type,
 \item{b.size}{Buffer size expressed in the map units.}
 
 \item{fun}{Summary function.}
+
+\item{npx}{Minimum number of pixels used in \emph{fun}. Default is 2.}
 }
 \value{
 A \emph{list}.

@@ -16,7 +16,7 @@ moveCloud(xy = xy, o.time = o.time, d.path = NULL, b.size = NULL,
 
 \item{p.res}{Should the output be ploted on screen? Default is TRUE.}
 
-\item{d.buffer}{Temporal buffer (expressed in days).}
+\item{d.buffer}{Two element vector with temporal buffer size (expressed in days).}
 
 \item{remove.files}{Logical. Should the files be deleted after usage?}
 }
@@ -32,7 +32,8 @@ For each observation date (\emph{o.time}), the function downloads the correspond
 and extracts the percent of cloud cover for the samples acquired at the target date. If 
 \emph{d.path} is specified, the function will look within the provided directory for the 
 required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each 
-date, the function will consider images before and after within a temporal buffer. These 
+date, the function will consider images before and after within a temporal buffer. \emph{d.buffer} 
+requires two elements which specify the buffer size before and after the target date. These 
 new images will be used to report on the closest time step with the lowest possible cloud 
 cover. The final report provides information on:
 \itemize{
