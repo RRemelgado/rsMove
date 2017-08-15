@@ -4,7 +4,7 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param o.time Object of class \emph{Date}.
 #' @param d.path Output data path for downloaded data.
-#' @param d.buffer Temporal buffer (expressed in days).
+#' @param d.buffer Two element vector with temporal buffer size (expressed in days).
 #' @param remove.files Logical. Should the files be deleted after usage?
 #' @param p.res Should the output be ploted on screen? Default is TRUE.
 #' @import ggplot2 sp rgdal grDevices
@@ -16,7 +16,8 @@
 #' and extracts the percent of cloud cover for the samples acquired at the target date. If 
 #' \emph{d.path} is specified, the function will look within the provided directory for the 
 #' required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each 
-#' date, the function will consider images before and after within a temporal buffer. These 
+#' date, the function will consider images before and after within a temporal buffer. \emph{d.buffer} 
+#' requires two elements which specify the buffer size before and after the target date. These 
 #' new images will be used to report on the closest time step with the lowest possible cloud 
 #' cover. The final report provides information on:
 #' \itemize{
@@ -65,7 +66,7 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
   } else {
     if (!dir.exists(d.path)) {stop('"dpath" not found in file system')}
     d.path <- paste0(file.path(d.path), .Platform$file.sep)}
-  if (!is.null(b.size)) {apply.buffer=TRUE}
+  if (!is.null(b.size)) {apply.buffer<-TRUE} else {apply.buffer<-FALSE}
   if (!is.logical(p.res)) {stop('"p.res" is not a logical argument')}
   
   # ftp servers
@@ -122,7 +123,7 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
     if(apply.buffer) {
       
       # determine dates within the buffer
-      day.ls <- seq(ud[d]-b.size, ud[d]+b.size, 1)
+      day.ls <- seq(ud[d]-b.size[1], ud[d]+b.size[2], 1)
       
       df <- lapply(day.ls, function(x) {
         ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", x, ".FLOAT.TIFF")
@@ -147,19 +148,29 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
       dq <- lapply(1:length(loc), function(x) {
         diff0 <- day.ls - ud[d]
         ind <- which(diff0 < 0)
-        bv <- min(f.cc[x,ind])
-        diff1 <- abs(diff0[ind])
-        ind <- ind[which(f.cc[x,ind]==bv)]
-        ind <- ind[which(diff0[ind]==min(diff0[ind]))]
-        db <- diff0[ind]
-        bd <- day.ls[ind]
+        if (length(ind)>0) {
+          bv <- min(f.cc[x,ind])
+          diff1 <- abs(diff0[ind])
+          ind <- ind[which(f.cc[x,ind]==bv)]
+          ind <- ind[which(diff0[ind]==min(diff0[ind]))]
+          db <- diff0[ind]
+          bd <- day.ls[ind]
+        } else {
+          bd <- NA
+          bv <- NA
+          db <- NA}
         ind <- which(diff0 > 0)
-        av <- min(f.cc[x,ind])
-        diff1 <- abs(diff0[ind])
-        ind <- ind[which(f.cc[x,ind]==av)]
-        ind <- ind[which(diff0[ind]==min(diff0[ind]))]
-        da <- abs(day.ls[ind]-ud[d])
-        ad <- day.ls[ind]
+        if (length(ind)>0) {
+          av <- min(f.cc[x,ind])
+          diff1 <- abs(diff0[ind])
+          ind <- ind[which(f.cc[x,ind]==av)]
+          ind <- ind[which(diff0[ind]==min(diff0[ind]))]
+          da <- abs(day.ls[ind]-ud[d])
+          ad <- day.ls[ind]
+        } else {
+          ad <- NA
+          av <- NA
+          da <- NA}
         return(list(bd=bd, bv=bv, db=db, ad=ad, av=av, da=da))})
       
       # update target variables
@@ -172,11 +183,15 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
       
       # raw cloud cover information
       f.cc[f.cc > 1] <- NA
-      o.cc[[d]] <- data.frame(value=apply(z, 2, mean, na.rm=T), date=day.ls)
+      o.cc[[d]] <- data.frame(value=apply(f.cc, 2, mean, na.rm=T), date=day.ls)
       
       rm(f.cc)
       
-    }
+    } else {
+      p.cc.b <- NA
+      p.cc.a <- NA
+      p.dt.b <- NA
+      p.dt.a <- NA}
     
     # remove files if required
     if (remove.file) {file.remove(list.files(d.path, '_D_CLD_FR_'))}
@@ -191,67 +206,21 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
 # 3. build plot
 #-------------------------------------------------------------------------------------------#
   
-  # make color ramp
-  cr = colorRampPalette(c("forestgreen", "khaki2", "darkred"))
-  
-  # build plot
-  odf <- data.frame(dd=d.df.b, cc=p.cc.b)
-  p1 <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
-    scale_x_continuous(limits=c(-b.size, 0)) + 
-    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0.0,1.0), breaks=c(0.0, 0.5, 1.0)) +
-    xlab("Day Difference") + ylab("Number of Samples") + 
-    theme(axis.text=element_text(size=10), 
-          axis.title=element_text(size=12))
-  
-  # determine optimal y range
-  mv <- max(ggplot_build(p1)$data[[1]]$count)
-  nc <- nchar(as.character(mv))
-  m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
-  mv <- mv / m
-  yr <- round(mv)
-  if (mv > yr) {yr <- (yr+0.5)*m} else {yr <- yr*m}
-  
-  # update plot
-  p1 <- p1 + scale_y_continuous(limits=c(0, yr))
-  
-  # build plot
-  odf <- data.frame(dd=d.df.a, cc=p.cc.a)
-  p2 <- ggplot(odf, aes(x=dd, fill=cc)) + geom_histogram(binwidth=1) + 
-    scale_x_continuous(limits=c(0, b.size)) + 
-    scale_fill_gradientn(name='Cloud cover %', colors=cr(10), limits=c(0.0,1.0), breaks=c(0.0, 0.5, 1.0)) +
-    xlab("Day Difference") + ylab("Number of Samples") + 
-    theme(axis.text=element_text(size=10), 
-          axis.title=element_text(size=12))
-  
-  # determine optimal y range
-  mv <- max(ggplot_build(p2)$data[[1]]$count)
-  nc <- nchar(as.character(mv))
-  m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
-  mv <- mv / m
-  yr <- round(mv)
-  if (mv > yr) {yr <- (yr+0.5)*m} else {yr <- yr*m}
-  
-  # update plot
-  p2 <- p2 + scale_y_continuous(limits=c(0, yr))
-  
-  if (p.res) {p1} # plot on screen (before)
-  if (p.res) {p2} # plot on screen (after)
-  
   # build plot with extended cloud cover information
   if (apply.buffer) {
+    
     df0 <- do.call(rbind, o.cc)
     ud <- unique(df0$date)
     df0 <- data.frame(date=ud, cover=sapply(ud, function(x) {df0$value[which(ud==x)]}))
-    p3 <- ggplot(df0, aes(x=date, y=cover)) + theme_bw() + geom_bar(stat="identity", colour="black", fill="grey80") + 
-      theme(axis.title=element_text(size=12), axis.text=element_text(size=10)) + xlab("Date") + ylab("Cloud Cover (%)")
-    if (p.res) {p3}}
-  
-  #---------------------------------------------------------------------------------------------------------------------#
-  #  7. derive output
-  #---------------------------------------------------------------------------------------------------------------------#
-  
-  # return data frame and plot
-  if (apply.buffer) {return(list(stats=df, plot.data=odf, plot.before=p1, plot.after=p2, daily.cover=df0, daily.cover.plot=p3))}
-  if (!apply.buffer) {return(list(stats=df, plot.data=odf, plot.before=p1, plot.after=p2))}
+    p <- ggplot(df0, aes(x=date, y=cover)) + theme_bw() + 
+      geom_bar(stat="identity", colour="black", fill="grey80") + 
+      theme(axis.title=element_text(size=12), axis.text=element_text(size=10)) + 
+      xlab("Date") + ylab("Cloud Cover (%)")
+    
+    if (p.res) {p}
+    
+    return(list(stats=df, daily.cover=df0, daily.cover.plot=p))
+    
+  } else {return(stats=df)}
   
 }

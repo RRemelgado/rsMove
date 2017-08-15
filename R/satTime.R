@@ -99,10 +99,15 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=TRUE) {
   p <- ggplot(gg, aes(x=doy, y=code, fill=factor(class, levels=cn))) + 
     theme_bw() + geom_bar(stat="identity") + ylab("") + xlab("Day of Year") + 
     theme(axis.text.y=element_blank(), axis.ticks.y=element_blank(), 
-          axis.text.x=element_text(size=12, vjust=1), 
+          axis.text.x=element_text(size=8, vjust=1), 
           legend.title=element_blank(), legend.position="bottom", 
-          legend.text=element_text(size=12)) + 
-    scale_x_continuous(breaks=seq(0, 370, 50), lim=c(1, 366), expand=c(0, 0)) + 
+          legend.text=element_text(size=12), 
+          axis.line = element_line(colour = "black"),
+          panel.grid.major = element_blank(),
+          panel.grid.minor = element_blank(),
+          panel.border = element_blank(),
+          panel.background = element_blank()) + 
+    scale_x_continuous(breaks=seq(0, 370, 50), lim=c(0, 376), expand=c(0, 0)) + 
     scale_y_continuous(expand=c(0, 0)) + 
     scale_fill_manual(values=cc, labels=cn) + 
     facet_wrap(~factor(year, levels=uy), nrow=length(uy))

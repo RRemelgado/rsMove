@@ -9,6 +9,7 @@
 #' @param dm One of 'm' or 'deg' specifying the projection unit. Default is 'm'.
 #' @param b.size Buffer size expressed in the map units.
 #' @param fun Summary function.
+#' @param npx Minimum number of pixels used in \emph{fun}. Default is 2.
 #' @import raster sp rgdal
 #' @importFrom stats lm
 #' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
@@ -64,7 +65,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size=NULL, fun=NULL) {
+spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size=NULL, fun=NULL, npx=2) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -95,7 +96,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     if (!type%in%c('cont', 'cat')) {stop('"type" is not a recognized keyword')}}
   
   # check/define input metrics
-  if (is.null(fun)) {fun <- function(x,y) {lm(y~x)$coefficients[2]}} else {
+  if (is.null(fun)) {fun <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}} else {
     if(!is.function(fun)) {stop('"fun" is not a valid function')}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
@@ -272,7 +273,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
     f2 <- function(i) {
       ind <- which(us1==i)
       u <- which(!is.na(edata[ind]))
-      if (sum(u)>1) {return(as.numeric(fun(as.numeric(edata[ind[u]]))))} else {return(NA)}}
+      if (sum(u) >= npx) {return(as.numeric(fun(as.numeric(edata[ind[u]]))))} else {return(NA)}}
     
     # apply user provided functon
     ov <- data.frame(stat=sapply(unique(us1), f2))
@@ -336,7 +337,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   if (type=="cont") {
     
-    mv <- round(max(df$stat))
+    mv <- round(max(df$stat, na.rm=T))
     nc <- nchar(as.character(mv))
     m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
     mv <- mv / m
@@ -355,7 +356,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   if (type=="cat") {
     
-    mv <- round(max(df$shannon))
+    mv <- round(max(df$shannon, na.rm=T))
     nc <- nchar(as.character(mv))
     m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
     mv <- mv / m

@@ -8,6 +8,7 @@
 #' @param p.raster Logical. Should the output be re-projected?
 #' @param p.res Target pixel resolution (if p.raster is TRUE).
 #' @param user.cred Two element character vector containing username and password.
+#' @param pad Padding expressed in number of pixels. Used when re-projecting and resampling.
 #' @import grDevices sp rgdal ncdf4
 #' @importFrom XML htmlParse readHTMLTable
 #' @importFrom httr GET write_disk
@@ -42,7 +43,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, p.res=NULL, user.cred=NULL) {
+proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE, p.res=NULL, user.cred=NULL, pad=10) {
   
   #-----------------------------------------------------------------------------------------------------------------#
   # 1. check input variables  
@@ -74,9 +75,19 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   if (is.null(o.time)) {stop('please provide "o.time"')}
   if (class(o.time)[1]!='Date') {stop('"o.time" is not of class "Date"')}
   
-  # check reference file
+  # build reference file (cropping extent)
   if (is.null(xy)) {stop('please provide "xy"')}
-  ref <- projectExtent(xy, crs(var.ls$crs[loc])) # croping extent
+  ref <- projectExtent(xy, crs(var.ls$crs[loc])) 
+  pxr <- res(ref)[1]
+  ext <- extent(xy)
+  ext@xmin <- (ext@xmin-pxr*pad)
+  ext@xmax <- (ext@xmax+pxr*pad)
+  ext@ymin <- (ext@ymin-pxr*pad)
+  ext@ymax <- (ext@ymax+pxr*pad)
+  ref <- raster(ext, res=pxr, crs=crs(xy))
+  ref <- projectExtent(xy, crs(var.ls$crs[loc]))
+  
+  # re-projection parameters
   if (p.raster) {
     if (is.null(p.res)) {stop('re-projection requested. Please specify "p.res"')}
     if (length(p.res) > 2) {stop('lenght of "p.res" is greater than 2')}
@@ -91,9 +102,14 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   yrs <- sapply(as.character(ud), function(x) {strsplit(x, '-')[[1]][1]})
   doa <- (ud-as.Date(paste0(yrs, '-01-01')))+1
   
-  # check which dates can be downloaded
+  # find nearest dates to downloaded
   potential.doa <- seq(1, 361, t.res)
-  
+  tmp <- lapply(1:length(doa), function(i) {
+    diff <- abs(doa[i] - potential.doa)
+    pd <- potential.doa[which(diff==min(diff))]
+    py <- replicate(length(pd), yrs[i])
+    dt <- as.Date(paste0(yrs[i], '-01-01')) + (as.numeric(pd)-1)
+    return(list(doa=pd, year=py, date=dt))})
   
   # update temporal information
   ud <- do.call('c', sapply(tmp, function(x) {x$date}))
