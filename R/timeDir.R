@@ -164,19 +164,15 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
 # 5. build plot
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  
-  # determine y scale range
-  mv <- max(df$value)
-  nc <- nchar(as.character(mv))
-  m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
-  mv <- mv / m
-  yr <- round(mv)
-  if (mv > yr) {yr <- (yr+0.2)*m} else {yr <- yr*m}
-  
   # build plot object
-  p <- ggplot(df, aes(y=value)) + geom_bar(stat='identity') +  ylim(0,yr) + 
-    xlab('') + theme(axis.text.x=element_blank())
-  
+  cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
+  df0 <- data.frame(x=xy@coords[,1], y=xy@coords[,2], value=df$value)
+  p <- ggplot(df0) + theme_bw() + xlab('X') + ylab('Y') + 
+    geom_point(aes(x=x, y=y, size=value, fill=value), color="black", pch=21) +
+    scale_size_continuous(guide=FALSE) + guides(col=cr(10)) + 
+    scale_fill_gradientn(colours=cr(10)) + 
+    theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
+          panel.grid.minor=element_blank())
   
   return(list(stats=df, plot=p))
  
