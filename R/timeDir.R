@@ -51,7 +51,7 @@
 #'  rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'  
 #'  # sample dates
-#'  td <- as.Date(moveData@data$date)
+#'  td <- as.Date(moveData@data$timestamp)
 #'  
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}

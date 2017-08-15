@@ -54,7 +54,7 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # observation time
-#'  td <- as.Date(moveData@data$date)
+#'  td <- as.Date(moveData@data$timestamp)
 #'  
 #'  # perform directional sampling
 #'  of <- function(x) {lm(1:length(x)~x)$coefficients[2]}
