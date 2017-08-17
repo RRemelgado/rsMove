@@ -32,7 +32,7 @@
  * BackSample() now assings background samples to the correct pixels.
 
 =================================================================================
-rsMove 0.1.0
+## rsMove 0.1.0
 =================================================================================
 
 Initial release to CRAN (2017-07-15) with the following functions:
