@@ -632,7 +632,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       
       # build file path (terra)
       if (var.ls$type[loc]=="tile") {
-        if (t.var!="snow" & t.var!="ice") {
+        if (t.var!="snow" & t.var!="ice" & t.var!="chlorofile" & t.var!="sst") {
           server <- paste0(var.ls[loc,1], yrs[d], '/', doa[d], '/')
           tbl = readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1
           file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl)])}))}
@@ -681,7 +681,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       
       # build file path (aqua)
       if (var.ls$type[loc]=="tile") {
-        if (t.var!="snow" & t.var!="ice") {
+        if (t.var!="snow" & t.var!="ice" & t.var!="chlorofile" & t.var!="sst") {
           server <- paste0(var.ls[loc,2], yrs[d], '/', doa[d], '/')
           tbl = readHTMLTable(xmlRoot(htmlParse(GET(url=server))), skip.rows=1)$V1
           file <- as.character(sapply(tiles, function(x) {paste0(server, tbl[grep(x, tbl)])}))}
