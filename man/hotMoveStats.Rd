@@ -33,10 +33,8 @@ identifies unique temporal segment corresponding to periods of consecutive days 
 observations. For each segment, the function reports on the amount of segment s(\emph{nts}) 
 as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}), ) of the time segments 
 and the total amount of time that they amount to (\emph{tts}). For each region, the function will 
-also report on the start and end of each temporal segment (identified by the region id) and on provide 
-indices which inform on which samples are assigned to which segment. The indices are provided within a list
-object (\emph{$segment.indices}) which indice is correspond to the order of entry for the segment 
-data frame (\empg{$temporal.segments}). If \emph{rid} contains polygons for 
+also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide 
+the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for 
 each region, the function also reports on the area of convex polygons. In this case, the 
 user can use the \emph{method} keyword to specify how the polygons should be handled. If the 
 polygons are in lat-lon, method \emph{deg} can be used to re-project each polygon to its 
