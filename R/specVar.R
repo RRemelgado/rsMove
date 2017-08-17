@@ -34,7 +34,7 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # apply function
-#'  s.var <- specVar(img=r, xy=moveData, pxr=c(60, 90), p.res=FALSE)
+#'  s.var <- specVar(img=r, xy=moveData, pxr=60, p.res=FALSE)
 #'  
 #' }
 #' @export

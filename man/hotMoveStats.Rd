@@ -34,8 +34,8 @@ observations. For each segment, the function reports on the amount of segment s(
 as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}), ) of the time segments 
 and the total amount of time that they amount to (\emph{tts}). For each region, the function will 
 also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide 
-the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for 
-each region, the function also reports on the area of convex polygons. In this case, the 
+the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains 
+polygons for each region, the function also reports on the area of convex polygons. In this case, the 
 user can use the \emph{method} keyword to specify how the polygons should be handled. If the 
 polygons are in lat-lon, method \emph{deg} can be used to re-project each polygon to its 
 corresponding UTZ zone before retrieving the area. This is the default, if the polygons 

@@ -15,7 +15,7 @@
  * hotMoveStats() now reports the sample indices for each temporal segment.
  * spaceDir() accepts categorical data.
  * spaceDir() and moveSeg() use an optional spatial buffer
- * moveSeg(), timeDir(), spaceDir() and hotMove() return plots as an additional output.
+ * moveSeg(), timeDir(), spaceDir() and hotMoveStats() return plots.
  * dataQuery() requires an adjustable buffer specifying the size of search window in the past and in the future.
 
 ### Changes

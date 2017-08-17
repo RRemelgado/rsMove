@@ -7,7 +7,7 @@
 #' @param tUnit Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.
 #' @param method Method used to estimate polygon area. 
 #' @return A \emph{data frame}.
-#' @import sp rgdal
+#' @import sp rgdal ggplot2
 #' @details {This functions analysis the attributes of sample regions define by hotMove().
 #' For each sample region, the function returns the amount of samples (\emph{tns}. If a vector 
 #' of unique identifiers is provided (\emph{aid}) the number of unique identifiers observed within 
@@ -17,8 +17,8 @@
 #' as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}), ) of the time segments 
 #' and the total amount of time that they amount to (\emph{tts}). For each region, the function will 
 #' also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide 
-#' the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for 
-#' each region, the function also reports on the area of convex polygons. In this case, the 
+#' the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains 
+#' polygons for each region, the function also reports on the area of convex polygons. In this case, the 
 #' user can use the \emph{method} keyword to specify how the polygons should be handled. If the 
 #' polygons are in lat-lon, method \emph{deg} can be used to re-project each polygon to its 
 #' corresponding UTZ zone before retrieving the area. This is the default, if the polygons 
@@ -167,14 +167,13 @@ hotMoveStats <- function(rid=rid, time=NULL, tUnit=NULL, aid=NULL, method='deg')
   # build plot
   cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
   p <- ggplot(df, aes(x=factor(rid, levels=unique(rid)), y=tts, fill=tns)) + theme_bw() + 
-    geom_bar(stat="identity") + xlab("\nRegion ID") + ylab("Number of Days\n") + 
-    scale_fill_gradientn(name="N° Samples\n", colours=cr(10))
+    geom_bar(stat="identity") + xlab("\nRegion ID") + ylab("Number of Days") + 
+    scale_fill_gradientn(name="Nr. Samples", colours=cr(10))
   
-
   # temporal segments
   time.seg <- do.call(rbind, ss1)
   
   # return output
   return(list(stats=df, plot=p, temporal.segments=time.seg, segment.indices=ss2))
-
+  
 }
