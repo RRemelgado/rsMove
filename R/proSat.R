@@ -60,7 +60,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   if (length(loc)==0) {stop('"t.var" is not a recognized variable')}
   sensor <- var.ls$sensor[loc]
   t.res <- var.ls$temporal.resolution..days.[loc]
-  s.res <- var.ls$spatial.resolution..meters.[loc]
+  s.res <- as.numeric(strsplit(var.ls$spatial.resolution[loc], '-')[[1]][1])
   
   # read var list for target sensor
   var.ls <- system.file('extdata', paste0(sensor, '_sat-variables.csv'), package="rsMove")
@@ -78,8 +78,8 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   
   # build reference file (cropping extent)
   if (is.null(xy)) {stop('please provide "xy"')}
-  ref <- projectExtent(xy, crs(var.ls$crs[loc])) 
-  ext <- extent(xy)
+  ref <- projectExtent(xy, crs(var.ls$crs[loc]))
+  ext <- extent(ref)
   ext@xmin <- (ext@xmin-s.res*pad)
   ext@xmax <- (ext@xmax+s.res*pad)
   ext@ymin <- (ext@ymin-s.res*pad)
@@ -111,7 +111,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
     return(list(doa=pd, year=py, date=dt))})
   
   # update temporal information
-  ud <- do.call('c', sapply(tmp, function(x) {x$date}))
+  ud <- do.call('c', lapply(tmp, function(x) {x$date}))
   ind <- !duplicated(ud)
   ud <- ud[ind]
   doa <- unlist(sapply(tmp, function(x) {x$doa}))[ind]
