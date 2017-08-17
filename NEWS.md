@@ -12,7 +12,7 @@
     * moveReduce()
     * plotMove()
  * moveSeg(), timeDir(), spaceDir(), linInt() now accept data frames as inputs.
- * hotMoveStats() now reports the sample indices for each temporal segment.
+ * hotMoveStats() now reports on each temporal segment found within each region and returns the corresponding sample indices.
  * spaceDir() accepts categorical data.
  * spaceDir() and moveSeg() use an optional spatial buffer
  * moveSeg(), timeDir(), spaceDir() and hotMoveStats() return plots.
