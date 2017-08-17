@@ -16,9 +16,9 @@
  * imgInt(), moveSeg(), timeDir(), spaceDir(), linInt() now accept data frames as inputs.
  * hotMoveStats() now reports on each temporal segment found within each region and returns the corresponding sample indices.
  * spaceDir() accepts categorical data.
- * spaceDir() and moveSeg() use an optional spatial buffer
+ * spaceDir() and moveSeg() use an optional spatial buffer.
  * moveSeg(), timeDir(), spaceDir() and hotMoveStats() return plots.
- * dataQuery() requires an adjustable buffer specifying the size of search window in the past and in the future.
+ * dataQuery() requires an adjustable buffer specifying the size of search window before and after the target date.
 
 ### Changes
   * spaceDirSample() was renamed as spaceDir() to avoid confusion regarding its purpose.
