@@ -55,7 +55,7 @@ the table to know which credentials to use and assign them through \emph{user.cr
 {
  
  # return list of variables
- modis.var <- proSat(sensor="MODIS")
+ modis.var <- proSat()
  
 }
 }

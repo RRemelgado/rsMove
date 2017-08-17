@@ -33,11 +33,11 @@
 #'  move.reduce <- moveReduce(xy=moveData, ot=o.time, img=r)
 #'  
 #'  # query data
-#'  ov <- dataQuery(xy=move.reduce, img=r)
+#'  ov <- dataQuery(xy=move.reduce$points, img=r)
 #'  
-#'  plot output
-#'  op <- plotMove(x=move.reduce@coords[,1], y=move.reduce@coords[,2], 
-#'  o.time=move.reduce@data$time, value=ov, type="cont")
+#'  # plot output
+#'  op <- plotMove(x=move.reduce$points@coords[,1], y=move.reduce$points@coords[,2], 
+#'  o.time=move.reduce$points@data$elapsed.time, value=ov[,1], type="cont")
 #'  
 #' }
 #' @export
@@ -79,15 +79,8 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
     if (mv > tb) {tb <- (tb+0.2)*m} else {tb <- tb*m}
     tb <- seq(0, tb, m)}
   
-  # value limit
-  if (!is.null(value)) {
-    if (type=='cont') {
-      mv <- round(max(value, na.rm=T))
-      nc <- nchar(as.character(mv))
-      m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
-      mv <- mv / m
-      vl <- round(mv)
-      if (mv > vl) {vl <- (vl+0.2)*m} else {tb <- vl*m}}}
+  # color scheme for value
+  if (!is.null(value)) {cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))}
   
 #----------------------------------------------------------------------------------------------------------#
 # 3. Build plots
@@ -106,7 +99,7 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
               panel.grid.minor=element_blank()) + 
         scale_size_continuous(name="Elapsed Time", breaks=tb, range=c(2,12)) + 
-        scale_fill_gradientn(name="Value", breaks=c(0, (vl/2), vl), limits=c(0,vl))}
+        scale_fill_gradientn(name="Value", colours=cr(10))}
     if (type=="cat") {
       df$value <- factor(df$value)
       p <- ggplot(df, aes(x=x, y=y, color=value, size=time)) + theme_bw() + geom_point() + 
@@ -149,7 +142,7 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
               panel.grid.minor=element_blank()) + 
         scale_size_continuous(name="Elapsed Time", breaks=tb, range=c(2,12)) + 
-        scale_fill_gradientn(name="Value", breaks=c(0, (vl/2), vl), limits=c(0,vl))}
+        scale_fill_gradientn(name="Value", colours=cr(10))}
     if (type=="cat") {
       df$value <- factor(df$value)
       ggplot(df, aes(x=x, y=y, color=factor(value))) + theme_bw() + geom_point() + 

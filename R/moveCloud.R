@@ -4,8 +4,8 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param o.time Object of class \emph{Date}.
 #' @param d.path Output data path for downloaded data.
-#' @param d.buffer Two element vector with temporal buffer size (expressed in days).
-#' @param remove.files Logical. Should the files be deleted after usage?
+#' @param b.size Two element vector with temporal buffer size (expressed in days).
+#' @param remove.file Logical. Should the files be deleted after usage?
 #' @param p.res Should the output be ploted on screen? Default is TRUE.
 #' @import ggplot2 sp rgdal grDevices
 #' @importFrom utils download.file
@@ -44,7 +44,8 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # test function for 5, 10 20 and 30 m
-#'  c.cover <- moveCloud(xy=moveData, o.time=as.Date(moveData@data$date), d.path="D:/05_TMP/", b.size=30)
+#'  od <- as.Date(moveData@data$date)
+#'  c.cover <- moveCloud(xy=moveData, o.time=od, d.path=".", b.size=30)
 #'  
 #' }
 #' @export

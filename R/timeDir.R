@@ -51,11 +51,11 @@
 #'  rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'  
 #'  # sample dates
-#'  td <- as.Date(moveData@data$timestamp)
+#'  ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'  
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  t.sample <- timeDir(xy=moveData, ot=td, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
+#'  t.sample <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
 #'  
 #' }
 #' @export

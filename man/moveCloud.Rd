@@ -14,11 +14,11 @@ moveCloud(xy = xy, o.time = o.time, d.path = NULL, b.size = NULL,
 
 \item{d.path}{Output data path for downloaded data.}
 
+\item{b.size}{Two element vector with temporal buffer size (expressed in days).}
+
+\item{remove.file}{Logical. Should the files be deleted after usage?}
+
 \item{p.res}{Should the output be ploted on screen? Default is TRUE.}
-
-\item{d.buffer}{Two element vector with temporal buffer size (expressed in days).}
-
-\item{remove.files}{Logical. Should the files be deleted after usage?}
 }
 \value{
 A \emph{list}.
@@ -60,7 +60,8 @@ cover. The final report provides information on:
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
  
  # test function for 5, 10 20 and 30 m
- c.cover <- moveCloud(xy=moveData, o.time=as.Date(moveData@data$date), d.path="D:/05_TMP/", b.size=30)
+ od <- as.Date(moveData@data$date)
+ c.cover <- moveCloud(xy=moveData, o.time=od, d.path=".", b.size=30)
  
 }
 }

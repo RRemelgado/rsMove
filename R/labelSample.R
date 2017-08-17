@@ -28,19 +28,22 @@
 #'  
 #'  require(raster)
 #'  
+#'  # read raster data
+#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  
 #'  # read movement data
-#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData)
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'  
 #'  # derive region labels
-#'  labels <- labelSample(xy=moveData, rad=500, npx=2, pxr=250)
+#'  labels <- labelSample(xy=moveData, rad=90, npx=2, pxr=30)
 #'  
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------------------------------#
 
-labelSample <- function(xy=xy, rad=rad, npt=NULL, npx=NULL, pxr=pxr) {
+labelSample <- function(xy=xy, rad=rad, npt=NULL, npx=NULL, pxr=r) {
   
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables

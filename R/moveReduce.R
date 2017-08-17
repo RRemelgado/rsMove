@@ -2,7 +2,7 @@
 #'
 #' @description Remote sensing based point segmentation.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param edata Object of class \emph{RasterLayer} or \emph{data.frame}.
+#' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates. 
 #' @import raster rgdal
 #' @seealso \code{\link{sampleMove}} \code{\link{moveSeg}}

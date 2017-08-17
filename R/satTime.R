@@ -76,7 +76,7 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=TRUE) {
 #-----------------------------------------------------------------------------------------------------------------#
   
   # build data frame used for plotting
-  uy <- sort(unique(yrs))
+  uy <- sort(unique(o.yrs))
   gg <- do.call(rbind, lapply(uy, function(x) {
     ind <- which(o.yrs==x)
     od <- unique(sort(c(o.doa[ind], s.doa)))
@@ -84,7 +84,6 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=TRUE) {
     yc[which(od%in%o.doa[ind] & od%in%s.doa)] <- 'Satellite/Observed' # obs. dates with sat. data
     yc[which(!od%in%o.doa[ind] & od%in%s.doa)] <- 'Satellite' # sat. dates not covering obs.
     yc[which(od%in%o.doa[ind] & !od%in%s.doa)] <- 'Observed' # obs. dates not covering sat.
-    yc[yc%in%o.doa[ind]] <- yc[yd%in%o.doa[ind]]
     return(data.frame(class=yc, doy=od, code=1, year=x, stringsAsFactors=F))}))
   
   # define color/class scheme

@@ -81,7 +81,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
   
   # check threshold
   if (type=='cont') {
-    if (!is.null(threshold)) {stop('"type" is set to "cat". Please define "threshold"')}
+    if (is.null(threshold)) {stop('"type" is set to "cont". Please define "threshold"')}
     if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}}
   if (type=='cat') {threshold <- 1}
   
@@ -101,7 +101,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
     if (!is.null(b.size)) {
       
       # average samples within buffer
-      if (type=='cont') {edata <- extract(img, xy@coords, buffer=b.size, fun=s.fun, na.rm=T)}
+      if (type=='cont') {edata <- extract(edata, xy@coords, buffer=b.size, fun=s.fun, na.rm=T)}
       
       # determine main class within the buffer
       if (type=='cat') {
@@ -116,12 +116,12 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
         tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
         
         # extract values
-        edata <- extract(img, tmp)
+        edata0 <- extract(edata, tmp)
         
         # sumarize data (extract dominant class)
         edata <- sapply(1:length(xy), function(x) {
           ind <- which(si==x)
-          r0 <- as.vector(edata[ind[!duplicated(cellFromXY(img, tmp[ind,]))]])
+          r0 <- as.vector(edata0[ind[!duplicated(cellFromXY(edata, tmp[ind,1:2]))]])
           uc <- unique(r0)
           uc <- uc[!is.na(uc)]
           if (length(uc)>0) {
@@ -134,7 +134,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
       }
       
       # simple query
-    } else {edata <- extract(img, xy@coords)}}
+    } else {edata <- extract(edata, xy@coords)}}
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 3. identify segments
@@ -185,9 +185,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
           time=sapply(sstat, function(x) {x$time}), value=rv)
   } else {df <- data.frame(sid=uid, count=sapply(uid, function(x){sum(id==x)}))}
   
-  # estimate relative time
-  df$rel.time <- time / diffTime(max(ot), min(ot), units='mins') * 100
-  
+
 #---------------------------------------------------------------------------------------------------------------------#
 # 5. build plot
 #---------------------------------------------------------------------------------------------------------------------#

@@ -11,7 +11,7 @@ moveReduce(xy = xy, ot = ot, img = img)
 
 \item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
-\item{edata}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
+\item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 }
 \value{
 A \emph{list}.

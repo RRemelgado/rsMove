@@ -75,11 +75,11 @@ with these shapefiles reports on:
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
  
  # observation time
- td <- as.Date(moveData@data$timestamp)
+ ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
  
  # perform directional sampling
  of <- function(x) {lm(1:length(x)~x)$coefficients[2]}
- s.sample <- spaceDir(xy=moveData, ot=td, img=r, dir="bwd", type='cont', fun=of)
+ s.sample <- spaceDir(xy=moveData, ot=ot, img=r, dir="bwd", type='cont', fun=of)
  
 }
 }

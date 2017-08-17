@@ -10,6 +10,8 @@ tMoveRes(xy = xy, o.time = o.time, t.res = t.res, s.res = s.res,
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
+\item{o.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+
 \item{t.res}{Temporal resolution.}
 
 \item{s.res}{Spatial resolution.}

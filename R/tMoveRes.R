@@ -2,6 +2,7 @@
 #'
 #' @description Provides historical information on cloud cover.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
+#' @param o.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param t.res Temporal resolution.
 #' @param s.res Spatial resolution.
 #' @param p.res Should the output be ploted on screen? Default is TRUE.
@@ -160,7 +161,7 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
   
   # build plot object
-  p <- ggplot(out1, aes(x=factor(t.res), y=n.pixels, fill=n.regions)) + 
+  p <- ggplot(out1, aes(x=factor(t.res), y=n.pixels, fill=n.regions)) + theme_bw() + 
     scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr), 
                          limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (days)") + 
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") + 

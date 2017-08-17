@@ -50,11 +50,11 @@ It will influence how the plots are built. The breaks a limits for the point siz
  move.reduce <- moveReduce(xy=moveData, ot=o.time, img=r)
  
  # query data
- ov <- dataQuery(xy=move.reduce, img=r)
+ ov <- dataQuery(xy=move.reduce$points, img=r)
  
- plot output
- op <- plotMove(x=move.reduce@coords[,1], y=move.reduce@coords[,2], 
- o.time=move.reduce@data$time, value=ov, type="cont")
+ # plot output
+ op <- plotMove(x=move.reduce$points@coords[,1], y=move.reduce$points@coords[,2], 
+ o.time=move.reduce$points@data$elapsed.time, value=ov[,1], type="cont")
  
 }
 }

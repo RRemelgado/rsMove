@@ -7,7 +7,7 @@
 #' @param rt Object of class \emph{Date} with \emph{img} observation dates.
 #' @param tb Two element vector with temporal search buffer, expressed in days.
 #' @param bs Buffer size (unit depends on the raster projection).
-#'  @param fun Passes an external function.
+#' @param fun Passes an external function.
 #' @import raster rgdal
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}

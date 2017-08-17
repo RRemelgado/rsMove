@@ -32,7 +32,11 @@ each region is also reported. If temporal information is provided (\emph{time}) 
 identifies unique temporal segment corresponding to periods of consecutive days with 
 observations. For each segment, the function reports on the amount of segment s(\emph{nts}) 
 as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}), ) of the time segments 
-and the total amount of time that they amount to (\emph{tts}). If \emph{rid} contains polygons for 
+and the total amount of time that they amount to (\emph{tts}). For each region, the function will 
+also report on the start and end of each temporal segment (identified by the region id) and on provide 
+indices which inform on which samples are assigned to which segment. The indices are provided within a list
+object (\emph{$segment.indices}) which indice is correspond to the order of entry for the segment 
+data frame (\empg{$temporal.segments}). If \emph{rid} contains polygons for 
 each region, the function also reports on the area of convex polygons. In this case, the 
 user can use the \emph{method} keyword to specify how the polygons should be handled. If the 
 polygons are in lat-lon, method \emph{deg} can be used to re-project each polygon to its 
@@ -42,7 +46,7 @@ are in a cartesian coordinate system use \emph{m}.}
 \examples{
 {
 
-require(sp)
+require(raster)
 
 # reference data
 sprj <- CRS("+proj=longlat +ellps=WGS84 +no_defs")

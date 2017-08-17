@@ -18,8 +18,9 @@ dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
 
 \item{tb}{Two element vector with temporal search buffer, expressed in days.}
 
-\item{bs}{Buffer size (unit depends on the raster projection).
-@param fun Passes an external function.}
+\item{bs}{Buffer size (unit depends on the raster projection).}
+
+\item{fun}{Passes an external function.}
 }
 \value{
 A n object of class \emph{vector} or \emph{data.frame}.

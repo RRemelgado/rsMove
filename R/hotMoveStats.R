@@ -24,7 +24,7 @@
 #' @seealso \code{\link{hotMove}}
 #' @examples {
 #' 
-#' require(sp)
+#' require(raster)
 #' 
 #' # reference data
 #' sprj <- CRS("+proj=longlat +ellps=WGS84 +no_defs")
@@ -143,8 +143,17 @@ hotMoveStats <- function(rid=rid, time=NULL, tUnit=NULL, aid=NULL, method='deg')
     } else {ura[r] <- NA}
 
   }
-
-  # build/return data frame with statistics
-  return(data.frame(rid=ur, tns=tns, nui=nui, mnt=mnt, avt=avt, mxt=mxt, tts=tts, nts=nts, ura=ura))
+  
+  # build plot
+  cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
+  p <- ggplot(hm.stats, aes(x=factor(rid, levels=unique(rid)), y=tts, fill=tns)) + theme_bw() + 
+    geom_bar(stat="identity") + xlab("\nRegion ID") + ylab("Number of Days\n") + 
+    scale_fill_gradientn(name="N° Samples\n", colours=cr(10))
+  
+  # build data frame with statistics
+  df <- data.frame(rid=ur, tns=tns, nui=nui, mnt=mnt, avt=avt, mxt=mxt, tts=tts, nts=nts, ura=ura)
+  
+  # return output
+  return(list(stats=df, plot=p))
 
 }

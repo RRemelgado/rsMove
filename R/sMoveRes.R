@@ -124,7 +124,7 @@ sMoveRes <- function(xy=xy, pxr=pxr, p.res=T) {
   
   # build plot object
   p <- ggplot(out1, aes(x=factor(pxr), y=n.pixels, fill=n.regions)) + 
-    scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr), 
+    theme_bw() + scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr), 
     limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution") + 
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") + 
     theme(axis.text.x=element_text(size=12), 
