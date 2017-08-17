@@ -15,7 +15,9 @@
 #' identifies unique temporal segment corresponding to periods of consecutive days with 
 #' observations. For each segment, the function reports on the amount of segment s(\emph{nts}) 
 #' as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}), ) of the time segments 
-#' and the total amount of time that they amount to (\emph{tts}). If \emph{rid} contains polygons for 
+#' and the total amount of time that they amount to (\emph{tts}). For each region, the function will 
+#' also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide 
+#' the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for 
 #' each region, the function also reports on the area of convex polygons. In this case, the 
 #' user can use the \emph{method} keyword to specify how the polygons should be handled. If the 
 #' polygons are in lat-lon, method \emph{deg} can be used to re-project each polygon to its 
@@ -70,6 +72,9 @@ hotMoveStats <- function(rid=rid, time=NULL, tUnit=NULL, aid=NULL, method='deg')
   tts <- matrix(0, nr) # sum of recorded time
   nts <- matrix(0, nr) # number of time segments
   
+  ss1 <- list() # temporal segment stats
+  ss2 <- list() # temporal segment indices
+  
   # evaluate each region separately
   for (r in 1:length(ur)) {
 
@@ -80,36 +85,48 @@ hotMoveStats <- function(rid=rid, time=NULL, tUnit=NULL, aid=NULL, method='deg')
   
     # identify unique temporal segments and count number of days
     if (!is.null(time)) {
-      ts <- list()
+      ts0 <- list()
       sp <- 1
       st <- sort(unique(time[ind]))
       if (length(st) > 1) {
         for (t in 2:length(st)) {
-          diff <- as.numeric(difftime(st[t], st[(t-1)], units='days'))
+          diff <- as.numeric(difftime(st[t], st[(t-1)], units=tUnit))
           if (diff > 1) {
-            ts[[(length(ts)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units='days')) + 1
+            ts0[[(length(ts0)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units=tUnit)) + 1
+            ss1[[length(ss1)+1]] <- data.frame(start=st[sp], end=st[(t-1)], id=ur[r])
+            ss2[[length(ss2)+1]] <- which(time >= ss1[[length(ss1)]]$start & 
+                                            time <= ss1[[length(ss1)]]$end & 
+                                            rid$indices==ur[r])
             sp <- t
           }}
-        ts <- unlist(ts)
-        if(!is.null(ts)) {
-          mnt[r] <- min(ts)
-          avt[r] <- mean(ts)
-          mxt[r] <- max(ts)
-          tts[r] <- sum(ts)
-          nts[r] <- length(ts)
+        ts0 <- unlist(ts0)
+        if(!is.null(ts0)) {
+          mnt[r] <- min(ts0)
+          avt[r] <- mean(ts0)
+          mxt[r] <- max(ts0)
+          tts[r] <- sum(ts0)
+          nts[r] <- length(ts0)
         } else {
-          tts[r] <- as.numeric(difftime(max(st), min(st), units='days')) + 1
+          tts[r] <- as.numeric(difftime(max(st), min(st), units=tUnit)) + 1
           mnt[r] <- tts[r]
           avt[r] <- tts[r]
           mxt[r] <- tts[r]
-          nts[r] <- 1}
-        
-        rm(ts, st, diff, sp)
+          nts[r] <- 1
+          ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r])
+          ss2[[length(ss2)+1]] <- which(time >= ss1[[length(ss1)]]$start & 
+                                          time <= ss1[[length(ss1)]]$end & 
+                                          rid$indices==ur[r])
+        }
+        rm(ts0, st, diff, sp)
       } else {
         mnt[r] <- 1
         mxt[r] <- 1
         tts[r] <- 1
-        nts[r] <- 1}
+        nts[r] <- 1
+        ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r])
+        ss2[[length(ss2)+1]] <- which(time >= ss1[[length(ss1)]]$start & 
+                                        time <= ss1[[length(ss1)]]$end & 
+                                        rid$indices==ur[r])}
     } else {
       mnt <- NA
       mat <- NA
@@ -144,16 +161,20 @@ hotMoveStats <- function(rid=rid, time=NULL, tUnit=NULL, aid=NULL, method='deg')
 
   }
   
-  # build plot
-  cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
-  p <- ggplot(hm.stats, aes(x=factor(rid, levels=unique(rid)), y=tts, fill=tns)) + theme_bw() + 
-    geom_bar(stat="identity") + xlab("\nRegion ID") + ylab("Number of Days\n") + 
-    scale_fill_gradientn(name="N° Samples\n", colours=cr(10))
-  
   # build data frame with statistics
   df <- data.frame(rid=ur, tns=tns, nui=nui, mnt=mnt, avt=avt, mxt=mxt, tts=tts, nts=nts, ura=ura)
   
+  # build plot
+  cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
+  p <- ggplot(df, aes(x=factor(rid, levels=unique(rid)), y=tts, fill=tns)) + theme_bw() + 
+    geom_bar(stat="identity") + xlab("\nRegion ID") + ylab("Number of Days\n") + 
+    scale_fill_gradientn(name="N° Samples\n", colours=cr(10))
+  
+
+  # temporal segments
+  time.seg <- do.call(rbind, ss1)
+  
   # return output
-  return(list(stats=df, plot=p))
+  return(list(stats=df, plot=p, temporal.segments=time.seg, segment.indices=ss2))
 
 }
