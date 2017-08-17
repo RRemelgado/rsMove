@@ -3,7 +3,7 @@
 "Leaf Area Index (mean / sd)","lai",1000,8,"MODIS",NA
 "Fraction of photosynthetically active radiation (mean / sd)","fpar",1000,8,"MODIS",NA
 "Land Surface Temperature (day / night)","lst",1000,1,"MODIS",NA
-"Fire mask","fire",1000,1,"MODIS",NA
+"Fire mask","fire",1000,8,"MODIS",NA
 "Snow cover","snow",500,1,"MODIS","EarthData"
 "Sea Ice (day)","ice",1000,1,"MODIS","EarthData"
 "Chlorofile content","chlorofile",4000,1,"MODIS",NA
