@@ -68,9 +68,6 @@ getEnv <- function(d.path=NULL, d.source=NULL, var=NULL, ref=NULL) {
   if (is.null(d.path)) {stop('"d.path" is missing')}
   if (!dir.exists(d.path)) {stop('could not find "d.path" in the file system')}
   if (min(var%in%var.ls$code)==0) {stop('one or more elements in "var" not found')}
-  if ('DEM90'%in%var) {if (is.null(ref)) {
-    stop('"DEM90" was set in "var". "ref" is required')}
-    ext <- extent(ref)}
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 3. download each variable
@@ -85,10 +82,13 @@ getEnv <- function(d.path=NULL, d.source=NULL, var=NULL, ref=NULL) {
     # simple download
     if (var.ls$code[ind[i]] != 'DEM90' & !d.source%in%c('GFC', 'GSW')) {
       ofile <- file.path(d.path, basename(var.ls$link[ind[i]]))
-      download.file(var.ls$link[ind[i]], ofile, mode="wb")}
+      download.file(var.ls$link[ind[i]], ofile, quiet=TRUE, mode="wb")}
     
     # DEM download
     if (var.ls$code[ind[i]] == 'DEM90' | d.source%in%c('GFC', 'GSW')) {
+      
+      # control if ref was provided
+      if (is.null(ref)) {stop('Selected a tiled product. Provide "ref"')}
       
       # read in shapefile with tiles
       file <- system.file('extdata', paste0(d.source, '-tiles.shp'), package="rsMove")
@@ -109,7 +109,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, var=NULL, ref=NULL) {
         if (d.source=='GFC') {ifile <- paste0(var.ls$link[ind[i]], '_', var.ls$code[ind[i]], '_', tiles[x], '.tif')}
         if (d.source=='GSW') {ifile <- paste0(var.ls$link[ind[i]], var.ls$code[ind[i]], '_', tiles[x], '.tif')}
         ofile <- file.path(d.path, basename(ifile)) # output
-        download.file(ifile, ofile, mode="wb")} # download file
+        download.file(ifile, ofile, quiet=TRUE, mode="wb")} # download file
       
     }
   }

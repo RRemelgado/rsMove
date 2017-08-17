@@ -1,2 +1,2 @@
-"link","type","code"
-"ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/GEBCO_BATHY/GEBCO_BATHY_2002.FLOAT.TIFF","2002 Ocean Bathimetry","bat"
+"link","type","code", "crs"
+"ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/GEBCO_BATHY/GEBCO_BATHY_2002.FLOAT.TIFF","2002 Ocean Bathimetry","bat", "+proj=longlat +datum=WGS84 +ellps=WGS84 +towgs84=0,0,0"
