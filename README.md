@@ -29,6 +29,7 @@ install.packages('rsMove')
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_4.md">Temporally Dynamic Data Query</a>
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_5.md">Pixel-Based Interpolation</a>
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_6.md">Which Satellite Data to Use? On Pixel Resolution and Movement</a> 
+* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_3.md">Directional Analysis of Environmental Change</a>
 <br>
 
 ### Bug reports & contact
