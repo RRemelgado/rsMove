@@ -4,20 +4,18 @@
 #' @param img Object of class \emph{RasterStack} or \emph{RasterBrick}.
 #' @param td Target dates. Object of class \emph{Date}.
 #' @param rd Raster dates. Object of class \emph{Date}.
-#' @param bs Temporal buffer size (in days).
+#' @param bs wo element vector with temporal search buffer (expressed in days).
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param edata Object of class \emph{data frame} or \emph{matrix} with remote sensing data.
 #' @import raster sp rgdal
 #' @importFrom stats lm
 #' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}.
-#' @details {Performs a pixel-wise linear interpolation over a raster 
-#' for a given set of dates (\emph{td}). A teporal buffer (\emph{bs}) is required 
-#' to limit the search for reference data points (\emph{rd}). If \emph{xy} is 
-#' provided the function only considers the pixels that overlap with 
-#' the these sample points. Otherwise, a RasterBrick is provided. However, 
-#' if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a 
-#' data frame is provided.}
+#' @details {Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{td}). 
+#' A teporal buffer (\emph{bs}) is required to limit the search for reference data points (\emph{rd}). \emph{bs} 
+#' is defined by a two element vector which limits the search of images in the past and future. If \emph{xy} is 
+#' provided the function only considers the pixels that overlap with the these sample points. Otherwise, a RasterBrick 
+#' is provided. However, if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a data frame is provided.}
 #' @examples {
 #'  
 #'  require(raster)
@@ -38,7 +36,7 @@
 #'  td = as.Date("2012-04-01")
 #'  
 #'  # interpolate raster data to target dates
-#'  i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=60, xy=moveData)
+#'  i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=c(60,60), xy=moveData)
 #'  
 #' }
 #' @export
@@ -80,8 +78,8 @@ imgInt <- function(img=NULL, rd=rd, td=td, bs=NULL, xy=NULL, edata=NULL) {
   int <- function(x) {
     di <- which(rd==otd & !is.na(x))
     if (length(di)>0) {return(mean(x[di]))} else {
-      bi <- rev(which(!is.na(x) & rd < otd & rd >= (otd-bs)))
-      ai <- which(!is.na(x) & rd > otd & rd <= (otd+bs))
+      bi <- rev(which(!is.na(x) & rd < otd & rd >= (otd-bs[1])))
+      ai <- which(!is.na(x) & rd > otd & rd <= (otd+bs[2]))
       if (length(bi)>=1 & length(ai)>=1) {
         lc <- lm(c(x[bi[1]],x[ai[1]])~as.numeric(c(rd[bi[1]],rd[ai[1]])))
         return(as.numeric(otd)*lc$coefficients[2]+lc$coefficients[1])

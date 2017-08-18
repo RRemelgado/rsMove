@@ -57,7 +57,7 @@
 #'  ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'  
 #'  # perform directional sampling
-#'  of <- function(x) {lm(1:length(x)~x)$coefficients[2]}
+#'  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
 #'  s.sample <- spaceDir(xy=moveData, ot=ot, img=r, dir="bwd", type='cont', fun=of)
 #'  
 #' }
@@ -337,8 +337,8 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   
   if (type=="cont") {
     
-    p <- ggplot(fl, aes(x=long, y=lat, color=stat)) + theme_bw() + 
-      geom_line(size=2) + xlab("X") + ylab("Y") + 
+    p <- ggplot(fl, aes(x=long, y=lat, color=stat, group=group)) + theme_bw() + 
+      geom_path(size=2) + xlab("X") + ylab("Y") + 
       theme(legend.text=element_text(size=10), 
             axis.text=element_text(size=10),
             panel.grid.major=element_blank(), 

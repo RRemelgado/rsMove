@@ -31,9 +31,10 @@
 #'  \item{\emph{timestamp} - mean observation time}
 #'  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
 #'  \item{\emph{stat}: statistical metric}}
-#' If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
-#' will contain the environmental data with each column representing a different variable. Otherwise, 
-#' this data will be retrieved from \emph{img}.}
+#' If \emph{edata} is provided, \emph{img} will be ignores as \emph{edata} will contain the environmental data 
+#' with each column representing a different variable. Otherwise, this data will be retrieved from \emph{img}. 
+#' Also, if \emph{edata} is provided, \emph{xy} is not required. However, it can be provided to built a spatial 
+#' plot with the results of the analysis.}
 #' @examples {
 #'  
 #'  require(raster)
@@ -55,42 +56,41 @@
 #'  
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  t.sample <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
+#'  time.env <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
 #'  
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL, fun=NULL) {
+timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # samples
-  if (!exists('xy')) {stop('"xy" is missing')}
-  if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  if (!is.null(xy)) {if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}}
   
   # sample dates
   if (!exists('ot')) {stop('"ot" is missing')}
   if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
   if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}
   
-  # raster
-  if (!exists('img')) {stop('"img" is missing')}
-  if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}   
+  # environmental data dates
+  if (!class(rt)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"rt" is nof of a valid class')}
   
   # environmental data
-  if (!is.null(edata)) {
+  if (is.null(edata)) {
+    if (is.null(img)) {stop('"edata" is missing. Please define "img"')} else {
+      if (is.null(xy)) {stop('"edata" missing and "img" required. Please define "xy" also')}
+      if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
+      if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
+      if (length(rt)!=nlayers(img)) {stop('errorr: "img" and "rt" have different lengths')}}
+  } else {
     if (class(edata)[1]!='data.frame') {stop('"edata" provided but not a data frame')}
-    if (nrow(edata)!=length(xy)) {stop('number of elements in "xy" and "edata" do not match')}}
-  
-  # raster dates
-  if (!exists('rt')) {stop('"rt" is missing')}
-  if (!class(rt)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"rt" is nof of a valid class')}
-  if (length(rt)!=nlayers(img)) {stop('errorr: "img" and "rt" have different lengths')}
+    if (!is.null(xy)) {if (length(xy)!=nrow(edata)) {stop('"xy" and "edata" have different lengths')}}
+    if (length(rt)!=ncol(edata)) {stop('errorr: "edata" and "rt" have different lengths')}}
   
   # time information
   if (is.null(mws)) {stop('"mws" is missing')} else {
@@ -158,22 +158,22 @@ timeDir <- function(xy=xy, ot=ot, img=img, edata=NULL, rt=rt, mws=NULL, dir=NULL
 # 4. query samples
 #-------------------------------------------------------------------------------------------------------------------------------#
   
-  df <- data.frame(value=unlist(lapply(1:length(xy), f)))
+  df <- data.frame(value=unlist(lapply(1:nrow(edata), f)))
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 5. build plot
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # build plot object
-  cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
-  df0 <- data.frame(x=xy@coords[,1], y=xy@coords[,2], value=df$value)
-  p <- ggplot(df0) + theme_bw() + xlab('X') + ylab('Y') + 
-    geom_point(aes(x=x, y=y, size=value, fill=value), color="black", pch=21) +
-    scale_size_continuous(guide=FALSE) + guides(col=cr(10)) + 
-    scale_fill_gradientn(colours=cr(10)) + 
-    theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
-          panel.grid.minor=element_blank())
-  
-  return(list(stats=df, plot=p))
+  if (!is.null(xy)) {
+    cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
+    df0 <- data.frame(x=xy@coords[,1], y=xy@coords[,2], value=df$value)
+    p <- ggplot(df0) + theme_bw() + xlab('X') + ylab('Y') + 
+      geom_point(aes(x=x, y=y, size=value, fill=value), color="black", pch=21) +
+      scale_size_continuous(guide=FALSE) + guides(col=cr(10)) + 
+      scale_fill_gradientn(colours=cr(10)) + 
+      theme(legend.text=element_text(size=10), panel.grid.major=element_blank(), 
+            panel.grid.minor=element_blank())
+    return(list(stats=df, plot=p))} else {return(list(stats=df))}
  
 }

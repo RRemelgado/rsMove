@@ -10,7 +10,7 @@
 #' @param user.cred Two element character vector containing username and password.
 #' @param pad Padding expressed in number of pixels. Used when re-projecting and resampling.
 #' @import grDevices sp rgdal ncdf4
-#' @importFrom XML htmlParse readHTMLTable
+#' @importFrom XML htmlParse readHTMLTable xmlRoot
 #' @importFrom httr GET write_disk authenticate
 #' @importFrom RCurl getURL
 #' @importFrom gdalUtils gdal_translate

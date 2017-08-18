@@ -14,7 +14,7 @@ imgInt(img = NULL, rd = rd, td = td, bs = NULL, xy = NULL,
 
 \item{td}{Target dates. Object of class \emph{Date}.}
 
-\item{bs}{Temporal buffer size (in days).}
+\item{bs}{wo element vector with temporal search buffer (expressed in days).}
 
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
@@ -27,13 +27,11 @@ A \emph{RasterBrick} or a \emph{data frame}.
 Temporal linear interpolation of raster data.
 }
 \details{
-{Performs a pixel-wise linear interpolation over a raster 
-for a given set of dates (\emph{td}). A teporal buffer (\emph{bs}) is required 
-to limit the search for reference data points (\emph{rd}). If \emph{xy} is 
-provided the function only considers the pixels that overlap with 
-the these sample points. Otherwise, a RasterBrick is provided. However, 
-if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a 
-data frame is provided.}
+{Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{td}). 
+A teporal buffer (\emph{bs}) is required to limit the search for reference data points (\emph{rd}). \emph{bs} 
+is defined by a two element vector which limits the search of images in the past and future. If \emph{xy} is 
+provided the function only considers the pixels that overlap with the these sample points. Otherwise, a RasterBrick 
+is provided. However, if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a data frame is provided.}
 }
 \examples{
 {
@@ -56,7 +54,7 @@ data frame is provided.}
  td = as.Date("2012-04-01")
  
  # interpolate raster data to target dates
- i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=60, xy=moveData)
+ i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=c(60,60), xy=moveData)
  
 }
 }

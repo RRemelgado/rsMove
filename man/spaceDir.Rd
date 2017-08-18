@@ -78,7 +78,7 @@ with these shapefiles reports on:
  ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
  
  # perform directional sampling
- of <- function(x) {lm(1:length(x)~x)$coefficients[2]}
+ of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
  s.sample <- spaceDir(xy=moveData, ot=ot, img=r, dir="bwd", type='cont', fun=of)
  
 }

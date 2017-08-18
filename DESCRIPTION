@@ -12,4 +12,3 @@ LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr
 RoxygenNote: 6.0.1
 License: GPL (>= 3)
-Suggests: testthat

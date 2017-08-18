@@ -4,7 +4,7 @@
 \alias{timeDir}
 \title{timeDir}
 \usage{
-timeDir(xy = xy, ot = ot, img = img, edata = NULL, rt = rt,
+timeDir(xy = NULL, ot = ot, img = NULL, edata = NULL, rt = rt,
   mws = NULL, dir = NULL, fun = NULL)
 }
 \arguments{
@@ -49,9 +49,10 @@ the raster values. The output reports on:
  \item{\emph{timestamp} - mean observation time}
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
  \item{\emph{stat}: statistical metric}}
-If \emph{edata} is provided, \emph{img} will only be used as a reference grid as \emph{edata} 
-will contain the environmental data with each column representing a different variable. Otherwise, 
-this data will be retrieved from \emph{img}.}
+If \emph{edata} is provided, \emph{img} will be ignores as \emph{edata} will contain the environmental data 
+with each column representing a different variable. Otherwise, this data will be retrieved from \emph{img}. 
+Also, if \emph{edata} is provided, \emph{xy} is not required. However, it can be provided to built a spatial 
+plot with the results of the analysis.}
 }
 \examples{
 {
@@ -75,7 +76,7 @@ this data will be retrieved from \emph{img}.}
  
  # perform directional sampling
  of <- function(x,y) {lm(y~x)$coefficients[2]}
- t.sample <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
+ time.env <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
  
 }
 }
