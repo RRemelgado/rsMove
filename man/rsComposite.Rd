@@ -15,7 +15,7 @@ rsComposite(img, rd, ot, cm = 1, type = "norm", d.buffer = NULL)
 
 \item{cm}{Number of deviations from the target date. Default is 1.}
 
-\item{type}{One of "norm" or "pheno".}
+\item{type}{One of "norm" or "pheno" or "pheno2".}
 
 \item{d.buffer}{Search buffer (expressed in days).}
 }
@@ -47,8 +47,11 @@ closer to the target that will be used when possible. The output provides:
  \item{\emph{count} - pixel count of \emph{dates}}
  \item{\emph{na.count} - count of NA values}
  \item{\emph{target} - target date}
- \item{\emph{mad} - temporal buffer}
-}}
+ \item{\emph{mad} - temporal buffer}}
+ If \emph{pheno2} is used, for each pixel, the function wilhin estimate a weighted 
+ mean of the clear pixels within the temporal buffer. The weights represent the 
+ inverse time difference between the target and the available dates giver higher 
+ weights to small differences.}
 }
 \examples{
 \dontrun{

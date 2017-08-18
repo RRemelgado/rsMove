@@ -4,13 +4,13 @@
 \alias{hotMoveStats}
 \title{hotMoveStats}
 \usage{
-hotMoveStats(rid = rid, time = NULL, tUnit = NULL, aid = NULL,
+hotMoveStats(rid = NULL, o.time = NULL, tUnit = NULL, aid = NULL,
   method = "deg")
 }
 \arguments{
 \item{rid}{List object as provided by \emph{hotMove()}.}
 
-\item{time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.}
+\item{o.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.}
 
 \item{tUnit}{Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.}
 
@@ -25,20 +25,19 @@ A \emph{data frame}.
 Provides statistics for the output of hotMove.
 }
 \details{
-{This functions analysis the attributes of sample regions define by hotMove().
-For each sample region, the function returns the amount of samples (\emph{tns}. If a vector 
-of unique identifiers is provided (\emph{aid}) the number of unique identifiers observed within 
-each region is also reported. If temporal information is provided (\emph{time}) the function 
-identifies unique temporal segment corresponding to periods of consecutive days with 
-observations. For each segment, the function reports on the amount of segment s(\emph{nts}) 
-as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}), ) of the time segments 
-and the total amount of time that they amount to (\emph{tts}). For each region, the function will 
-also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide 
-the sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains 
-polygons for each region, the function also reports on the area of convex polygons. In this case, the 
-user can use the \emph{method} keyword to specify how the polygons should be handled. If the 
-polygons are in lat-lon, method \emph{deg} can be used to re-project each polygon to its 
-corresponding UTZ zone before retrieving the area. This is the default, if the polygons 
+{This functions analysis the attributes of sample regions define by hotMove(). Alternatively, 
+the user can keep \emph{rid} as NULL. This case, all information will be assumed as part of one region. 
+For each sample region, the function returns the amount of samples (\emph{tns}. If a vector of unique 
+identifiers is provided (\emph{aid}) the number of unique identifiers observed within each region is also 
+reported. If temporal information is provided (\emph{time}) the function identifies unique temporal segment 
+corresponding to periods of consecutive days with observations. For each segment, the function reports on the 
+amount of segments (\emph{nts}) as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt}) 
+of the time segments and the total amount of time that they amount to (\emph{tts}). For each region, the function 
+will also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide the 
+sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for each 
+region, the function also reports on the area of convex polygons. In this case, the user can use the \emph{method} 
+keyword to specify how the polygons should be handled. If the polygons are in lat-lon, method \emph{deg} can be used 
+to re-project each polygon to its corresponding UTZ zone before retrieving the area. This is the default, if the polygons 
 are in a cartesian coordinate system use \emph{m}.}
 }
 \examples{
@@ -61,7 +60,8 @@ plot(hm$polygons, col=hm$indices)
 moveData@data <- cbind(moveData@data, hm$indices)
 
 # derive statistics
-hm.stats <- hotMoveStats(rid=hm, time=as.Date(moveData@data$timestamp))
+hm.region.stats <- hotMoveStats(rid=hm, o.time=as.Date(moveData@data$timestamp))
+hm.time.stats <- hotMoveStats(o.time=as.Date(moveData@data$timestamp))
 
 }
 }

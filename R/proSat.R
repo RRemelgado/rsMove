@@ -168,6 +168,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       return(do.call(mosaic, rfiles))
       
     } else {
@@ -244,6 +245,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       r0 <- do.call(mosaic, rfiles)
       
       rm(rfiles)
@@ -326,6 +328,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       r0 <- do.call(mosaic, rfiles)
       
       rm(rfiles)
@@ -406,6 +409,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       r0 <- do.call(mosaic, rfiles)
       
       rm(rfiles)
@@ -470,6 +474,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       r0 <- do.call(mosaic, rfiles)
       
       rm(rfiles)
@@ -525,6 +530,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       r0 <- do.call(mosaic, rfiles)
       
       rm(rfiles)
@@ -580,6 +586,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
       }
       
       # mosaic raster list
+      rfiles$fun <- mean
       r0 <- do.call(mosaic, rfiles)
       
       rm(rfiles)

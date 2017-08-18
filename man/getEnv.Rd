@@ -4,16 +4,23 @@
 \alias{getEnv}
 \title{getEnv}
 \usage{
-getEnv(d.path = NULL, d.source = NULL, var = NULL, ref = NULL)
+getEnv(d.path = NULL, d.source = NULL, t.var = NULL, ref = NULL,
+  p.raster = NULL, p.res = NULL, pad = 10)
 }
 \arguments{
 \item{d.path}{Output data path for downloaded data.}
 
 \item{d.source}{Data source. One of "EarthEnv", "GFC", "GSW", "CCI" or "HSM".}
 
-\item{var}{Target variables.}
+\item{t.var}{Target variable.}
 
-\item{ref}{Object from which an extent can be derived.}
+\item{ref}{Projected spatial object from which an extent can be derived.}
+
+\item{p.raster}{Logical. Should the output be reprojected?}
+
+\item{p.res}{Pixel resolution (used if p.raster is TRUE).}
+
+\item{pad}{Mi,ner pf cells used to pad the output raster when resampling.}
 }
 \value{
 One or multiple raster objects.
@@ -23,10 +30,10 @@ Interface to download ecologically relevant data.
 }
 \details{
 {Downloads data from earthenv.org. To check which variables can be downloaded, 
-run the function without specifying \emph{var} and specifying \emph{d.source}. This will 
-return a data frame list the existing variables for a given data source. Here, the user 
+run the function without specifying \emph{t.var} and specifying \emph{d.source}. This will 
+return a data frame listing the existing variables for a given data source. Here, the user 
 can refer to the column \emph{"code"} to retrieve the keywords that can be passed to 
-the function through \emph{var}. The keywords recognized by \emph{d.source} are:
+the function through \emph{t.var}. The keywords recognized by \emph{d.source} are:
 \itemize{
 \item{\emph{"EarthEnv"} - EarthEnv project.}
 \item{\emph{"GFC"} - Maryland University Global Forest Change.}
@@ -34,10 +41,10 @@ the function through \emph{var}. The keywords recognized by \emph{d.source} are:
 \item{\emph{"CCI"} - ESA CCI Global land cover.}
 \item{\emph{"HSM"} - JRC Human Settlement map.}
 \item{\emph{"NEO"} - NASA Earth Observations.}}
-If \emph{var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
-or \emph{"GSW"}, \emph{ref} is required. This will be used to determine which tiles should 
-be downloaded. For details on the specifications of the provided datasets please consult 
-the referenced websites.}
+If \emph{t.var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
+or \emph{"GSW"}, The function might require more time as it will mosaic the tiles with which 
+the rerence spatial object (\emph{ref}) overlap with. In any circunstance, the output will be 
+cropped to the extent of \emph{ref} and, if prompted, use it as a reference to reproject the output.}
 }
 \examples{
 {

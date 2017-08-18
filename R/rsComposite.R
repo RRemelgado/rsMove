@@ -5,7 +5,7 @@
 #' @param rd Object of class \emph{Date} with \emph{img} observation dates.
 #' @param ot Object of class \emph{Date} with reference dates.
 #' @param cm Number of deviations from the target date. Default is 1.
-#' @param type One of "norm" or "pheno".
+#' @param type One of "norm" or "pheno" or "pheno2".
 #' @param d.buffer Search buffer (expressed in days).
 #' @import raster rgdal
 #' @importFrom stats lm
@@ -32,8 +32,11 @@
 #'  \item{\emph{count} - pixel count of \emph{dates}}
 #'  \item{\emph{na.count} - count of NA values}
 #'  \item{\emph{target} - target date}
-#'  \item{\emph{mad} - temporal buffer}
-#' }}
+#'  \item{\emph{mad} - temporal buffer}}
+#'  If \emph{pheno2} is used, for each pixel, the function wilhin estimate a weighted 
+#'  mean of the clear pixels within the temporal buffer. The weights represent the 
+#'  inverse time difference between the target and the available dates giver higher 
+#'  weights to small differences.}
 #' @examples \dontrun{
 #'  
 #'  require(raster)
@@ -86,15 +89,14 @@ rsComposite <- function(img, rd, ot, cm=1, type='norm', d.buffer=NULL) {
 #-------------------------------------------------------------------------------------------------------------------------------#
   
   # determine date format
-  if (type=='pheno') {
+  if (type=='norm') {
+    ot0 <- ot
+    rd0 <- rd}
+  if (type=='pheno' | type=='pheno2') {
     bd <- as.Date(paste0(as.character(format(ot,'%Y')), '-01-01'))
     ot0 <- as.numeric((ot-bd) + 1)
     bd <- as.Date(paste0(as.character(format(rd,'%Y')), '-01-01'))
-    rd0 <- as.numeric((rd-bd) + 1)
-  } else {
-    ot0 <- ot
-    rd0 <- rd
-  }
+    rd0 <- as.numeric((rd-bd) + 1)}
   
   # determine date range
   if (length(ot)>1) {
@@ -106,55 +108,75 @@ rsComposite <- function(img, rd, ot, cm=1, type='norm', d.buffer=NULL) {
   }
   
   
+  if (type=="norm" | type=="pheno") {
+    
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 3. define functions
 #-------------------------------------------------------------------------------------------------------------------------------#
-  
-  # compositing
-  f1 <- function(x) {
-    ind <- which(!is.na(x))
-    if (length(ind)>0) {
-      v <- x[ind]
-      d <- rd0[ind]
-      diff <- abs(d-t.date)
-      ind <- which(diff <= d.buffer)
-      if (length(ind)>0) {v[ind[which(diff[ind]==min(diff[ind]))]]
-    } else {return(NA)}} else {return(NA)}}
-
-  
-  # retrieve date
-  f2 <- function(x) {
-    ind <- which(!is.na(x))
-    if (length(ind)>0) {
-      v <- x[ind]
-      d <- rd0[ind]
-      diff <- abs(d-t.date)
-      ind <- which(diff <= d.buffer)
-      if (length(ind)>0) {as.numeric(d[ind[which(diff[ind]==min(diff[ind]))]])
-    } else {return(NA)}} else {return(NA)}}
-  
+    
+    # compositing
+    f1 <- function(x) {
+      ind <- which(!is.na(x))
+      if (length(ind)>0) {
+        v <- x[ind]
+        d <- rd0[ind]
+        diff <- abs(d-t.date)
+        ind <- which(diff <= d.buffer)
+        if (length(ind)>0) {v[ind[which(diff[ind]==min(diff[ind]))]]
+        } else {return(NA)}} else {return(NA)}}
+    
+    # retrieve date
+    f2 <- function(x) {
+      ind <- which(!is.na(x))
+      if (length(ind)>0) {
+        v <- x[ind]
+        d <- rd0[ind]
+        diff <- abs(d-t.date)
+        ind <- which(diff <= d.buffer)
+        if (length(ind)>0) {as.numeric(d[ind[which(diff[ind]==min(diff[ind]))]])
+        } else {return(NA)}} else {return(NA)}}
+    
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 4. build composites
 #-------------------------------------------------------------------------------------------------------------------------------#
-  
-  r.value <- calc(img, f1)
-  r.date <- calc(img, f2)
-  
+    
+    r.value <- calc(img, f1)
+    r.date <- calc(img, f2)
+    
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 4. build composites
 #-------------------------------------------------------------------------------------------------------------------------------#
-  
-  # build table from date info
-  ud <- unique(r.date)
-  used <- rd0[as.numeric(rd0)%in%ud]
-  ud <- as.numeric(rd0)
-  count <- sapply(ud, function(x) {cellStats(r.date==x, sum)})
-  df <- data.frame(date=used, value=ud, count=count)
-  
-  # check for missing values
-  mv <- cellStats(is.na(r.date), sum)
-
-  # return data
-  return(list(value=r.value, date=r.date, count=df, na.count=mv, target=t.date, buffer=d.buffer))
-  
+    
+    # build table from date info
+    ud <- unique(r.date)
+    used <- rd0[as.numeric(rd0)%in%ud]
+    ud <- as.numeric(rd0)
+    count <- sapply(ud, function(x) {cellStats(r.date==x, sum)})
+    df <- data.frame(date=used, value=ud, count=count)
+    
+    # check for missing values
+    mv <- cellStats(is.na(r.date), sum)
+    
+    # return data
+    return(list(value=r.value, date=r.date, count=df, na.count=mv, target=t.date, buffer=d.buffer))
+    
+  } else {
+    
+    # averaging function
+    f1 <- function(x) {
+      ind <- which(!is.na(x))
+      if (length(ind)>0) {
+        v <- x[ind]
+        d <- rd0[ind]
+        diff <- abs(d-t.date)
+        w <- 1 - (diff/max(diff))
+        ind <- which(diff <= d.buffer)
+        if (length(ind)>0) {sum(v[ind]*w[ind]) / sum(w[ind])} else {
+          return(NA)}} else {return(NA)}}
+    
+    # apply function to raster
+    return(calc(img, f1))
+    
+  }
+ 
 }
