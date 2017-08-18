@@ -28,7 +28,7 @@
 #' the rerence spatial object (\emph{ref}) overlap with. In any circunstance, the output will be 
 #' cropped to the extent of \emph{ref} and, if prompted, use it as a reference to reproject the output.}
 #' @references {\url{http://www.earthenv.org/} 
-#' \url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
+#' \url{https://earthenginepartners.appspot.com/science-2013-global-forest} 
 #' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}
 #' \url{http://maps.elie.ucl.ac.be/CCI/viewer/} \url{https://neo.sci.gsfc.nasa.gov/}}
 #' @seealso \code{\link{dataQuery}} \code{\link{spaceDir}}
@@ -47,7 +47,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=NULL, p.res=NULL, pad=10) {
+getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FALSE, p.res=NULL, pad=10) {
   
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. load variable list  
@@ -146,6 +146,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=NU
     # untar before mosaic (if EarthEnv)
     if (d.source=="EarthEnv") {
       for (x in 1:length(tiles)) {
+        #untar(ofile[x], exdir=d.path, tar="internal")
         untar(ofile[x], exdir=d.path, tar="internal")
         file.remove(ofile)}
       files <- list.files(d.path, ".bil$", full.names=T)
@@ -153,9 +154,9 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=NU
       fls$fun <- mean
       if (length(tiles) > 1 ) {r.data <- do.call(mosaic, fls)}
       if (length(tiles) == 1) {r.data <- fls[[1]]}
-      file.remove(list.files(d.path, "EarthEnv", full.names=T))}
-    
-    # export raster
+      files <- list.files(d.path, "EarthEnv", full.names=T)}
+      
+      # export raster
     if (p.raster) {
       pxr <- res(r.data)[1]
       ext@xmin <- (ext@xmin-pxr*pad)
@@ -166,6 +167,6 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=NU
       r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
     writeRaster(r.data, file.path(d.path, paste0(var.ls$code[ind], '_', paste0(tiles, collapse="-"), '.tif')), overwrite=T)
     
-  }
+    }
   
 }

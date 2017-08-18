@@ -5,7 +5,7 @@
 \title{getEnv}
 \usage{
 getEnv(d.path = NULL, d.source = NULL, t.var = NULL, ref = NULL,
-  p.raster = NULL, p.res = NULL, pad = 10)
+  p.raster = FALSE, p.res = NULL, pad = 10)
 }
 \arguments{
 \item{d.path}{Output data path for downloaded data.}
@@ -61,7 +61,7 @@ cropped to the extent of \emph{ref} and, if prompted, use it as a reference to r
 }
 \references{
 {\url{http://www.earthenv.org/} 
-\url{https://earthenginepartners.appspot.com/science-2013-global-forest/} 
+\url{https://earthenginepartners.appspot.com/science-2013-global-forest} 
 \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}
 \url{http://maps.elie.ucl.ac.be/CCI/viewer/} \url{https://neo.sci.gsfc.nasa.gov/}}
 }

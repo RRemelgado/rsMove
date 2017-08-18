@@ -106,8 +106,6 @@ satTime <- function(o.time=o.time, t.var=t.var, p.res=TRUE) {
           panel.grid.minor = element_blank(),
           panel.border = element_blank(),
           panel.background = element_blank()) + 
-    scale_x_continuous(breaks=seq(0, 370, 50), lim=c(0, 376), expand=c(0, 0)) + 
-    scale_y_continuous(expand=c(0, 0)) + 
     scale_fill_manual(values=cc, labels=cn) + 
     facet_wrap(~factor(year, levels=uy), nrow=length(uy))
   
