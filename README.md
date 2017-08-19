@@ -2,8 +2,7 @@
 # rsMove
 [![CRAN version](https://www.r-pkg.org/badges/version/rsMove)](https://CRAN.R-project.org/package=rsMove)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=rsMove)
-[![Package Control](https://img.shields.io/packagecontrol/dt/GitGutter.svg)](https://CRAN.R-project.org/package=rsMove)
-[![PyPI](https://img.shields.io/pypi/status/Django.svg)](https://CRAN.R-project.org/package=rsMove)
+[![Package Control](https://cranlogs.r-pkg.org/badges/total/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=rsMove)
 
 ### Why develop rsMove?
 
