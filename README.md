@@ -20,11 +20,13 @@ install.packages('rsMove')
 
 ### Examples
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_1.md">Finding the hotspots! Ojective study site selection</a>
-* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_2.md">Tracking land cover changes in space and time</a>
+* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_6.md">Which Satellite Data to Use? On Pixel Resolution and Movement</a>
+* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_7.md">Gazing at the clouds: which dates to download RS data for?</a>
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_4.md">Temporally Dynamic Data Query</a>
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_5.md">Pixel-Based Interpolation</a>
-* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_6.md">Which Satellite Data to Use? On Pixel Resolution and Movement</a>
+* <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_2.md">Tracking land cover changes in space and time</a>
 * <a href="https://github.com/RRemelgado/README_data/blob/master/rsMove/example_3.md">Directional Analysis of Environmental Change</a>
+
 <br>
 
 ### Bug reports & contact
