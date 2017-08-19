@@ -13,13 +13,9 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 
 ### Installation
 This gitHub is used as a basis for the improvement of *rsMove*. A stable release is available on <a href="https://cran.r-project.org/package=rsMove">CRAN</a> and can installed with:
-
-<br>
-
 ```R
 install.packages('rsMove')
 ```
-
 <br>
 
 ### Examples
