@@ -10,26 +10,26 @@
 #' @return A \emph{SpatialPointsDataFrame}.
 #' @details {Determines coordinates of pixels within a given extent. If \emph{re} is missing the
 #'            target extent corresponds to the extent of the polygon layer. In this case, \emph{pr}
-#'            is required. If \emph{re} is an \emph{Extent} object or \emph{re} is missing \emph{rp} is required. 
-#'            \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the 
-#'            percentage of area cover by a polygon is below the defined threshold. 
-#'            The output provides the coordinates (\emph{x} and \emph{y}) the 
+#'            is required. If \emph{re} is an \emph{Extent} object or \emph{re} is missing \emph{rp} is required.
+#'            \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the
+#'            percentage of area cover by a polygon is below the defined threshold.
+#'            The output provides the coordinates (\emph{x} and \emph{y}) the
 #'            pixel percent cover (\emph{cover}) for each selected pixel.}
 #' @examples {
-#'  
+#'
 #'  require(raster)
-#'  
+#'
 #'  # load example probability image
 #'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
 #'  img <- raster(file)
-#'  
+#'
 #'  # load area of interest
 #'  file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
 #'  roi <- shapefile(file)
-#'  
+#'
 #'  # segment probabilities
 #'  samples <- poly2sample(pol=roi, re=img)
-#'  
+#'
 #' }
 #' @export
 
@@ -38,7 +38,7 @@
 poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------#
-  
+
   # check input
   if(is.null('pol')) {stop('"pol" is missing')}
   if(!class(pol)[1]%in%c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
@@ -61,7 +61,7 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
     if (rp@projargs!=crs(pol)@projargs) {stop('using different projections')}
   } else {
     if (is.null(pr)) {stop('provide "pr" since "re" is missing')}
-    re <- extent(pol) # extent derived from 
+    re <- extent(pol) # extent derived from
     rr <- raster(re, crs=crs(pol), res=pr)
     nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
   }
@@ -75,9 +75,9 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
   re[2] <- re[2] - ar
   re[3] <- re[3] + ar
   re[4] <- re[4] - ar
-  
+
 #-------------------------------------------------------------------------------------------------------------------------#
-    
+
   # function to apply
   lf <- function(i) {
     r <- crop(rr, extent(pol[i,]))
@@ -91,35 +91,35 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
   x <- lapply(1:np, lf) # evaluate polygons
   pp <- unlist(sapply(x, function(x) {x$pp})) # positions
   pc <- unlist(sapply(x, function(x) {x$pc})) # percent cover
-  
+
   rm(x)
-  
+
 #-------------------------------------------------------------------------------------------------------------------------#
-  
+
   # remove duplicated pixels and update pecent count
-  
+
   up <- unique(pp) # unique ppositions
   pc <- sapply(up, function(x) {sum(pc[which(pp==x)])}) # update percentages
   pc[which(pc>100)] <- 100 # account for miss-calculations (related to e.g. overlapping polygons)
-  
+
   rm(pp)
-  
+
 #-------------------------------------------------------------------------------------------------------------------------#
-  
-  # apply percent cover filter  
+
+  # apply percent cover filter
   ind <- which(pc >= mpc)
   up <- up[ind]
   pc <- pc[ind]
-  
+
 #------------------------------------------------------------------------------------------------------------------------#
-  
+
   # build/return output
   xc <- re[1] + (round(up/nr)*pr) # convert positions to x coordinates
   yc <- re[4] - (round(up%%nr)*pr) # convert positions to y coordinates
-  
+
   os <- data.frame(x=xc, y=yc, index=up, cover=pc)
   return(SpatialPointsDataFrame(cbind(xc,yc), os, proj4string=crs(pol)))
-  
+
 #------------------------------------------------------------------------------------------------------------------------#
-  
+
 }

@@ -5,7 +5,6 @@
 #' @param o.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param t.res Temporal resolution.
 #' @param s.res Spatial resolution.
-#' @param p.res Should the output be ploted on screen? Default is TRUE.
 #' @import ggplot2 sp rgdal grDevices
 #' @importFrom utils download.file
 #' @return A \emph{list}.
@@ -34,32 +33,31 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
+tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res) {
   
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
 #---------------------------------------------------------------------------------------------------------------------#
   
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  rr <- crs(xy) # reference projection
   if (is.na(rr@projargs)) {stop('"xy" does not have a valid projection')}
   if (length(s.res)>1) {stop('"s.res" has more than one element')}
-  if (!is.logical(p.res)) {stop('"p.res" is not a logical argument')}
+  if (!is.numeric(t.res)) {stop('"t.res" is not numeric')}
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
   
-  ext <- extent(xy) # reference extent
-  nc <- round((ext[2]-ext[1]) / s.res) + 1 # number of columns
-  nr <- round((ext[4]-ext[3]) / s.res) + 1 # number of rows
-  sp <- (round((ext[4]-xy@coords[,2])/s.res)+1) + nr * round((xy@coords[,1]-ext[1])/s.res) # convert coordinates to pixel positions
+  ext <- extend(raster(extent(xy), res=s.res, crs=crs(xy)), c(2,2)) # raster extent
+  rd <- dim(ext)# raster dimensions
+  nr <- rd[1] # number of rows
+  nc <- rd[2] # number of columns
+  sp <- cellFromXY(ext, xy) # unique pixels
+  up <- unique(sp) # unique pixel positions
   
 #---------------------------------------------------------------------------------------------------------------------#
 # 3. find unique sample regions
 #---------------------------------------------------------------------------------------------------------------------#
-
-  up <- unique(sp) # unique pixel positions
   
   # evaluate pixel connectivity
   regions <- matrix(0, nr, nc)
@@ -97,14 +95,14 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
     id <- 0 # reference sample ID
     ind <- vector('numeric', length(xy)) # position index
     nw <- as.numeric(((et - st) / t.res[r]) + 1) # number of temporal windows
-    nr <- vector('numeric', length(nw)) # number of regions
+    sc <- nr <- vector('numeric', nw) # number of regions
     
-    for (w in 1:length(nw)) {
+    for (w in 1:nw) {
       
       # locate pixels within the temporal window
       loc1 <- which(o.time >= (st+(t.res[r]*(w-1))) & 
                      o.time <= ((st+t.res[r])+(t.res[r]*(w-1))))
-       
+      
       # quantify unique samples
       upr <- unique(sp[loc1])
       for (p in 1:length(upr)) {
@@ -112,39 +110,32 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
         loc2 <- which(sp[loc1]==upr[p])
         ind[loc1[loc2]] <- id}
       
-      # number of unique regions
-      nr[w] <- length(unique(uregions[up%in%upr]))}
+      # derive statistics
+      nr[w] <- length(unique(uregions[up%in%upr])) # number of regions
+      sc[w] <- length(upr) # number of samples
+      
+    }
     
     # update output
-    out[[r]] <- list(count=max(ind), indices=ind, regions=sum(nr))
+    out[[r]] <- list(indices=ind, regions=sum(nr), count=sum(sc), regions.window=nr, count.window=sc)
     
   }
   
   # output data frame with statistics
   out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}), 
-                     n.regions=sapply(out, function(x) {x$regions}))
-  row.names(out1) <- as.character(t.res)
+                     n.regions=sapply(out, function(x) {x$regions}), 
+                     resolution=t.res)
   
   # output data frame with sample indices
-  out <- lapply(out, function(x) {x$indices})
-  out2 <- do.call(cbind, lapply(out, data.frame, stringsAsFactors=FALSE))
+  out2 <- do.call(cbind, lapply(out, function(x) {x$indices}))
   colnames(out2) <- as.character(t.res)
+  
+  # count per window
+  out3 <- lapply(out, function(x) {list(regions.window=x$regions.window, count.window=x$count.window)})
   
   #---------------------------------------------------------------------------------------------------------------------#
   # 4. plot output
   #---------------------------------------------------------------------------------------------------------------------#
-  
-  # determine fill scale range
-  mv = max(out1$n.regions)
-  if (mv < 100) {
-    mv <- mv / 10
-    fr <- round(mv*2)/2
-    if (mv > fr) {fr <- (fr+0.5)*10} else {fr <- fr*10}
-  }
-  if (mv >= 100) {
-    mv <- mv / 100
-    fr <- round(mv*20)/20
-    if (mv > fr) {fr <- (fr+0.5)*100} else {fr <- fr*100}}
   
   # determine yscale range
   mv <- max(out1$n.pixels)
@@ -162,8 +153,7 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
   
   # build plot object
   p <- ggplot(out1, aes(x=factor(t.res), y=n.pixels, fill=n.regions)) + theme_bw() + 
-    scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr), 
-                         limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (days)") + 
+    scale_fill_gradientn(colors=cr(10), name="Nr. Regions\n") + xlab("\nResolution (days)") + 
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") + 
     theme(axis.text.x=element_text(size=12), 
           axis.title.x =element_text(size=14), 
@@ -172,9 +162,7 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res, p.res=T) {
           legend.text=element_text(size=12), 
           legend.title=element_text(size=14)) + ylim(0,yr)
   
-  if (p.res) {p} # plot on screen
-  
   # return data frame and plot
-  return(list(stats=out1, plot=p, indices=out2))
+  return(list(stats=out1, plot=p, indices=out2, window.stats=out3))
   
 }
