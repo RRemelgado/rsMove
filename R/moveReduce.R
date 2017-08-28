@@ -79,23 +79,68 @@ moveReduce <- function(xy=xy, ot=ot, img=img) {
   et <- list() # elapsed time
   sg <- list() # segment position
   for (r in 2:length(sp)) {
-    if (sp[r]!=sp[r-1]) {
-      ep <- (r-1)
-      ux[[li]] <- mean(xy@coords[sp0:ep,1])
-      uy[[li]] <- mean(xy@coords[sp0:ep,2])
-      if (!is.null(ot)) {
-        ft[[li]] <- ot[sp0]
-        lt[[li]] <- ot[ep]
-        ut[[li]] <- mean(ot[sp0:ep])
-        et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+    
+    if (r < length(sp)) {
+      
+      if (sp[r]!=sp[r-1]) {
+        ep <- (r-1)
+        ux[[li]] <- mean(xy@coords[sp0:ep,1])
+        uy[[li]] <- mean(xy@coords[sp0:ep,2])
+        if (!is.null(ot)) {
+          ft[[li]] <- ot[sp0]
+          lt[[li]] <- ot[ep]
+          ut[[li]] <- mean(ot[sp0:ep])
+          et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+        } else {
+          ft[[li]] <- NA
+          lt[[li]] <- NA
+          ut[[li]] <- NA
+          et[[li]] <- NA}
+        sg[[li]] <- sp[r-1]
+        sp0 <- r
+        li <- li + 1
+      }
+      
+    } else {
+      
+      if (sp[r]!=sp[r-1]) {
+        ep <- (r-1)
+        ux[[li]] <- mean(xy@coords[sp0:ep,1])
+        uy[[li]] <- mean(xy@coords[sp0:ep,2])
+        if (!is.null(ot)) {
+          ft[[li]] <- ot[sp0]
+          lt[[li]] <- ot[ep]
+          ut[[li]] <- mean(ot[sp0:ep])
+          et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+        } else {
+          ft[[li]] <- NA
+          lt[[li]] <- NA
+          ut[[li]] <- NA
+          et[[li]] <- NA}
+        sg[[li]] <- sp[r-1]
+        sp0 <- r
+        li <- li + 1
+        
       } else {
-        ft[[li]] <- NA
-        lt[[li]] <- NA
-        ut[[li]] <- NA
-        et[[li]] <- NA}
-      sg[[li]] <- sp[r-1]
-      sp0 <- r
-      li <- li + 1
+        
+        ep <- r
+        ux[[li]] <- mean(xy@coords[sp0:ep,1])
+        uy[[li]] <- mean(xy@coords[sp0:ep,2])
+        if (!is.null(ot)) {
+          ft[[li]] <- ot[sp0]
+          lt[[li]] <- ot[ep]
+          ut[[li]] <- mean(ot[sp0:ep])
+          et[[li]] <- difftime(ot[ep], ot[sp0], units='mins')
+        } else {
+          ft[[li]] <- NA
+          lt[[li]] <- NA
+          ut[[li]] <- NA
+          et[[li]] <- NA}
+        sg[[li]] <- sp[r-1]
+        sp0 <- r
+        li <- li + 1
+        
+      }
     }
   }
   
