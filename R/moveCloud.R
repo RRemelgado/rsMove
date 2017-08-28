@@ -6,7 +6,6 @@
 #' @param d.path Output data path for downloaded data.
 #' @param b.size Two element vector with temporal buffer size (expressed in days).
 #' @param remove.file Logical. Should the files be deleted after usage?
-#' @param p.res Should the output be ploted on screen? Default is TRUE.
 #' @import ggplot2 sp rgdal grDevices
 #' @importFrom utils download.file
 #' @importFrom RCurl url.exists
@@ -43,7 +42,7 @@
 #'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
-#'  # test function for 5, 10 20 and 30 m
+#'  # test function for 30 day buffer
 #'  od <- as.Date(moveData@data$date)
 #'  c.cover <- moveCloud(xy=moveData, o.time=od, d.path=".", b.size=c(30,30))
 #'
@@ -52,7 +51,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.file=TRUE, p.res=T) {
+moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.file=FALSE) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
@@ -68,7 +67,6 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
     if (!dir.exists(d.path)) {stop('"dpath" not found in file system')}
     d.path <- paste0(file.path(d.path), .Platform$file.sep)}
   if (!is.null(b.size)) {apply.buffer<-TRUE} else {apply.buffer<-FALSE}
-  if (!is.logical(p.res)) {stop('"p.res" is not a logical argument')}
 
   # ftp servers
   myd <- "ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/MYDAL2_D_CLD_FR/" # aqua
@@ -217,8 +215,6 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
       geom_bar(stat="identity", colour="black", fill="grey80") +
       theme(axis.title=element_text(size=12), axis.text=element_text(size=10)) +
       xlab("Date") + ylab("Cloud Cover (%)")
-
-    if (p.res) {p}
 
     return(list(stats=df, daily.cover=df0, daily.cover.plot=p))
 

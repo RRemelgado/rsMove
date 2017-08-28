@@ -106,10 +106,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
         r.data <- raster(ofile)}
       if (p.raster) {
         pxr <- res(r.data)[1]
-        ext@xmin <- (ext@xmin-pxr*pad)
-        ext@xmax <- (ext@xmax+pxr*pad)
-        ext@ymin <- (ext@ymin-pxr*pad)
-        ext@ymax <- (ext@ymax+pxr*pad)
+        ext <- extend(ext, pxr*pad)
         r.data <- crop(r.data, ext)
         r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))
       } else{r.data <- crop(r.data, ext)}
@@ -159,10 +156,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
       # export raster
     if (p.raster) {
       pxr <- res(r.data)[1]
-      ext@xmin <- (ext@xmin-pxr*pad)
-      ext@xmax <- (ext@xmax+pxr*pad)
-      ext@ymin <- (ext@ymin-pxr*pad)
-      ext@ymax <- (ext@ymax+pxr*pad)
+      ext <- extend(ext, pxr*pad)
       r.data <- crop(r.data, ext)
       r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
     writeRaster(r.data, file.path(d.path, paste0(var.ls$code[ind], '_', paste0(tiles, collapse="-"), '.tif')), overwrite=T)

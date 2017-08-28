@@ -33,10 +33,25 @@
 #' spatial resolution and the sensor of origin. Some variables might require login credentials. Check
 #' the table to know which credentials to use and assign them through \emph{user.cred}.}
 #' @seealso \code{\link{getEnv}} \code{\link{imgInt}} \code{\link{dataQuery}}
-#' @examples {
+#' @examples \dontrun{
 #'
-#'  # return list of variables
-#'  modis.var <- proSat()
+#'  require(raster)
+#'
+#'  # read raster data
+#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'
+#'  # read movement data
+#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+#'  obs.date <- as.Date(moveData@data$date)
+#'
+#'  # download NDVI image for query date
+#'  ndvi.file <- proSat(t.var="ndvi",
+#'  xy=moveData, o.time=obs.date, d.path=".",
+#'  p.raster=T, p.res=250)
+#'
+#'  # print output data path and date
+#'  ndvi.file
 #'
 #' }
 #' @export
@@ -80,10 +95,7 @@ proSat <- function(t.var=NULL, xy=NULL, o.time=NULL, d.path=NULL, p.raster=FALSE
   if (is.null(xy)) {stop('please provide "xy"')}
   ref <- projectExtent(xy, crs(var.ls$crs[loc]))
   ext <- extent(ref)
-  ext@xmin <- (ext@xmin-s.res*pad)
-  ext@xmax <- (ext@xmax+s.res*pad)
-  ext@ymin <- (ext@ymin-s.res*pad)
-  ext@ymax <- (ext@ymax+s.res*pad)
+  ext <- extend(ext, s.res*pad)
   ref <- raster(ext, res=s.res, crs=crs(ref))
 
   # re-projection parameters
