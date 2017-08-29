@@ -4,12 +4,12 @@
 \alias{poly2sample}
 \title{poly2sample}
 \usage{
-poly2sample(pol = pol, re = NULL, mpc = NULL, pr = NULL)
+poly2sample(pol = pol, ref.ext = NULL, mpc = NULL, pr = NULL)
 }
 \arguments{
 \item{pol}{Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.}
 
-\item{re}{Object of class \emph{Extent} or a raster object from which an extent can be derived.}
+\item{ref.ext}{Object of class \emph{Extent} or a raster object from which an extent can be derived.}
 
 \item{mpc}{Minimum pixel cover (0-100). Default is 100.}
 
@@ -19,33 +19,33 @@ poly2sample(pol = pol, re = NULL, mpc = NULL, pr = NULL)
 A \emph{SpatialPointsDataFrame}.
 }
 \description{
-Convert spatial polygons into point samples.
+Convert spatial polygons into point samples based on a pixel heterogeneity analysis.
 }
 \details{
-{Determines coordinates of pixels within a given extent. If \emph{re} is missing the
+{Determines coordinates of pixels within a given extent. If \emph{ref.ext} is missing the
            target extent corresponds to the extent of the polygon layer. In this case, \emph{pr}
-           is required. If \emph{re} is an \emph{Extent} object or \emph{re} is missing \emph{rp} is required. 
-           \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the 
-           percentage of area cover by a polygon is below the defined threshold. 
-           The output provides the coordinates (\emph{x} and \emph{y}) the 
+           is required. If \emph{ref.ext} is an \emph{Extent} object or \emph{ref.ext} is missing \emph{rp} is required.
+           \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the
+           percentage of area cover by a polygon is below the defined threshold.
+           The output provides the coordinates (\emph{x} and \emph{y}) the
            pixel percent cover (\emph{cover}) for each selected pixel.}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # load example probability image
  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
  img <- raster(file)
- 
+
  # load area of interest
  file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
  roi <- shapefile(file)
- 
+
  # segment probabilities
- samples <- poly2sample(pol=roi, re=img)
- 
+ samples <- poly2sample(pol=roi, ref.ext=img)
+
 }
 }
 \seealso{
