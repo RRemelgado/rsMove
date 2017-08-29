@@ -80,7 +80,7 @@ segRaster <- function(prob, break.point=0.1, mp=0.5) {
 #-----------------------------------------------------------------------------------#
 
   # update region id
-  uv = sort(unique(regions[which(regions>0)]))
+  uv <- sort(unique(regions[which(regions>0)]))
   uregions = regions
   nr <- length(uv)
   pmn <- vector('numeric', nr) # min
@@ -105,7 +105,7 @@ segRaster <- function(prob, break.point=0.1, mp=0.5) {
 #-----------------------------------------------------------------------------------#
 
   # convert data back to raster
-  uregions = raster(uregions)
+  uregions <- raster(uregions)
   extent(uregions) <- extent(prob)
   res(uregions) <- res(prob)
   crs(uregions) <- crs(prob)

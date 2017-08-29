@@ -71,10 +71,7 @@ poly2sample <- function(pol=pol, ref.ext=NULL, mpc=NULL, pr=NULL) {
   # update extent object
   # (correspond x/y to pixel center)
   ar <- pr / 2 # half resolution
-  ref.ext[1] <- ref.ext[1] + ar
-  ref.ext[2] <- ref.ext[2] - ar
-  ref.ext[3] <- ref.ext[3] + ar
-  ref.ext[4] <- ref.ext[4] - ar
+  ref.ext[1] <- extend(ref.ext, ar)
 
 #-------------------------------------------------------------------------------------------------------------------------#
 

@@ -75,7 +75,7 @@ sMoveRes <- function(xy=xy, pxr=pxr) {
     }
 
     # update output
-    uv = unique(regions[which(regions>0)])
+    uv <- unique(regions[which(regions>0)])
     out[[p]] <- list(count=length(up), regions=length(uv), indices=sp)
 
   }

@@ -64,7 +64,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
 
   # read variable list
   var.ls <- system.file('extdata', paste0(d.source, '_variables.csv'), package="rsMove")
-  var.ls <- var.ls <- read.csv(var.ls, stringsAsFactors=F)
+  var.ls <- var.ls <- read.csv(var.ls, stringsAsFactors=FALSE)
 
   # return variable list if none is specified
   if (is.null(t.var)) {return(var.ls[,2:3])}
@@ -103,7 +103,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
     if (d.source=="HSM") {
       files = unzip(ofile, list=TRUE)
       files <- files$Name[grep("tif", files$Name)]
-      unzip(ofile, files=files, exdir=d.path, junkpaths=T, overwrite=T)
+      unzip(ofile, files=files, exdir=d.path, junkpaths=TRUE, overwrite=TRUE)
       file.remove(ofile)
       ofile <- paste0(d.path, .Platform$file.sep, basename(files[grep("tif$", files)]))}
 
@@ -116,7 +116,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
         r.data <- crop(r.data, ext)
         r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
       if (!p.raster) {r.data <- crop(r.data, extent(ref))}
-      writeRaster(r.data, ofile, overwrite=T)}
+      writeRaster(r.data, ofile, overwrite=TRUE)}
     }
 
   if (var.ls$code[ind] == 'DEM90' | d.source%in%c('GFC', 'GSW')) {
@@ -156,12 +156,12 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
         #untar(ofile[x], exdir=d.path, tar="internal")
         untar(ofile[x], exdir=d.path, tar="internal")
         file.remove(ofile)}
-      files <- list.files(d.path, ".bil$", full.names=T)
+      files <- list.files(d.path, ".bil$", full.names=TRUE)
       fls <- lapply(files, function(x) {raster(files)})
       fls$fun <- mean
       if (length(tiles) > 1 ) {r.data <- do.call(mosaic, fls)}
       if (length(tiles) == 1) {r.data <- fls[[1]]}
-      files <- list.files(d.path, "EarthEnv", full.names=T)}
+      files <- list.files(d.path, "EarthEnv", full.names=TRUE)}
 
       # export raster
     if (!is.null(ref)) {
@@ -173,7 +173,7 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
       if (!p.raster) {r.data <- crop(r.data, extent(ref))}}
 
     # write raster
-    writeRaster(r.data, file.path(d.path, paste0(var.ls$code[ind], '_', paste0(tiles, collapse="-"), '.tif')), overwrite=T)
+    writeRaster(r.data, file.path(d.path, paste0(var.ls$code[ind], '_', paste0(tiles, collapse="-"), '.tif')), overwrite=TRUE)
 
   }
 

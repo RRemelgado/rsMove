@@ -86,7 +86,7 @@ dataQuery <- function(xy=xy, o.date=NULL, img=img, r.date=NULL, tb=NULL, bs=NULL
   op <- crs(xy)
 
   # read data
-  edata <- as.data.frame(extract(img, xy@coords, buffer=bs, fun=fun, na.rm=T))
+  edata <- as.data.frame(extract(img, xy@coords, buffer=bs, fun=fun, na.rm=TRUE))
 
   # extract environmental data
   if (processTime) {

@@ -80,7 +80,7 @@ backSample <- function(xy=xy, region.id=region.id, method=method, img=img, n.sam
 
   # derice background samples
   ind <- which(!(1:np)%in%sp)
-  if (!is.null(n.samples)) {ind <- ind[sample(1:length(ind), n.samples, replace=T)]}
+  if (!is.null(n.samples)) {ind <- ind[sample(1:length(ind), n.samples, replace=TRUE)]}
   xy <- rbind(xyFromCell(img[[1]], sp), xyFromCell(img[[1]], ind))
   region.id <- c(region.id, replicate(length(ind), 0))
 
@@ -103,7 +103,7 @@ backSample <- function(xy=xy, region.id=region.id, method=method, img=img, n.sam
     pcf = function(x) {which((x$sdev^2) > 1)}
 
     # estimate pca and apply kaiser rule
-    pca <- prcomp(edata, scale=T, center=T)
+    pca <- prcomp(edata, scale=TRUE, center=TRUE)
     npc <- pcf(pca)
     pca <- data.frame(pca$x[,npc])
 
