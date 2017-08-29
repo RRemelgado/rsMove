@@ -100,25 +100,24 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
     ofile <- file.path(d.path, basename(var.ls$link[ind]))
     download.file(var.ls$link[ind], ofile, quiet=TRUE, mode="wb")
 
-    if (!is.na(crs(var.ls$crs[ind]))) {
+    if (d.source=="HSM") {
+      files = unzip(ofile, list=TRUE)
+      files <- files$Name[grep("tif", files$Name)]
+      unzip(ofile, files=files, exdir=d.path, junkpaths=T, overwrite=T)
+      file.remove(ofile)
+      ofile <- paste0(d.path, .Platform$file.sep, basename(files[grep("tif$", files)]))}
 
-      if (d.source=="HSM") {
-        files = unzip(ofile, list=TRUE)
-        files <- files$Name[grep("tif", files$Name)]
-        unzip(ofile, files=files, exdir=d.path, junkpaths=T, overwrite=T)
-        file.remove(ofile)
-        ofile <- paste0(d.path, .Platform$file.sep, basename(files[grep("tif$", files)]))
-        r.data <- raster(ofile)
-      } else {
-        r.data <- raster(ofile)}
-      if (!is.null(ref)) {
-        if (p.raster) {
-          pxr <- res(r.data)[1]
-          ext <- extend(ext, pxr*pad)
-          r.data <- crop(r.data, ext)
-          r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
-        if (!p.raster) {r.data <- crop(r.data, extent(ref))}}
-      writeRaster(r.data, ofile, overwrite=T)}}
+    # crop/re-rpoeject raster
+    if (!is.null(ref)) {
+      r.data <- raster(ofile)
+      if (p.raster) {
+        pxr <- res(r.data)[1]
+        ext <- extend(ext, pxr*pad)
+        r.data <- crop(r.data, ext)
+        r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
+      if (!p.raster) {r.data <- crop(r.data, extent(ref))}
+      writeRaster(r.data, ofile, overwrite=T)}
+    }
 
   if (var.ls$code[ind] == 'DEM90' | d.source%in%c('GFC', 'GSW')) {
 
@@ -172,6 +171,8 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
         r.data <- crop(r.data, ext)
         r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
       if (!p.raster) {r.data <- crop(r.data, extent(ref))}}
+
+    # write raster
     writeRaster(r.data, file.path(d.path, paste0(var.ls$code[ind], '_', paste0(tiles, collapse="-"), '.tif')), overwrite=T)
 
   }
