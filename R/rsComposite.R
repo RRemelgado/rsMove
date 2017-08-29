@@ -1,7 +1,7 @@
 #' @title rsComposite
 #'
-#' @description {Phenological and date based compositing of
-#' remote sensing data supported by GPS tracking date information.}
+#' @description {Phenological and date driven Pixel Based Compositing (PBC)
+#' of remote sensing data supported by GPS tracking date information.}
 #' @param img Object of class \emph{RasterSpack} or \emph{RasterBrick}.
 #' @param r.dates Object of class \emph{Date} with \emph{img} observation dates.
 #' @param obs.time Object of class \emph{Date} with reference dates.

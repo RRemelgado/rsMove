@@ -1,6 +1,6 @@
 #' @title timeDir
 #'
-#' @description Temporal directional analysis of environmental change.
+#' @description Analysis of environmental change in time for a set of coordinate pairs.
 #' @param xy Object of class "SpatialPoints" or "SpatialPointsDataFrame".
 #' @param obs.date Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterStack} or \emph{RasterBrick}.

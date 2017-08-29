@@ -1,6 +1,6 @@
 #' @title spaceDir
 #'
-#' @description Spatial directional analysis of environmental change.
+#' @description Analysis of environmental change in space along a set of coordinate pairs.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterLayer}.
