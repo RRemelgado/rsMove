@@ -4,34 +4,33 @@
 \alias{satTime}
 \title{satTime}
 \usage{
-satTime(o.time = o.time, t.var = t.var, p.res = TRUE)
+satTime(obs.time = obs.time, t.var = t.var)
 }
 \arguments{
-\item{o.time}{Object of class \emph{Date}.}
+\item{obs.time}{Object of class \emph{Date}.}
 
 \item{t.var}{Target variable.}
-
-\item{p.res}{Logical. Should the output be ploted?}
 }
 \value{
 One or multiple plots.
 }
 \description{
-Finds available satellite dates for tracking data.
+{Finds available dates for satellite data
+downloadable trough proSat using tracking dates as a reference.}
 }
 \details{
-{This function compares a set of input dates (\emph{o.time}) to the possible dates for 
-which satellite data can be downloaded. This analysis is performed for the set of variables 
-provided through the function proSat(). The function provides a report with the closest dates 
-available for each of the samples and a faceted plot for each unique year showing the observed 
+{This function compares a set of input dates (\emph{obs.time}) to the possible dates for
+which satellite data can be downloaded. This analysis is performed for the set of variables
+provided through the function proSat(). The function provides a report with the closest dates
+available for each of the samples and a faceted plot for each unique year showing the observed
 dates, the dates covered by the satellite data and the dates covered by both.}
 }
 \examples{
 {
- 
+
  # return list of variables
- var.ls <- satTime(o.time=as.Date("2013-08-04"), t.var="ndvi")
- 
+ var.ls <- satTime(obs.time=as.Date("2013-08-04"), t.var="ndvi")
+
 }
 }
 \seealso{

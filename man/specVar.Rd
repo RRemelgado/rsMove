@@ -4,7 +4,7 @@
 \alias{specVar}
 \title{specVar}
 \usage{
-specVar(img = img, xy = NULL, pxr = pxr, p.res = T)
+specVar(img = img, xy = NULL, pxr = pxr)
 }
 \arguments{
 \item{img}{Object of class \emph{RasterLayer}.}
@@ -12,23 +12,23 @@ specVar(img = img, xy = NULL, pxr = pxr, p.res = T)
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{pxr}{vector of target resolutions.}
-
-\item{p.res}{Should the output be ploted on screen? Default is TRUE.}
 }
 \value{
 A \emph{list}.
 }
 \description{
-Quantifies how changes in the resolution of a raster affects the perception of spectral complexity.
+{Tool to support the selection of adequate satellite spatial
+resoltuon. Evaluates how the spectral variability within a pixel change
+after aggregated to a new resolution.}
 }
 \details{
-{Given a raster object, the function determines how reducing the resolution 
-of the raster impacts our ability to perceive the complexity of the landscape. The 
-function aggregates \emph{img} to each of the given pixel resolutions (\emph{pxr}) 
-and estimates the Mean Absolute Error (MAE) for each pixel with the aggregated 
-layer where the differences are estimated from the pixel within the original raster 
-that overlap with the target pixel. If a point shapefile is provided (\emph{xy}), 
-the function will only report on the values that overlap with the points. The output 
+{Given a raster object, the function determines how reducing the resolution
+of the raster impacts our ability to perceive the complexity of the landscape. The
+function aggregates \emph{img} to each of the given pixel resolutions (\emph{pxr})
+and estimates the Mean Absolute Error (MAE) for each pixel with the aggregated
+layer where the differences are estimated from the pixel within the original raster
+that overlap with the target pixel. If a point shapefile is provided (\emph{xy}),
+the function will only report on the values that overlap with the points. The output
 of the function consists of:
 \itemize{
  \item{\emph{mae} - MAE, either for all pixels or for the points within \emph{xy}}
@@ -38,20 +38,20 @@ of the function consists of:
 If \emph{xy} is set, the output will contain a vector with the optimal resolution per sample (\emph{$sample.optimal}).}
 }
 \examples{
-{
- 
+\dontrun{
+
  require(raster)
- 
+
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
+
  # apply function
- s.var <- specVar(img=r, xy=moveData, pxr=60, p.res=FALSE)
- 
+ s.var <- specVar(img=r, xy=moveData, pxr=60)
+
 }
 }
 \seealso{

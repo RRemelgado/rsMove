@@ -4,48 +4,47 @@
 \alias{tMoveRes}
 \title{tMoveRes}
 \usage{
-tMoveRes(xy = xy, o.time = o.time, t.res = t.res, s.res = s.res,
-  p.res = T)
+tMoveRes(xy = xy, obs.time = obs.time, t.res = t.res, s.res = s.res)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{o.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{t.res}{Temporal resolution.}
 
 \item{s.res}{Spatial resolution.}
-
-\item{p.res}{Should the output be ploted on screen? Default is TRUE.}
 }
 \value{
 A \emph{list}.
 }
 \description{
-Provides historical information on cloud cover.
+{Tool to support the selection of adequate satellite temporal
+resoltuon. Evaluates how the change in temporal resolution changes the
+amount of samples/sample regions based on a set of coordinate
+pairs and their observation dates.}
 }
 \details{
-{Given a vector of temporal resolutions (\emph{t.res}), the function determines 
-the number of unique pixels and unique pixel groups after their temporal agggation. The 
-function returns the corresponding pixel indices per resolution showing which 
-samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats}) 
+{Given a vector of temporal resolutions (\emph{t.res}), the function determines
+the number of unique pixels and unique pixel groups after their temporal agggation. The
+function returns the corresponding pixel indices per resolution showing which
+samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats})
 and a plot (\emph{$plot}) with the statistics per temporal resolution.}
 }
 \examples{
-\dontrun{
- 
+{
+
  require(raster)
- 
- # read raster data
- r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
- # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
+
+ # reference data
+ sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
+ moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
+ moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
+
  # test function for 5, 10 20 and 30 m
- a.res <- tMoveRes(xy=moveData, dpath='.')
- 
+ obs.date <- as.Date(moveData@data$timestamp)
+ a.res <- tMoveRes(xy=moveData, obs.time=obs.date, t.res=c(1,8,16), s.res=0.01)
+
 }
 }
 \seealso{

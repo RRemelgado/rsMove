@@ -21,41 +21,44 @@ plotMove(x = x, y = y, o.time = NULL, value = NULL, type = NULL)
 A \emph{ggplot} object.
 }
 \description{
-Plots per pixel time and value.
+{Standardized plotting of sampled environmental information
+ and time spent for each sample given a set of coordinate pairs.}
 }
 \details{
-{This function plots a provided set of x and y coordinates adding information on the elapsed time 
-at each coordinate (\emph{e.time}) and/or a given environmental variable (\emph{value}). If only \emph{time} 
-or \emph{value} are set, the function builds a scatterplot where the size of the points is defined by the input 
-variables. If both are provided, the size of the points is defined by the elapsed time and the raster value is 
-used to build a color scheme for the points. When \emph{value} is provided, the keyword \emph{type} is required. 
+{This function plots a provided set of x and y coordinates adding information on the elapsed time
+at each coordinate (\emph{e.time}) and/or a given environmental variable (\emph{value}). If only \emph{time}
+or \emph{value} are set, the function builds a scatterplot where the size of the points is defined by the input
+variables. If both are provided, the size of the points is defined by the elapsed time and the raster value is
+used to build a color scheme for the points. When \emph{value} is provided, the keyword \emph{type} is required.
 It will influence how the plots are built. The breaks a limits for the point size and colors is define automatically.}
 }
 \examples{
 {
- 
+
  require(raster)
 
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
+
  # observation time
  o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
- 
+
  # reduce amount of samples
  move.reduce <- moveReduce(xy=moveData, ot=o.time, img=r)
- 
+
  # query data
  ov <- dataQuery(xy=move.reduce$points, img=r)
- 
+
  # plot output
- op <- plotMove(x=move.reduce$points@coords[,1], y=move.reduce$points@coords[,2], 
- o.time=move.reduce$points@data$elapsed.time, value=ov[,1], type="cont")
- 
+ x <- move.reduce$points@coords[,1]
+ y <- move.reduce$points@coords[,2]
+ et <- move.reduce$points@data$elapsed.time
+ op <- plotMove(x=x, y=y, o.time=et, value=ov[,1], type="cont")
+
 }
 }
 \seealso{

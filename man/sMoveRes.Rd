@@ -4,43 +4,43 @@
 \alias{sMoveRes}
 \title{sMoveRes}
 \usage{
-sMoveRes(xy = xy, pxr = pxr, p.res = T)
+sMoveRes(xy = xy, pxr = pxr)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{pxr}{vector of target resolutions.}
-
-\item{p.res}{Should the output be ploted on screen? Default is TRUE.}
 }
 \value{
 A \emph{list}.
 }
 \description{
-Evaluates how a change in raster resolution impacst the availability of data points.
+{Tool to support the selection of adequate satellite spatial
+resoltuon. Evaluates how the change in spatial resolution changes the
+amount of samples/sample regions based on a set of coordinate pairs.}
 }
 \details{
-{Given a vector of pixel resolutions (\emph{pxr}), the function determines 
-the number of unique pixels and unique pixel groups. Additionaly, for each pixel, 
-the function returns the corresponding pixel indices per resolution showing which 
-samples would be grouped. The function returns a data frame (\emph{$stats}) and a 
-plot (\emph{$plot}) with the statistics per resolution as well as a data frame with 
+{Given a vector of pixel resolutions (\emph{pxr}), the function determines
+the number of unique pixels and unique pixel groups. Additionaly, for each pixel,
+the function returns the corresponding pixel indices per resolution showing which
+samples would be grouped. The function returns a data frame (\emph{$stats}) and a
+plot (\emph{$plot}) with the statistics per resolution as well as a data frame with
 the pixel indices per resolution (\emph{$indices}).}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData)
- 
+
  # test function for 5, 10 20 and 30 m
  a.res <- sMoveRes(xy=moveData, pxr=c(5, 10, 20, 30))
- 
+
 }
 }
 \seealso{
-\code{\link{tMoveRes}}
+\code{\link{tMoveRes}} \code{\link{specVar}}
 }

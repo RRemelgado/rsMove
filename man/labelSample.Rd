@@ -4,7 +4,7 @@
 \alias{labelSample}
 \title{labelSample}
 \usage{
-labelSample(xy = xy, rad = rad, npt = NULL, npx = NULL, pxr = r)
+labelSample(xy = xy, rad = rad, npt = NULL, npx = NULL, pxr = pxr)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
@@ -21,40 +21,41 @@ labelSample(xy = xy, rad = rad, npt = NULL, npx = NULL, pxr = r)
 A \emph{vector}.
 }
 \description{
-Region labeling of samples based on their spatial connectivity.
+{Region labeling of pixels based on their spatial connectivity
+for the identification and splitting of training and validation samples}.
 }
 \details{
-{First, the samples are converted to pixel coordinates and then one  
-of two occur: 1) if \emph{npt} is set, the function removes pixels with a pixel 
-count smaller than the one specified; 2) If \emph{npx} is set, the connectivity 
-between neighboring samples is evaluated and regions with a count small than the 
-specified value are filtered. Only one option may be set at a time. Then, the 
-remaining pixels are dilated and the samples are again labeled accounting for 
-regions that are not connected but are near to each other. Regions within a given 
-distance of each other (defined by \emph{rad}) are aggregated. The grid used for 
-this analysis is built from the spatial extent of \emph{xy} and a given pixel 
-resolution (\emph{pxr}). If \emph{pxr} is a raster, this will be used to define 
-the dimensions of the grid. Doing so can be of use when the user has pre-select 
-environmental predictors that will be used for modeling. Note that the finer the 
-resolution the more independent regions are likely to be returned. The output is 
-a vector with ID's assigning each sample to its region. Samples filtered by 
+{First, the samples are converted to pixel coordinates and then one
+of two occur: 1) if \emph{npt} is set, the function removes pixels with a pixel
+count smaller than the one specified; 2) If \emph{npx} is set, the connectivity
+between neighboring samples is evaluated and regions with a count small than the
+specified value are filtered. Only one option may be set at a time. Then, the
+remaining pixels are dilated and the samples are again labeled accounting for
+regions that are not connected but are near to each other. Regions within a given
+distance of each other (defined by \emph{rad}) are aggregated. The grid used for
+this analysis is built from the spatial extent of \emph{xy} and a given pixel
+resolution (\emph{pxr}). If \emph{pxr} is a raster, this will be used to define
+the dimensions of the grid. Doing so can be of use when the user has pre-select
+environmental predictors that will be used for modeling. Note that the finer the
+resolution the more independent regions are likely to be returned. The output is
+a vector with ID's assigning each sample to its region. Samples filtered by
 \emph{npt} or \emph{npx} will be returned as zeros.}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
+
  # derive region labels
  labels <- labelSample(xy=moveData, rad=90, npx=2, pxr=30)
- 
+
 }
 }
 \seealso{

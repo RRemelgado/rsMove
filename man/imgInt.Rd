@@ -4,17 +4,17 @@
 \alias{imgInt}
 \title{imgInt}
 \usage{
-imgInt(img = NULL, rd = rd, td = td, bs = NULL, xy = NULL,
-  edata = NULL)
+imgInt(img = NULL, r.dates = r.dates, obs.dates = obs.dates,
+  time.buffer = NULL, xy = NULL, edata = NULL)
 }
 \arguments{
 \item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{rd}{Raster dates. Object of class \emph{Date}.}
+\item{r.dates}{Raster dates. Object of class \emph{Date}.}
 
-\item{td}{Target dates. Object of class \emph{Date}.}
+\item{obs.dates}{Target dates. Object of class \emph{Date}.}
 
-\item{bs}{wo element vector with temporal search buffer (expressed in days).}
+\item{time.buffer}{wo element vector with temporal search buffer (expressed in days).}
 
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
@@ -24,38 +24,39 @@ imgInt(img = NULL, rd = rd, td = td, bs = NULL, xy = NULL,
 A \emph{RasterBrick} or a \emph{data frame}.
 }
 \description{
-Temporal linear interpolation of raster data.
+{Temporal linear interpolation of raster data for
+\emph{rasters}, \emph{SpatialPointsDataFrames} or \emph{data frames}.}
 }
 \details{
-{Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{td}). 
-A teporal buffer (\emph{bs}) is required to limit the search for reference data points (\emph{rd}). \emph{bs} 
-is defined by a two element vector which limits the search of images in the past and future. If \emph{xy} is 
-provided the function only considers the pixels that overlap with the these sample points. Otherwise, a RasterBrick 
+{Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{obs.dates}).
+A teporal buffer (\emph{time.buffer}) is required to limit the search for reference data points (\emph{r.dates}). \emph{time.buffer}
+is defined by a two element vector which limits the search of images in the past and future. If \emph{xy} is
+provided the function only considers the pixels that overlap with the these sample points. Otherwise, a RasterBrick
 is provided. However, if \emph{edata} is provided, \emph{xy} and \emph{img} are ignored. and a data frame is provided.}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  #'  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
- 
+
  # raster dates
- rd = seq.Date(as.Date("2012-01-01"), as.Date("2012-12-31"), 45)
- 
+ r.dates = seq.Date(as.Date("2012-01-01"), as.Date("2012-12-31"), 45)
+
  # target dates
- td = as.Date("2012-04-01")
- 
+ obs.dates = as.Date("2012-04-01")
+
  # interpolate raster data to target dates
- i.img <- imgInt(img=rsStk, rd=rd, td=td, bs=c(60,60), xy=moveData)
- 
+ i.img <- imgInt(img=rsStk, r.dates=r.dates, obs.dates=obs.dates, time.buffer=c(60,60), xy=moveData)
+
 }
 }
 \seealso{

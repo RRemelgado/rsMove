@@ -29,10 +29,10 @@ One or multiple raster objects.
 Interface to download ecologically relevant data.
 }
 \details{
-{Downloads data from earthenv.org. To check which variables can be downloaded, 
-run the function without specifying \emph{t.var} and specifying \emph{d.source}. This will 
-return a data frame listing the existing variables for a given data source. Here, the user 
-can refer to the column \emph{"code"} to retrieve the keywords that can be passed to 
+{Downloads data from earthenv.org. To check which variables can be downloaded,
+run the function without specifying \emph{t.var} and specifying \emph{d.source}. This will
+return a data frame listing the existing variables for a given data source. Here, the user
+can refer to the column \emph{"code"} to retrieve the keywords that can be passed to
 the function through \emph{t.var}. The keywords recognized by \emph{d.source} are:
 \itemize{
 \item{\emph{"EarthEnv"} - EarthEnv project.}
@@ -41,14 +41,15 @@ the function through \emph{t.var}. The keywords recognized by \emph{d.source} ar
 \item{\emph{"CCI"} - ESA CCI Global land cover.}
 \item{\emph{"HSM"} - JRC Human Settlement map.}
 \item{\emph{"NEO"} - NASA Earth Observations.}}
-If \emph{t.var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"} 
-or \emph{"GSW"}, The function might require more time as it will mosaic the tiles with which 
-the rerence spatial object (\emph{ref}) overlap with. In any circunstance, the output will be 
-cropped to the extent of \emph{ref} and, if prompted, use it as a reference to reproject the output.}
+If \emph{t.var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"}
+or \emph{"GSW"}, The function will require a reference spatial object (\emph{ref}) to
+determine which tiles to download. The user can also set \emph{p.raster} to TRUE and define
+a reference spatial resolution (\emph{s.res}) to re-project the data. The use of \emph{ref})
+with the remaining variables is optional. If prompted, These files can also be cropped and reprojected.}
 }
 \examples{
-{
- 
+\dontrun{
+
  # return list of variables
  ee.var <- getEnv(d.source="EarthEnv")
  gfc.var <- getEnv(d.source="GFC")
@@ -56,15 +57,19 @@ cropped to the extent of \emph{ref} and, if prompted, use it as a reference to r
  cci.var <- getEnv(d.source="CCI")
  hsm.var <- getEnv(d.source="HSM")
  neo.var <- getEnv(d.source="NEO")
- 
+
+ # download bathimetry data
+ getEnv(d.source="NEO", t.var="bat", d.path=".")
+ getEnv(d.source="CCI", t.var="2015", d.path=".")
+
 }
 }
 \references{
-{\url{http://www.earthenv.org/} 
-\url{https://earthenginepartners.appspot.com/science-2013-global-forest} 
+{\url{http://www.earthenv.org/}
+\url{https://earthenginepartners.appspot.com/science-2013-global-forest}
 \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}
 \url{http://maps.elie.ucl.ac.be/CCI/viewer/} \url{https://neo.sci.gsfc.nasa.gov/}}
 }
 \seealso{
-\code{\link{dataQuery}} \code{\link{spaceDir}}
+\code{\link{dataQuery}} \code{\link{proSat}}
 }

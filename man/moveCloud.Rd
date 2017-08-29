@@ -4,37 +4,36 @@
 \alias{moveCloud}
 \title{moveCloud}
 \usage{
-moveCloud(xy = xy, o.time = o.time, d.path = NULL, b.size = NULL,
-  remove.file = TRUE, p.res = T)
+moveCloud(xy = xy, obs.time = obs.time, d.path = NULL, b.size = NULL,
+  remove.file = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{o.time}{Object of class \emph{Date}.}
+\item{obs.time}{Object of class \emph{Date}.}
 
 \item{d.path}{Output data path for downloaded data.}
 
 \item{b.size}{Two element vector with temporal buffer size (expressed in days).}
 
 \item{remove.file}{Logical. Should the files be deleted after usage?}
-
-\item{p.res}{Should the output be ploted on screen? Default is TRUE.}
 }
 \value{
 A \emph{list}.
 }
 \description{
-Provides historical information on cloud cover.
+{Provides historical information on cloud cover for a set of coordinate
+pairs. The temporal information is adjusted to the sample observation date}.
 }
 \details{
-{This function makes uses daily cloud fraction data from NASA's NEO service. 
-For each observation date (\emph{o.time}), the function downloads the correspondent image 
-and extracts the percent of cloud cover for the samples acquired at the target date. If 
-\emph{d.path} is specified, the function will look within the provided directory for the 
-required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each 
-date, the function will consider images before and after within a temporal buffer. \emph{d.buffer} 
-requires two elements which specify the buffer size before and after the target date. These 
-new images will be used to report on the closest time step with the lowest possible cloud 
+{This function makes uses daily cloud fraction data from NASA's NEO service.
+For each observation date (\emph{obs.time}), the function downloads the correspondent image
+and extracts the percent of cloud cover for the samples acquired at the target date. If
+\emph{d.path} is specified, the function will look within the provided directory for the
+required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each
+date, the function will consider images before and after within a temporal buffer. \emph{d.buffer}
+requires two elements which specify the buffer size before and after the target date. These
+new images will be used to report on the closest time step with the lowest possible cloud
 cover. The final report provides information on:
 \itemize{
  \item{\emph{day.cover}: cloud cover for the observation date}
@@ -42,27 +41,27 @@ cover. The final report provides information on:
  \item{\emph{p.cover.before}: cloud cover for \emph{p.day.before}}
  \item{\emph{p.day.after}: date after the obsertation date with the lowest cloud cover}
  \item{\emph{p.cover.after}: cloud cover for \emph{p.day.after}}}
- The output will also contain a two plots with information on the distance between the 
- observation dates and the closest date with the lowest cloud cover. The plots show the 
- amount of samples that are covered in each of the target dates for the best dates before 
+ The output will also contain a two plots with information on the distance between the
+ observation dates and the closest date with the lowest cloud cover. The plots show the
+ amount of samples that are covered in each of the target dates for the best dates before
  (\emph{$plot.before}) and after (\emph{$plot.after}) the observation dates.}
 }
 \examples{
 \dontrun{
- 
+
  require(raster)
- 
+
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
- # test function for 5, 10 20 and 30 m
+
+ # test function for 30 day buffer
  od <- as.Date(moveData@data$date)
- c.cover <- moveCloud(xy=moveData, o.time=od, d.path=".", b.size=30)
- 
+ c.cover <- moveCloud(xy=moveData, obs.time=od, d.path=".", b.size=c(30,30))
+
 }
 }
 \references{

@@ -31,32 +31,47 @@ One or multiple raster objects.
 Interface to download and process satelite data.
 }
 \details{
-{Downloads and pre-processes pre-selected satellite datasets That provide ecologically 
-meaningful variables. \emph{xy} is required to define a reference extent for which the data will 
-be downloaded and croped. If \emph{p.raster} is TRUE, the function will also re-project the output 
-to the projection of \emph{xy}. Note that \emph{xy} does not required reprojection a priori. The 
-function will find the approapriate projection to use when deriving a reference extent. If \emph{p.raster} 
-is TRUE \emph{p.res} is also required to determine the output pixel resolution. The outputs are presented 
-in GTiff format and are croped and masked by default. Note that the download files might not correspond to 
-the dates supplied through \emph{o.time}. The function will consider the temporal resolution of the target 
-dataset and compare the possible and the requested dates. If a requested date is not found, the 
-function will instead provide the closest image time. As a consequence, the number of downloaded 
-files might be lesser than the number of dates. The function will inform the user on this by providing 
-a list object which contains the downloaded dates (\emph{$date}) as well as the path for the correspondent 
+{Downloads and pre-processes pre-selected satellite datasets That provide ecologically
+meaningful variables. \emph{xy} is required to define a reference extent for which the data will
+be downloaded and croped. If \emph{p.raster} is TRUE, the function will also re-project the output
+to the projection of \emph{xy}. Note that \emph{xy} does not required reprojection a priori. The
+function will find the approapriate projection to use when deriving a reference extent. If \emph{p.raster}
+is TRUE \emph{p.res} is also required to determine the output pixel resolution. The outputs are presented
+in GTiff format and are croped and masked by default. Note that the download files might not correspond to
+the dates supplied through \emph{o.time}. The function will consider the temporal resolution of the target
+dataset and compare the possible and the requested dates. If a requested date is not found, the
+function will instead provide the closest image time. As a consequence, the number of downloaded
+files might be lesser than the number of dates. The function will inform the user on this by providing
+a list object which contains the downloaded dates (\emph{$date}) as well as the path for the correspondent
 image (\emph{$path}).}
 }
 \note{
 {To consult the list of provided variables, run the function without specifying any input.
-This will provide information on the variables, variable codes (used in \emph{t.var}), temporal and 
-spatial resolution and the sensor of origin. Some variables might require login credentials. Check 
+This will provide information on the variables, variable codes (used in \emph{t.var}), temporal and
+spatial resolution and the sensor of origin. Some variables might require login credentials. Check
 the table to know which credentials to use and assign them through \emph{user.cred}.}
 }
 \examples{
-{
- 
- # return list of variables
- modis.var <- proSat()
- 
+\dontrun{
+
+ require(raster)
+
+ # read raster data
+ r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+
+ # read movement data
+ moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+ moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+ obs.date <- as.Date(moveData@data$date)
+
+ # download NDVI image for query date
+ ndvi.file <- proSat(t.var="ndvi",
+ xy=moveData, o.time=obs.date, d.path=".",
+ p.raster=T, p.res=250)
+
+ # print output data path and date
+ ndvi.file
+
 }
 }
 \seealso{

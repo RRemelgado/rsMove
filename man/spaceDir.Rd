@@ -4,13 +4,13 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(xy = xy, ot = NULL, img = img, dir = dir, type = type,
-  dm = "m", b.size = NULL, fun = NULL, npx = 2)
+spaceDir(xy = xy, obs.time = NULL, img = img, dir = dir, type = type,
+  dist.method = "m", b.size = NULL, fun = NULL, npx = 2)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterLayer}.}
 
@@ -18,7 +18,7 @@ spaceDir(xy = xy, ot = NULL, img = img, dir = dir, type = type,
 
 \item{type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
 
-\item{dm}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
+\item{dist.method}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
 
 \item{b.size}{Buffer size expressed in the map units.}
 
@@ -30,17 +30,17 @@ spaceDir(xy = xy, ot = NULL, img = img, dir = dir, type = type,
 A \emph{list}.
 }
 \description{
-Spatial directional raster analysis.
+Analysis of environmental change in space along a set of coordinate pairs.
 }
 \details{
-{This function evaluates how do environmental conditions change in space 
-along a movement track. First, it looks at consectuve observations to define spatial segments. 
-All the pixels between the two endpoints of the segment are considered in this process. 
-The user can use the argument \emph{dir} to prompt the function to focus on previous 
-(\emph{bwd}) or following (\emph{fwd}) observations or to look in both directions (\emph{both}) 
-when defining the segments. The output consists of a list containing two shapefiles, one 
-\emph{SpatialPointsDataFrame} (\emph{$endpoints}) with the endpoints of each segment and a 
-\emph{SpatialLinesDataFrame} (\emph{$segments}) representing each segment. The data frames provided 
+{This function evaluates how do environmental conditions change in space
+along a movement track. First, it looks at consectuve observations to define spatial segments.
+All the pixels between the two endpoints of the segment are considered in this process.
+The user can use the argument \emph{dir} to prompt the function to focus on previous
+(\emph{bwd}) or following (\emph{fwd}) observations or to look in both directions (\emph{both})
+when defining the segments. The output consists of a list containing two shapefiles, one
+\emph{SpatialPointsDataFrame} (\emph{$endpoints}) with the endpoints of each segment and a
+\emph{SpatialLinesDataFrame} (\emph{$segments}) representing each segment. The data frames provided
 with these shapefiles reports on:
 \itemize{
  \item{\emph{x} - mean x coordinates}
@@ -49,38 +49,38 @@ with these shapefiles reports on:
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
  \item{\emph{travel.distance} - distance between a segment endpoints}
  \item{\emph{travel.time} - elapsed time between a segment endpoints}}
- The additionaly information added to the data frame depends on the type of data. If \emph{type} is set 
- to \emph{'cont'}, the function will assume the input raster is a continuous variable as estimate a 
- statistical metric for each segment. If none is provided throught the keyword \emph{fun}, the slope 
- will be returned by default and assigned to the column \emph{'stat'} within the output data frame. If 
+ The additionaly information added to the data frame depends on the type of data. If \emph{type} is set
+ to \emph{'cont'}, the function will assume the input raster is a continuous variable as estimate a
+ statistical metric for each segment. If none is provided throught the keyword \emph{fun}, the slope
+ will be returned by default and assigned to the column \emph{'stat'} within the output data frame. If
  \emph{type} is set to '\emph{'cat'}, the function will assume the data is categorical. As a result,
- the keyword \emph{fun} is ignored. Instead, the function will return the proportion of pixels occupied 
- by each class for each segment. In addition, the dominant class (\emph{'main'}) and the shannon index 
- (\emph{'shannon'}) will be returned for each segment within the output data frame. In order to include 
- the area surrounding the sample points in this analysis, \emph{d.buffer} can be used. This keyword 
+ the keyword \emph{fun} is ignored. Instead, the function will return the proportion of pixels occupied
+ by each class for each segment. In addition, the dominant class (\emph{'main'}) and the shannon index
+ (\emph{'shannon'}) will be returned for each segment within the output data frame. In order to include
+ the area surrounding the sample points in this analysis, \emph{d.buffer} can be used. This keyword
  dilates the interpolated sample points by a given distance transforming the initial line into a polygon.}
- @note {If \emph{d.buffer} is used, the default \emph{fun} (the slope) is not adequate given that spatial 
+ @note {If \emph{d.buffer} is used, the default \emph{fun} (the slope) is not adequate given that spatial
  order of the samples is not preserved. This should be considered when using these keywords simulaneously,}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
+
  # observation time
- ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
- 
+ obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+
  # perform directional sampling
  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
- s.sample <- spaceDir(xy=moveData, ot=ot, img=r, dir="bwd", type='cont', fun=of)
- 
+ s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r, dir="bwd", type='cont', fun=of)
+
 }
 }
 \seealso{

@@ -4,46 +4,47 @@
 \alias{segRaster}
 \title{segRaster}
 \usage{
-segRaster(prob, pt = 0.1, mp = 0.5)
+segRaster(prob, break.point = 0.1, min.prob = 0.5)
 }
 \arguments{
 \item{prob}{Object of class \emph{RasterLayer}.}
 
-\item{pt}{Difference threshold. Default is 0.05.}
+\item{break.point}{Difference threshold. Default is 0.05.}
 
-\item{mp}{Minimum value. Default is 0.5.}
+\item{min.prob}{Minimum value. Default is 0.5.}
 }
 \value{
 A list object.
 }
 \description{
-Connencte-region based raster segmentation.
+{Connencte-region based raster segmentation
+that preserves spatial gradients and reports on region statistics.}
 }
 \details{
-{The function segments an input layer using a connected 
-component region labeling approach. For each pixel, the function 
-estimates the difference between it and its imediate 8 neighbors. 
-The pixels where the difference is below the defined threshold 
-(\emph{ct}) are aggregated into a single region. The user can define 
-a minimum pixel value using \emph{mp} which will limit the range of 
-pixels under evaluation. The result contains a raster with unique 
-values for each segment region region (\emph{$segment}) as well as a 
-data frame (\emph{$stats}) with statistics for each region. The data 
-frame report on the minimum (\emph{min}), maximum (\emph{max}), mean (\emph{mean}) 
+{The function segments an input layer using a connected
+component region labeling approach. For each pixel, the function
+estimates the difference between it and its imediate 8 neighbors.
+The pixels where the difference is below the defined threshold
+(\emph{ct}) are aggregated into a single region. The user can define
+a minimum pixel value using \emph{min.prob} which will limit the range of
+pixels under evaluation. The result contains a raster with unique
+values for each segment region region (\emph{$segment}) as well as a
+data frame (\emph{$stats}) with statistics for each region. The data
+frame report on the minimum (\emph{min}), maximum (\emph{max}), mean (\emph{mean})
 and standard deviation (\emph{sd}) of the pixels contained in each region.}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # load example probability image
  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
  probImg <- raster(file)
- 
+
  # segment probabilities
  rs <- segRaster(probImg)
- 
+
 }
 }
 \seealso{

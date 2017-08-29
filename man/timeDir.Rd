@@ -4,21 +4,21 @@
 \alias{timeDir}
 \title{timeDir}
 \usage{
-timeDir(xy = NULL, ot = ot, img = NULL, edata = NULL, rt = rt,
-  mws = NULL, dir = NULL, fun = NULL)
+timeDir(xy = NULL, obs.date = obs.date, img = NULL, edata = NULL,
+  r.date = r.date, window.size = NULL, dir = NULL, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class "SpatialPoints" or "SpatialPointsDataFrame".}
 
-\item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.date}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
 
 \item{edata}{Object of class \emph{data frame}.}
 
-\item{rt}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.}
+\item{r.date}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.}
 
-\item{mws}{Moving window size (expressed in days).}
+\item{window.size}{Moving window size (expressed in days).}
 
 \item{dir}{One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.}
 
@@ -28,20 +28,20 @@ timeDir(xy = NULL, ot = ot, img = NULL, edata = NULL, rt = rt,
 A \emph{vector}.
 }
 \description{
-Temporal directional raster analysis.
+Analysis of environmental change in time for a set of coordinate pairs.
 }
 \details{
-{This function evaluates how do environmental conditions change in time 
-along a movement track. First, it compares the observation times (\emph{ot}) 
-of \emph{xy} against the acquisition times (\emph{rt}) of \emph{img} to search for relevant 
-information within a pre-defined temporal window (\emph{mws}). The user can chose to 
-only consider time steps before (\emph{bwd}) or after (\emph{fwd} the target observation 
-time or look at both directios (\emph{both}). If the latest is chosen, the function 
-applies \emph{mws} equally to both directions. After selecting adequate temporal 
-information, a statistical metric (\emph{fun}) is used to summarize the selected 
-time steps. By default, the slope will be used. The slope is estimated from 
-a linear regression estimated between the acquisition times of \emph{img} and their 
-corresponding values. When providing a new function, set x for time and y for 
+{This function evaluates how do environmental conditions change in time
+along a movement track. First, it compares the observation times (\emph{obs.date})
+of \emph{xy} against the acquisition times (\emph{r.date}) of \emph{img} to search for relevant
+information within a pre-defined temporal window (\emph{window.size}). The user can chose to
+only consider time steps before (\emph{bwd}) or after (\emph{fwd} the target observation
+time or look at both directios (\emph{both}). If the latest is chosen, the function
+applies \emph{window.size} equally to both directions. After selecting adequate temporal
+information, a statistical metric (\emph{fun}) is used to summarize the selected
+time steps. By default, the slope will be used. The slope is estimated from
+a linear regression estimated between the acquisition times of \emph{img} and their
+corresponding values. When providing a new function, set x for time and y for
 the raster values. The output reports on:
 \itemize{
  \item{\emph{x} - mean x coordinates}
@@ -49,35 +49,35 @@ the raster values. The output reports on:
  \item{\emph{timestamp} - mean observation time}
  \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
  \item{\emph{stat}: statistical metric}}
-If \emph{edata} is provided, \emph{img} will be ignores as \emph{edata} will contain the environmental data 
-with each column representing a different variable. Otherwise, this data will be retrieved from \emph{img}. 
-Also, if \emph{edata} is provided, \emph{xy} is not required. However, it can be provided to built a spatial 
+If \emph{edata} is provided, \emph{img} will be ignores as \emph{edata} will contain the environmental data
+with each column representing a different variable. Otherwise, this data will be retrieved from \emph{img}.
+Also, if \emph{edata} is provided, \emph{xy} is not required. However, it can be provided to built a spatial
 plot with the results of the analysis.}
 }
 \examples{
 {
- 
+
  require(raster)
 
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
- 
+
  # raster dates
  rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
- 
+
  # sample dates
- ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
- 
+ obs.date <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+
  # perform directional sampling
  of <- function(x,y) {lm(y~x)$coefficients[2]}
- time.env <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
- 
+ time.env <- timeDir(xy=moveData, obs.date=obs.date, img=rsStk, r.date=rd, window.size=10, dir="bwd", fun=of)
+
 }
 }
 \seealso{

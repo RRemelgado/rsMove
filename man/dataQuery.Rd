@@ -4,21 +4,21 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
-  bs = NULL, fun = NULL)
+dataQuery(xy = xy, obs.date = NULL, img = img, r.date = NULL,
+  time.buffer = NULL, spatial.buffer = NULL, fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{st}{Object of class \emph{Date} with \emph{xy} observation dates.}
+\item{obs.date}{Object of class \emph{Date} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{rt}{Object of class \emph{Date} with \emph{img} observation dates.}
+\item{r.date}{Object of class \emph{Date} with \emph{img} observation dates.}
 
-\item{tb}{Two element vector with temporal search buffer, expressed in days.}
+\item{time.buffer}{Two element vector with temporal search buffer, expressed in days.}
 
-\item{bs}{Buffer size (unit depends on the raster projection).}
+\item{spatial.buffer}{Buffer size (unit depends on the raster projection).}
 
 \item{fun}{Passes an external function.}
 }
@@ -26,39 +26,39 @@ dataQuery(xy = xy, st = NULL, img = img, rt = NULL, tb = NULL,
 A n object of class \emph{vector} or \emph{data.frame}.
 }
 \description{
-Query environmental data for coordinate pairs.
+Query environmental data for coordinate pairs using the nearest non NA value in time.
 }
 \details{
 {Returns environmental variables from a raster object for a given set of x and y coordinates.
-         A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample 
-         within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided 
-         (\emph{rt}) and the date of sampling (\emph{st}). In this case, the function will treat the raster 
-         data as a time series and search for clear pixel in time within the contraints of a temporal buffer 
-         defined by \emph{tb}. \emph{tb} passes two values which represent the size of the buffer in two 
+         A buffer size (\emph{spatial.buffer}) and a user defined function (\emph{fun}) can be specified to sample
+         within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided
+         (\emph{r.date}) and the date of sampling (\emph{obs.date}). In this case, the function will treat the raster
+         data as a time series and search for clear pixel in time within the contraints of a temporal buffer
+         defined by \emph{time.buffer}. \emph{time.buffer} passes two values which represent the size of the buffer in two
          directions: before and after the target date. This allows for bacward and forward sampling.}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
- 
+
  # raster dates
  r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
- 
+
  # sample dates
- o.date <- as.Date(moveData@data$date)
- 
+ obs.date <- as.Date(moveData@data$date)
+
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData, st=o.date, img=rsStk, rt=r.date, tb=c(30,30))
+ rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, img=rsStk, r.date=r.date, time.buffer=c(30,30))
 
 }
 

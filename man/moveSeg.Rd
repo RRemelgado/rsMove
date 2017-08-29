@@ -4,7 +4,7 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = xy, edata = edata, type = "cont", ot = NULL,
+moveSeg(xy = xy, edata = edata, type = "cont", obs.time = NULL,
   b.size = NULL, threshold = NULL, s.fun = NULL)
 }
 \arguments{
@@ -14,7 +14,7 @@ moveSeg(xy = xy, edata = edata, type = "cont", ot = NULL,
 
 \item{type}{Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).}
 
-\item{ot}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{b.size}{Buffer size expressed in the map units.}
 
@@ -26,49 +26,50 @@ moveSeg(xy = xy, edata = edata, type = "cont", ot = NULL,
 A \emph{list}.
 }
 \description{
-Remote sensing based point segmentation
+{Segmentation of spatial points using categorigal
+or continuous remote sensing data with reporting of time spend per segment.}
 }
 \details{
-{Segmentation of a point shapefile based on the spatial variability 
-of a raster dataset. When the \emph{method} is set to \emph{'cont'}, the raster 
-data is assumed to be continuous. Then, the function determines the percentual 
-change between each pair of two consecutive coordinate pairs. If this change is 
-above a predifined \emph{threshold}, a new pointer is added and the previous 
-sequence of samples is labeled as a unique segment. If \emph{method} is set as 
-\emph{'cat'}, the function assumes the raster data is categorical ignoring the 
-\emph{theshold} and \emph{s.fun} keywords. In this case, a new segment is identified 
-if the any change is observed between two consecutife points. The output consists of 
-a list containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the 
-segment ID (\emph{sid}) associated to each sample and a data frame (\emph{$report}) 
-with the amount of points in each region and the value returned by \emph{s.fun}. If 
-\emph{ot} is provided, the function also provides the elapsed time within each segment. 
-If \emph{fun} is set by the user, the provided function will be used to summarize the 
-raster values at each segment. Also, if \emph{edata} is a \emph{RasterStack} or a 
-\emph{RasterBrick}, \emph{r.fun} is used to reduce the multi-layered object to a single 
-layer. he user can either use a Principal Component Analysis (PCA) analysis by setting 
-\emph{r.fun} to \emph{pca} or provide a function. If \emph{pca} is selected, the first 
-Principal Conponent (PC) \emph{threshold} will be set automatically to the standard 
-deviation of the first PC. This is the default. If \emph{method} is \emph{cat} the 
+{Segmentation of a point shapefile based on the spatial variability
+of a raster dataset. When the \emph{method} is set to \emph{'cont'}, the raster
+data is assumed to be continuous. Then, the function determines the percentual
+change between each pair of two consecutive coordinate pairs. If this change is
+above a predifined \emph{threshold}, a new pointer is added and the previous
+sequence of samples is labeled as a unique segment. If \emph{method} is set as
+\emph{'cat'}, the function assumes the raster data is categorical ignoring the
+\emph{theshold} and \emph{s.fun} keywords. In this case, a new segment is identified
+if the any change is observed between two consecutife points. The output consists of
+a list containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the
+segment ID (\emph{sid}) associated to each sample and a data frame (\emph{$report})
+with the amount of points in each region and the value returned by \emph{s.fun}. If
+\emph{obs.time} is provided, the function also provides the elapsed time within each segment.
+If \emph{fun} is set by the user, the provided function will be used to summarize the
+raster values at each segment. Also, if \emph{edata} is a \emph{RasterStack} or a
+\emph{RasterBrick}, \emph{r.fun} is used to reduce the multi-layered object to a single
+layer. he user can either use a Principal Component Analysis (PCA) analysis by setting
+\emph{r.fun} to \emph{pca} or provide a function. If \emph{pca} is selected, the first
+Principal Conponent (PC) \emph{threshold} will be set automatically to the standard
+deviation of the first PC. This is the default. If \emph{method} is \emph{cat} the
 function will assume the data is categorical and wil define segments whenever a change occurres.}
 }
 \examples{
 {
- 
+
  require(raster)
 
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
- 
+
  # observation time
  o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
- 
+
  # perform directional sampling
- seg <- moveSeg(xy=moveData, ot=o.time, edata=r, type="cont", threshold=0.1)
- 
+ seg <- moveSeg(xy=moveData, obs.time=o.time, edata=r, type="cont", threshold=0.1)
+
 }
 }
 \seealso{

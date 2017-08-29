@@ -4,18 +4,19 @@
 \alias{backSample}
 \title{backSample}
 \usage{
-backSample(xy = xy, rid = rid, method = method, img = img, nb = NULL)
+backSample(xy = xy, region.id = region.id, method = method, img = img,
+  n.samples = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
-\item{rid}{Vector of region identifyers for each sample.}
+\item{region.id}{Vector of region identifyers for each sample.}
 
 \item{method}{One of \emph{random} or \emph{pca}. Default is \emph{random}.}
 
 \item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{nb}{Number of random background samples.}
+\item{n.samples}{Number of random background samples.}
 }
 \value{
 A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
@@ -24,39 +25,39 @@ A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
 Background sample selection.
 }
 \details{
-{The function selects a set of n background samples where n is determined by 
-\emph{nb}. If \emph{nb} is not provided all background pixels are considered. If the 
-method is \emph{random} these samples are returned in the form of a \emph{SpatialPoints} 
-object. If \emph{pca} is used, a PCA analysis is performed over all available samples 
-(provided and random). For each unique region ID (\emph{rid}) the median and the Median 
-Absolute Deviation (MAD) is estimated for a given Principal Component (PC). Background 
-samples where the difference between their variance and the variance of the region samples 
-exceeds the MAD are selected. Only the samples that are selected by all unique regions are 
-kept. This process is repeated for all PC's with eigenvalues greater than 1 (Kaiser rule). 
-The final set of samples corresponds to the unique records selected by the different PC's. 
-These samples are returned as a SpatialPointsDataFrame containing the variables extracted 
+{The function selects a set of n background samples where n is determined by
+\emph{n.samples}. If \emph{n.samples} is not provided all background pixels are considered. If the
+method is \emph{random} these samples are returned in the form of a \emph{SpatialPoints}
+object. If \emph{pca} is used, a PCA analysis is performed over all available samples
+(provided and random). For each unique region ID (\emph{region.id}) the median and the Median
+Absolute Deviation (MAD) is estimated for a given Principal Component (PC). Background
+samples where the difference between their variance and the variance of the region samples
+exceeds the MAD are selected. Only the samples that are selected by all unique regions are
+kept. This process is repeated for all PC's with eigenvalues greater than 1 (Kaiser rule).
+The final set of samples corresponds to the unique records selected by the different PC's.
+These samples are returned as a SpatialPointsDataFrame containing the variables extracted
 from \emph{img}.}
 }
 \examples{
 {
- 
+
  require(raster)
- 
+
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
  rsStk <- stack(file)
- 
+
  # read movement data
  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
- 
+
  # find sample regions
  label <- labelSample(xy=moveData, rad=500, npx=2, pxr=30)
- 
+
  # select background samples
  ind <- which(label>0) # selected samples
- bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='random')
- 
+ bSamples <- backSample(xy=moveData[ind,], region.id=label[ind], img=rsStk, method='random')
+
 }
 }
 \seealso{

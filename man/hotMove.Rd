@@ -17,16 +17,16 @@ hotMove(xy = xy, pxr = pxr, shp = FALSE)
 A list object.
 }
 \description{
-Identifies hotspots of samples using a pixel based approach.
+Regional detection of sample hotspots using a pixel based approach.
 }
 \details{
-{The function builds a matrix for a given resolution and a 
-spatial extent derived from a set of samples (\emph{xy}). First, these 
-samples are converted into unique pixel coordinates. Then, the 
-spatial connectivity of these pixels is evaluated using a 8-neighboor 
-connected component labelling algorithm. The function returns a vector 
-with the region ID per sample (\emph{$indices}). If \emph{shp} is TRUE the 
-function also returns a shapefile for each region defined by the 
+{The function builds a matrix for a given resolution and a
+spatial extent derived from a set of samples (\emph{xy}). First, these
+samples are converted into unique pixel coordinates. Then, the
+spatial connectivity of these pixels is evaluated using a 8-neighboor
+connected component labelling algorithm. The function returns a vector
+with the region ID per sample (\emph{$indices}). If \emph{shp} is TRUE the
+function also returns a shapefile for each region defined by the
 convex hull of the samples within them (\emph{$polygons}).}
 }
 \examples{
