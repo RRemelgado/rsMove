@@ -24,15 +24,16 @@
 #' \item{\emph{"HSM"} - JRC Human Settlement map.}
 #' \item{\emph{"NEO"} - NASA Earth Observations.}}
 #' If \emph{t.var} contains \emph{"DEM90"} from {"EarthEv"} or any variable from \emph{"GFC"}
-#' or \emph{"GSW"}, The function might require more time as it will mosaic the tiles with which
-#' the rerence spatial object (\emph{ref}) overlap with. In any circunstance, the output will be
-#' cropped to the extent of \emph{ref} and, if prompted, use it as a reference to reproject the output.}
+#' or \emph{"GSW"}, The function will require a reference spatial object (\emph{ref}) to
+#' determine which tiles to download. The user can also set \emph{p.raster} to TRUE and define
+#' a reference spatial resolution (\emph{s.res}) to re-project the data. The use of \emph{ref})
+#' with the remaining variables is optional. If prompted, These files can also be cropped and reprojected.}
 #' @references {\url{http://www.earthenv.org/}
 #' \url{https://earthenginepartners.appspot.com/science-2013-global-forest}
 #' \url{https://global-surface-water.appspot.com/} \url{http://ghsl.jrc.ec.europa.eu/}
 #' \url{http://maps.elie.ucl.ac.be/CCI/viewer/} \url{https://neo.sci.gsfc.nasa.gov/}}
 #' @seealso \code{\link{dataQuery}} \code{\link{proSat}}
-#' @examples {
+#' @examples \dontrun{
 #'
 #'  # return list of variables
 #'  ee.var <- getEnv(d.source="EarthEnv")
@@ -41,6 +42,10 @@
 #'  cci.var <- getEnv(d.source="CCI")
 #'  hsm.var <- getEnv(d.source="HSM")
 #'  neo.var <- getEnv(d.source="NEO")
+#'
+#'  # download bathimetry data
+#'  getEnv(d.source="NEO", t.var="bat")
+#'  getEnv(d.source"CCI", t.var="2015")
 #'
 #' }
 #' @export
@@ -73,8 +78,11 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
   if (length(ind)==0) {stop('"t.var" is not a valid variable')}
 
   # check reference fil
-  if (is.null(ref)) {stop('Selected a tiled product. Provide "ref"')}
-  if (!is.na(crs(var.ls$crs[ind]))) {ext <- extent(projectExtent(ref, crs(var.ls$crs[ind])))} #  project extent
+  if (!is.null(ref)) {
+    ext <- extent(projectExtent(ref, crs(var.ls$crs[ind])))} #  project extent
+
+
+  if (!is.)
 
   # check output path
   if (is.null(d.path)) {stop('"d.path" is missing')}
@@ -82,7 +90,9 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
   d.path <- file.path(d.path)
 
   # check re-projection parameters
-  if (p.raster) if (is.null(p.res)) {'"p.raster" set to TRUE. Please define "p.res"'}
+  if (p.raster) {
+    if (is.null(p.res)) {stop('"p.raster" set to TRUE. Please define "p.res"')}
+    if (!is.numeric(p.res)) {stop('"p.res" is not numeric')}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 3. download each variable
@@ -104,15 +114,19 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
         r.data <- raster(ofile)
       } else {
         r.data <- raster(ofile)}
-      if (p.raster) {
-        pxr <- res(r.data)[1]
-        ext <- extend(ext, pxr*pad)
-        r.data <- crop(r.data, ext)
-        r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))
-      } else{r.data <- crop(r.data, ext)}
+      if (!is.null(ref)) {
+        if (p.raster) {
+          pxr <- res(r.data)[1]
+          ext <- extend(ext, pxr*pad)
+          r.data <- crop(r.data, ext)
+          r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
+        if (!p.raster) {r.data <- crop(r.data, extent(ref))}}
       writeRaster(r.data, ofile, overwrite=T)}}
 
-    if (var.ls$code[ind] == 'DEM90' | d.source%in%c('GFC', 'GSW')) {
+  if (var.ls$code[ind] == 'DEM90' | d.source%in%c('GFC', 'GSW')) {
+
+    # check if res exist
+    if (is.null(ref)) {stop('Requested a tiled variable. Please provide "ref"')}
 
     # read in shapefile with tiles
     file <- system.file('extdata', paste0(d.source, '-tiles.shp'), package="rsMove")
@@ -154,13 +168,15 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
       files <- list.files(d.path, "EarthEnv", full.names=T)}
 
       # export raster
-    if (p.raster) {
-      pxr <- res(r.data)[1]
-      ext <- extend(ext, pxr*pad)
-      r.data <- crop(r.data, ext)
-      r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
+    if (!is.null(ref)) {
+      if (p.raster) {
+        pxr <- res(r.data)[1]
+        ext <- extend(ext, pxr*pad)
+        r.data <- crop(r.data, ext)
+        r.data <- crop(projectRaster(r.data, crs=crs(ref), res=p.res), extent(ref))}
+      if (!p.raster) {r.data <- crop(r.data, extent(ref))}}
     writeRaster(r.data, file.path(d.path, paste0(var.ls$code[ind], '_', paste0(tiles, collapse="-"), '.tif')), overwrite=T)
 
-    }
+  }
 
 }
