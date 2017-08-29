@@ -1,8 +1,9 @@
 #' @title moveCloud
 #'
-#' @description Provides historical information on cloud cover.
+#' @description {Provides historical information on cloud cover for a set of coordinate
+#' pairs. The temporal information is adjusted to the sample observation date}.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param o.time Object of class \emph{Date}.
+#' @param obs.time Object of class \emph{Date}.
 #' @param d.path Output data path for downloaded data.
 #' @param b.size Two element vector with temporal buffer size (expressed in days).
 #' @param remove.file Logical. Should the files be deleted after usage?
@@ -11,7 +12,7 @@
 #' @importFrom RCurl url.exists
 #' @return A \emph{list}.
 #' @details {This function makes uses daily cloud fraction data from NASA's NEO service.
-#' For each observation date (\emph{o.time}), the function downloads the correspondent image
+#' For each observation date (\emph{obs.time}), the function downloads the correspondent image
 #' and extracts the percent of cloud cover for the samples acquired at the target date. If
 #' \emph{d.path} is specified, the function will look within the provided directory for the
 #' required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each
@@ -44,14 +45,14 @@
 #'
 #'  # test function for 30 day buffer
 #'  od <- as.Date(moveData@data$date)
-#'  c.cover <- moveCloud(xy=moveData, o.time=od, d.path=".", b.size=c(30,30))
+#'  c.cover <- moveCloud(xy=moveData, obs.time=od, d.path=".", b.size=c(30,30))
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.file=FALSE) {
+moveCloud <- function(xy=xy, obs.time=obs.time, d.path=NULL, b.size=NULL, remove.file=FALSE) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
@@ -77,8 +78,8 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
 #---------------------------------------------------------------------------------------------------------------------#
 
   # target dates
-  o.time <- as.Date(o.time)
-  ud <- unique(o.time)
+  obs.time <- as.Date(obs.time)
+  ud <- unique(obs.time)
 
   # output variables
   d.cc <- vector('numeric', length(xy))
@@ -97,7 +98,7 @@ moveCloud <- function(xy=xy, o.time=o.time, d.path=NULL, b.size=NULL, remove.fil
   for (d in 1:length(ud)) {
 
     # target observations
-    loc <- which(o.time==ud[d])
+    loc <- which(obs.time==ud[d])
 
     # set file name
     ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", ud[d], ".FLOAT.TIFF")

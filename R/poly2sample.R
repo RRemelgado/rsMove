@@ -1,6 +1,6 @@
 #' @title poly2sample
 #'
-#' @description Convert spatial polygons into point samples.
+#' @description Convert spatial polygons into point samples based on a pixel heterogeneity analysis.
 #' @param pol Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
 #' @param ref.ext Object of class \emph{Extent} or a raster object from which an extent can be derived.
 #' @param mpc Minimum pixel cover (0-100). Default is 100.

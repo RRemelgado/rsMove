@@ -1,6 +1,7 @@
 #' @title moveSeg
 #'
-#' @description Remote sensing based point segmentation
+#' @description {Segmentation of spatial points using categorigal
+#' or continuous remote sensing data with reporting of time spend per segment.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param edata Object of class \emph{RasterLayer} or \emph{data.frame}.
 #' @param type Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).

@@ -1,6 +1,8 @@
 #' @title sMoveRes
 #'
-#' @description Evaluates how a change in raster resolution changes the amount of samples/sample regions.
+#' @description {Tool to support the selection of adequate satellite spatial
+#' resoltuon. Evaluates how the change in spatial resolution changes the
+#' amount of samples/sample regions based on a set of coordinate pairs.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pxr vector of target resolutions.
 #' @import ggplot2 sp rgdal grDevices

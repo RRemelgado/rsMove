@@ -1,9 +1,10 @@
 #' @title rsComposite
 #'
-#' @description Compositing of remote sensing data based on GPS tracking dates.
+#' @description {Phenological and date based compositing of
+#' remote sensing data supported by GPS tracking date information.}
 #' @param img Object of class \emph{RasterSpack} or \emph{RasterBrick}.
 #' @param r.dates Object of class \emph{Date} with \emph{img} observation dates.
-#' @param o.time Object of class \emph{Date} with reference dates.
+#' @param obs.time Object of class \emph{Date} with reference dates.
 #' @param n.dev Number of deviations from the target date. Default is 1.
 #' @param type One of "norm" or "pheno" or "pheno2".
 #' @param d.buffer Search buffer (expressed in days).
@@ -13,12 +14,12 @@
 #' @return A \emph{list}.
 #' @details {The function uses a multi-layer raster object to build a composite.
 #' It looks at a ginve set of dates (e.g. GPS tracking dates) and estimates a
-#' reference date to build the composite for defined by the median of \emph{o.time}.
+#' reference date to build the composite for defined by the median of \emph{obs.time}.
 #' The median is then used to estimate Median Absolute Deviation (MAD) which
 #' specifies the size of the buffer set aroung the target date within which
 #' bands will be considered. Here, \emph{n.dev} is used as a multiplier to enlarge
 #' the temporal buffer. Alternatively, a user define temporal buffer is allowed
-#' by using the keyword \emph{d.buffer}. If \emph{o.time} countains only one element,
+#' by using the keyword \emph{d.buffer}. If \emph{obs.time} countains only one element,
 #' the function will use it as a reference date. In this case, if \emph{d.buffer}
 #' is NULL the function will set it to 30 by default. The way how the function handles
 #' temporal information depends on the \emph{type} keyword. If set to \emph{norm},
@@ -50,17 +51,17 @@
 #'  r.dates = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), 45)
 #'
 #'  # target date
-#'  o.time = as.Date("2013-06-01")
+#'  obs.time = as.Date("2013-06-01")
 #'
 #'  # build composite
-#'  r.comp <- rsComposite(rsStk, r.dates, o.time, d.buffer=90)
+#'  r.comp <- rsComposite(rsStk, r.dates, obs.time, d.buffer=90)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-rsComposite <- function(img, r.dates, o.time, n.dev=1, type='norm', d.buffer=NULL) {
+rsComposite <- function(img, r.dates, obs.time, n.dev=1, type='norm', d.buffer=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -76,8 +77,8 @@ rsComposite <- function(img, r.dates, o.time, n.dev=1, type='norm', d.buffer=NUL
   if (length(r.dates)!=nlayers(img)) {stop('errorr: "img" and "r.dates" have different lengths')}
 
   # reference dates
-  if (!exists('o.time')) {stop('"o.time" is missing')}
-  if (!class(o.time)[1]%in%c('Date')) {stop('error: "o.time" is nof of a valid class')}
+  if (!exists('obs.time')) {stop('"obs.time" is missing')}
+  if (!class(obs.time)[1]%in%c('Date')) {stop('error: "obs.time" is nof of a valid class')}
 
   # auxiliary variables
   if (!is.numeric(n.dev)) {stop('"n.dev" is not numeric')}
@@ -90,16 +91,16 @@ rsComposite <- function(img, r.dates, o.time, n.dev=1, type='norm', d.buffer=NUL
 
   # determine date format
   if (type=='norm') {
-    ot0 <- o.time
+    ot0 <- obs.time
     rd0 <- r.dates}
   if (type=='pheno' | type=='pheno2') {
-    bd <- as.Date(paste0(as.character(format(o.time,'%Y')), '-01-01'))
-    ot0 <- as.numeric((o.time-bd) + 1)
+    bd <- as.Date(paste0(as.character(format(obs.time,'%Y')), '-01-01'))
+    ot0 <- as.numeric((obs.time-bd) + 1)
     bd <- as.Date(paste0(as.character(format(r.dates,'%Y')), '-01-01'))
     rd0 <- as.numeric((r.dates-bd) + 1)}
 
   # determine date range
-  if (length(o.time)>1) {
+  if (length(obs.time)>1) {
     t.date <- median(ot0) # target date
     if (is.null(d.buffer)) {d.buffer <- median(abs(ot0-t.date))*n.dev} # search buffer
   } else {

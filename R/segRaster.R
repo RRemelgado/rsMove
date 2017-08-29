@@ -1,9 +1,10 @@
 #' @title segRaster
 #'
-#' @description Connencte-region based raster segmentation.
+#' @description {Connencte-region based raster segmentation
+#' that preserves spatial gradients and reports on region statistics.}
 #' @param prob Object of class \emph{RasterLayer}.
 #' @param break.point Difference threshold. Default is 0.05.
-#' @param mp Minimum value. Default is 0.5.
+#' @param min.prob Minimum value. Default is 0.5.
 #' @import raster rgdal
 #' @importFrom stats sd
 #' @return A list object.
@@ -12,7 +13,7 @@
 #' estimates the difference between it and its imediate 8 neighbors.
 #' The pixels where the difference is below the defined threshold
 #' (\emph{ct}) are aggregated into a single region. The user can define
-#' a minimum pixel value using \emph{mp} which will limit the range of
+#' a minimum pixel value using \emph{min.prob} which will limit the range of
 #' pixels under evaluation. The result contains a raster with unique
 #' values for each segment region region (\emph{$segment}) as well as a
 #' data frame (\emph{$stats}) with statistics for each region. The data
@@ -35,7 +36,7 @@
 
 #-----------------------------------------------------------------------------------#
 
-segRaster <- function(prob, break.point=0.1, mp=0.5) {
+segRaster <- function(prob, break.point=0.1, min.prob=0.5) {
 
 #-----------------------------------------------------------------------------------#
 # 1. check input variables
@@ -52,7 +53,7 @@ segRaster <- function(prob, break.point=0.1, mp=0.5) {
 
   # identify usable pixels
   data <- as.matrix(prob)
-  pos <- which(data > mp)
+  pos <- which(data > min.prob)
 
   # evaluate pixel connectivity
   regions <- matrix(0, nr, nc)

@@ -1,6 +1,7 @@
 #' @title plotMove
 #'
-#' @description Plots per pixel time and value.
+#' @description {Standardized plotting of sampled environmental information
+#'  and time spent for each sample given a set of coordinate pairs.}
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
 #' @param o.time Vector with time length.

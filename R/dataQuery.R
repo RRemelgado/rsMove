@@ -1,23 +1,23 @@
 #' @title dataQuery
 #'
-#' @description Query environmental data for coordinate pairs.
+#' @description Query environmental data for coordinate pairs using the nearest non NA value in time.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param o.date Object of class \emph{Date} with \emph{xy} observation dates.
+#' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param r.date Object of class \emph{Date} with \emph{img} observation dates.
-#' @param tb Two element vector with temporal search buffer, expressed in days.
-#' @param bs Buffer size (unit depends on the raster projection).
+#' @param time.buffer Two element vector with temporal search buffer, expressed in days.
+#' @param spatial.buffer Buffer size (unit depends on the raster projection).
 #' @param fun Passes an external function.
 #' @import raster rgdal
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
 #' @return A n object of class \emph{vector} or \emph{data.frame}.
 #' @details {Returns environmental variables from a raster object for a given set of x and y coordinates.
-#'          A buffer size (\emph{bs}) and a user defined function (\emph{fun}) can be specified to sample
+#'          A buffer size (\emph{spatial.buffer}) and a user defined function (\emph{fun}) can be specified to sample
 #'          within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided
-#'          (\emph{r.date}) and the date of sampling (\emph{o.date}). In this case, the function will treat the raster
+#'          (\emph{r.date}) and the date of sampling (\emph{obs.date}). In this case, the function will treat the raster
 #'          data as a time series and search for clear pixel in time within the contraints of a temporal buffer
-#'          defined by \emph{tb}. \emph{tb} passes two values which represent the size of the buffer in two
+#'          defined by \emph{time.buffer}. \emph{time.buffer} passes two values which represent the size of the buffer in two
 #'          directions: before and after the target date. This allows for bacward and forward sampling.}
 #' @examples {
 #'
@@ -36,10 +36,10 @@
 #'  r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
-#'  o.date <- as.Date(moveData@data$date)
+#'  obs.date <- as.Date(moveData@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, o.date=o.date, img=rsStk, r.date=r.date, tb=c(30,30))
+#'  rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, img=rsStk, r.date=r.date, time.buffer=c(30,30))
 #'
 #' }
 #'
@@ -47,7 +47,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, o.date=NULL, img=img, r.date=NULL, tb=NULL, bs=NULL, fun=NULL) {
+dataQuery <- function(xy=xy, obs.date=NULL, img=img, r.date=NULL, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
@@ -66,19 +66,19 @@ dataQuery <- function(xy=xy, o.date=NULL, img=img, r.date=NULL, tb=NULL, bs=NULL
   if (!is.null(r.date)) {
     if (class(r.date)[1]!='Date') {stop('"r.date" is not of a valid class')}
     if (length(r.date)!=nlayers(img)) {stop('lengths of "r.date" and "img" differ')}
-    if (is.null(o.date)) {stop('"o.date" is missing')}
-    if (class(o.date)[1]!='Date') {stop('"o.date" is not of a valid class')}
-    if (length(o.date)!=length(xy)) {stop('lengths of "o.date" and "xy" differ')}
+    if (is.null(obs.date)) {stop('"obs.date" is missing')}
+    if (class(obs.date)[1]!='Date') {stop('"obs.date" is not of a valid class')}
+    if (length(obs.date)!=length(xy)) {stop('lengths of "obs.date" and "xy" differ')}
     processTime <- TRUE
   } else {processTime <- FALSE}
 
   # auxiliary
-  if (!is.null(bs)) {if (!is.numeric(bs)) {stop('"bs" assigned but not numeric')}} else {fun=NULL}
-  if (!is.null(bs) & is.null(fun)) {fun <- function(x) {sum(x*x) / sum(x)}} else {
+  if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {fun=NULL}
+  if (!is.null(spatial.buffer) & is.null(fun)) {fun <- function(x) {sum(x*x) / sum(x)}} else {
   if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a valid function')}}}
-  if (!is.null(tb)) {
-    if (!is.numeric(tb)) {stop('"tb" is not numeric')}
-    if (length(tb)!=2) {stop('"tb" should be a two element vector')}}
+  if (!is.null(time.buffer)) {
+    if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')}
+    if (length(time.buffer)!=2) {stop('"time.buffer" should be a two element vector')}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
@@ -86,7 +86,7 @@ dataQuery <- function(xy=xy, o.date=NULL, img=img, r.date=NULL, tb=NULL, bs=NULL
   op <- crs(xy)
 
   # read data
-  edata <- as.data.frame(extract(img, xy@coords, buffer=bs, fun=fun, na.rm=TRUE))
+  edata <- as.data.frame(extract(img, xy@coords, buffer=spatial.buffer, fun=fun, na.rm=TRUE))
 
   # extract environmental data
   if (processTime) {
@@ -95,11 +95,11 @@ dataQuery <- function(xy=xy, o.date=NULL, img=img, r.date=NULL, tb=NULL, bs=NULL
     ns <- nrow(xy@coords)
 
     # function to select pixels
-    if (is.null(tb)) {
+    if (is.null(time.buffer)) {
       qf <- function(i) {
         ind <- which(!is.na(edata[i,]))
         if (length(ind)!=0) {
-          diff <- abs(o.date[i]-r.date[ind])
+          diff <- abs(obs.date[i]-r.date[ind])
           loc <- which(diff==min(diff))[1]
           return(list(value=edata[i,ind[loc]], date=r.date[ind[loc]]))
         } else{return(list(value=NA, date=NA))}}
@@ -107,8 +107,8 @@ dataQuery <- function(xy=xy, o.date=NULL, img=img, r.date=NULL, tb=NULL, bs=NULL
       qf <- function(i) {
         ind <- which(!is.na(edata[i,]))
         if (length(ind)!=0) {
-          diff <- abs(o.date[i]-r.date[ind])
-          loc <- r.date[ind] >= (o.date[i]-tb[1]) & r.date[ind] <= (o.date[i]+tb[2])
+          diff <- abs(obs.date[i]-r.date[ind])
+          loc <- r.date[ind] >= (obs.date[i]-time.buffer[1]) & r.date[ind] <= (obs.date[i]+time.buffer[2])
           if (sum(loc)>0) {
             loc <- which(diff==min(diff[loc]))[1]
             return(list(value=edata[i,ind[loc]], date=r.date[ind[loc]]))

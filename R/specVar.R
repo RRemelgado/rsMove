@@ -1,6 +1,8 @@
 #' @title specVar
 #'
-#' @description Quantifies how changes in the resolution of a raster affects the perception of spectral complexity.
+#' @description {Tool to support the selection of adequate satellite spatial
+#' resoltuon. Evaluates how the spectral variability within a pixel change
+#' after aggregated to a new resolution.}
 #' @param img Object of class \emph{RasterLayer}.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pxr vector of target resolutions.

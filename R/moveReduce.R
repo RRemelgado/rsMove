@@ -1,6 +1,6 @@
 #' @title moveReduce
 #'
-#' @description Remote sensing based point segmentation.
+#' @description Remote sensing based point segmentation that preserves periodic movements.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param o.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.

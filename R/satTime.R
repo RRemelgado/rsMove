@@ -1,11 +1,12 @@
 #' @title satTime
 #'
-#' @description Finds available satellite dates for tracking data.
-#' @param o.time Object of class \emph{Date}.
+#' @description {Finds available dates for satellite data
+#' downloadable trough proSat using tracking dates as a reference.}
+#' @param obs.time Object of class \emph{Date}.
 #' @param t.var Target variable.
 #' @import ggplot2
 #' @return One or multiple plots.
-#' @details {This function compares a set of input dates (\emph{o.time}) to the possible dates for
+#' @details {This function compares a set of input dates (\emph{obs.time}) to the possible dates for
 #' which satellite data can be downloaded. This analysis is performed for the set of variables
 #' provided through the function proSat(). The function provides a report with the closest dates
 #' available for each of the samples and a faceted plot for each unique year showing the observed
@@ -14,20 +15,20 @@
 #' @examples {
 #'
 #'  # return list of variables
-#'  var.ls <- satTime(o.time=as.Date("2013-08-04"), t.var="ndvi")
+#'  var.ls <- satTime(obs.time=as.Date("2013-08-04"), t.var="ndvi")
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-satTime <- function(o.time=o.time, t.var=t.var) {
+satTime <- function(obs.time=obs.time, t.var=t.var) {
 
 #-----------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
 #-----------------------------------------------------------------------------------------------------------------#
 
-  if (class(o.time)[1] != 'Date') {stop('"o.time" is not of class "Date"')}
+  if (class(obs.time)[1] != 'Date') {stop('"obs.time" is not of class "Date"')}
   if (!is.character(t.var)) {stop('"t.var" is not a "character"')}
   if (length(t.var)>1) {stop('"t.var" has more than 1 element')}
 
@@ -43,15 +44,15 @@ satTime <- function(o.time=o.time, t.var=t.var) {
   t.res <- var.ls$temporal.resolution..days.[var.ls$code==t.var]
 
   # determine day of year for provided dates
-  o.yrs <- sapply(as.character(o.time), function(x) {strsplit(x, '-')[[1]][1]})
-  o.doa <- (o.time-as.Date(paste0(o.yrs, '-01-01')))+1
+  o.yrs <- sapply(as.character(obs.time), function(x) {strsplit(x, '-')[[1]][1]})
+  o.doa <- (obs.time-as.Date(paste0(o.yrs, '-01-01')))+1
   s.doa <- (seq(1, 365, t.res))
 
 #-----------------------------------------------------------------------------------------------------------------#
 # 3. compare provided and target dates
 #-----------------------------------------------------------------------------------------------------------------#
 
-  tmp <- lapply(1:length(o.time), function(x) {
+  tmp <- lapply(1:length(obs.time), function(x) {
     diff <- s.doa - o.doa[x]
     i0 <- which(diff==0)
     if (length(i0>0)) {
@@ -66,7 +67,7 @@ satTime <- function(o.time=o.time, t.var=t.var) {
                   ad=(as.Date(paste0(o.yrs[x],'-01-01'))+(ad-1))))}})
 
   # output data frame
-  df <- data.frame(original=o.time,
+  df <- data.frame(original=obs.time,
                    closest.before=do.call('c', lapply(tmp, function(x) {x$bd})),
              closest.after=do.call('c', lapply(tmp, function(x) {x$ad})))
 

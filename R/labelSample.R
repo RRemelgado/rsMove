@@ -1,6 +1,7 @@
 #' @title labelSample
 #'
-#' @description Region labeling of samples based on their spatial connectivity.
+#' @description {Region labeling of pixels based on their spatial connectivity
+#' for the identification and splitting of training and validation samples}.
 #' @param xy Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
 #' @param rad Minimum radius. Unit depends on the projection of the data.
 #' @param npt Minimum pixel count per pixel.

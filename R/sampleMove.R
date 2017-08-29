@@ -1,6 +1,6 @@
 #' @title sampleMove
 #'
-#' @description Sampling of possible stops along a movement track.
+#' @description Sampling of possible stops along a movement track using GPS error information.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the same length as \emph{xy}.
 #' @param error Distance (in meters).

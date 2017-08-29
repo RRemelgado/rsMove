@@ -1,9 +1,10 @@
 #' @title hotMoveStats
 #'
-#' @description Provides statistics for the output of hotMove.
+#' @description {Temporal segmentation and statistical reporting for
+#' sample regions such as the ones reported with hotMove().}
 #' @param rid List object as provided by \emph{hotMove()}.
 #' @param aid Optional. Unique identifiers.
-#' @param o.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.
+#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.
 #' @param tUnit Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.
 #' @param method Method used to estimate polygon area.
 #' @return A \emph{data frame}.
@@ -42,30 +43,30 @@
 #' moveData@data <- cbind(moveData@data, hm$indices)
 #'
 #' # derive statistics
-#' hm.region.stats <- hotMoveStats(rid=hm, o.time=as.Date(moveData@data$timestamp))
-#' hm.time.stats <- hotMoveStats(o.time=as.Date(moveData@data$timestamp))
+#' hm.region.stats <- hotMoveStats(rid=hm, obs.time=as.Date(moveData@data$timestamp))
+#' hm.time.stats <- hotMoveStats(obs.time=as.Date(moveData@data$timestamp))
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-hotMoveStats <- function(rid=NULL, o.time=NULL, tUnit=NULL, aid=NULL, method='deg') {
+hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='deg') {
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-  if(is.null(rid) & is.null(o.time) & is.null(aid)) {stop('no information provided ("rid", "o.time" and "aid" are NULL)')}
-  if (!is.null(o.time)) {
-    if (!class(o.time)[1]%in%c("Date", "POSIXlt", "POSIXt")) {stop('"o.time" is not a valid "POSIXlt"/POSIXt" object')}
+  if(is.null(rid) & is.null(obs.time) & is.null(aid)) {stop('no information provided ("rid", "obs.time" and "aid" are NULL)')}
+  if (!is.null(obs.time)) {
+    if (!class(obs.time)[1]%in%c("Date", "POSIXlt", "POSIXt")) {stop('"obs.time" is not a valid "POSIXlt"/POSIXt" object')}
     pt <- TRUE} else {pt <- FALSE}
-  if(!is.null(o.time) & !is.null(aid)) {if (length(aid)!=length(o.time)) {stop('"o.time" and "aid" have different lengths')}}
+  if(!is.null(obs.time) & !is.null(aid)) {if (length(aid)!=length(obs.time)) {stop('"obs.time" and "aid" have different lengths')}}
   if (!(method %in% c('m', 'deg')) & !is.null(rid$polygons)) {stop(paste0('shapefile provided in "rid" but method ', method, ' not valid (choose between "m" and "deg")'))}
   if (!is.null(rid)) {
     if (!is.list(rid)) {stop('"rid" is not a list')}
     if (min(names(rid)%in%c('indices', 'polygons'))==0) {stop('names in "rid" are not valid (requires "indices" and/or "polygons"')}
-    if (!is.null(o.time)) {if (length(rid$indices)!=length(o.time)) {stop('"o.time" and "rid" have different lengths')}}
+    if (!is.null(obs.time)) {if (length(rid$indices)!=length(obs.time)) {stop('"obs.time" and "rid" have different lengths')}}
     if (!is.null(aid)) {if (length(rid$indices)!=length(aid)) {stop('"aid" and "rid" have different lengths')}}
     ur <- sort(unique(rid$indices)) # unique regions
     nr <- length(ur) # number of unique regions
@@ -82,11 +83,11 @@ hotMoveStats <- function(rid=NULL, o.time=NULL, tUnit=NULL, aid=NULL, method='de
   ura <- matrix(0, nr) # area of unique regions
   tns <- matrix(0, nr) # number of samples per region
   nui <- matrix(0, nr) # number of individuals per region
-  mnt <- matrix(0, nr) # smallest o.time segment per region
-  avt <- matrix(0, nr) # average of o.time segments per region
-  mxt <- matrix(0, nr) # largest o.time segment per region
-  tts <- matrix(0, nr) # sum of recorded o.time
-  nts <- matrix(0, nr) # number of o.time segments
+  mnt <- matrix(0, nr) # smallest obs.time segment per region
+  avt <- matrix(0, nr) # average of obs.time segments per region
+  mxt <- matrix(0, nr) # largest obs.time segment per region
+  tts <- matrix(0, nr) # sum of recorded obs.time
+  nts <- matrix(0, nr) # number of obs.time segments
 
   if (pt) {
     ss1 <- list() # temporal segment stats
@@ -101,23 +102,23 @@ hotMoveStats <- function(rid=NULL, o.time=NULL, tUnit=NULL, aid=NULL, method='de
   for (r in 1:length(ur)) {
 
     # extract base stats
-    if (pr) {ind <- which(rid$indices==ur[r])} else {ind <- 1:length(o.time)}
+    if (pr) {ind <- which(rid$indices==ur[r])} else {ind <- 1:length(obs.time)}
     if (!is.null(aid)) {nui[r] = length(unique(aid[ind]))} else {nui[r]<-NA}
     tns[r] = length(ind)
 
     # identify unique temporal segments and count number of days
-    if (!is.null(o.time)) {
+    if (!is.null(obs.time)) {
       ts0 <- list()
       sp <- 1
-      st <- sort(unique(o.time[ind]))
+      st <- sort(unique(obs.time[ind]))
       if (length(st) > 1) {
         for (t in 2:length(st)) {
           diff <- as.numeric(difftime(st[t], st[(t-1)], units=tUnit))
           if (diff > 1) {
             ts0[[(length(ts0)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units=tUnit)) + 1
             ss1[[length(ss1)+1]] <- data.frame(start=st[sp], end=st[(t-1)], id=ur[r], count=length(sp:(t-1)))
-            ss2[[length(ss2)+1]] <- which(o.time >= ss1[[length(ss1)]]$start &
-                                            o.time <= ss1[[length(ss1)]]$end &
+            ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start &
+                                            obs.time <= ss1[[length(ss1)]]$end &
                                             rid$indices==ur[r])
             sp <- t
           }}
@@ -135,8 +136,8 @@ hotMoveStats <- function(rid=NULL, o.time=NULL, tUnit=NULL, aid=NULL, method='de
           mxt[r] <- tts[r]
           nts[r] <- 1
           ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r], count=length(st))
-          ss2[[length(ss2)+1]] <- which(o.time >= ss1[[length(ss1)]]$start &
-                                          o.time <= ss1[[length(ss1)]]$end &
+          ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start &
+                                          obs.time <= ss1[[length(ss1)]]$end &
                                           rid$indices==ur[r])
         }
         rm(ts0, st, diff, sp)
@@ -146,8 +147,8 @@ hotMoveStats <- function(rid=NULL, o.time=NULL, tUnit=NULL, aid=NULL, method='de
         tts[r] <- 1
         nts[r] <- 1
         ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r], count=length(st))
-        ss2[[length(ss2)+1]] <- which(o.time >= ss1[[length(ss1)]]$start &
-                                        o.time <= ss1[[length(ss1)]]$end &
+        ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start &
+                                        obs.time <= ss1[[length(ss1)]]$end &
                                         rid$indices==ur[r])}
     } else {
       mnt <- NA

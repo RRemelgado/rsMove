@@ -1,45 +1,45 @@
 #' @title hotMove
 #'
-#' @description Identifies hotspots of samples using a pixel based approach.
+#' @description Regional detection of sample hotspots using a pixel based approach.
 #' @param xy Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
 #' @param pxr Grid resolution. Unit depends on \emph{xy} projection.
 #' @param shp Logical. Should the function provide polygons? Default is FALSE.
 #' @return A list object.
 #' @import sp raster rgdal grDevices
-#' @details {The function builds a matrix for a given resolution and a 
-#' spatial extent derived from a set of samples (\emph{xy}). First, these 
-#' samples are converted into unique pixel coordinates. Then, the 
-#' spatial connectivity of these pixels is evaluated using a 8-neighboor 
-#' connected component labelling algorithm. The function returns a vector 
-#' with the region ID per sample (\emph{$indices}). If \emph{shp} is TRUE the 
-#' function also returns a shapefile for each region defined by the 
+#' @details {The function builds a matrix for a given resolution and a
+#' spatial extent derived from a set of samples (\emph{xy}). First, these
+#' samples are converted into unique pixel coordinates. Then, the
+#' spatial connectivity of these pixels is evaluated using a 8-neighboor
+#' connected component labelling algorithm. The function returns a vector
+#' with the region ID per sample (\emph{$indices}). If \emph{shp} is TRUE the
+#' function also returns a shapefile for each region defined by the
 #' convex hull of the samples within them (\emph{$polygons}).}
 #' @seealso \code{\link{sampleMove}} \code{\link{hotMoveStats}}
 #' @examples {
-#' 
+#'
 #' require(raster)
-#' 
+#'
 #' # reference data
 #' sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
 #' moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
 #' moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
-#' 
+#'
 #' # extract regions
 #' hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
-#' 
+#'
 #' # plot shapefile (color by region)
 #' plot(hm$polygons, col=hm$indices)
-#' 
+#'
 #' # add new information to original shapefile
 #' moveData@data$indices <- hm$indices
-#' 
+#'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
 hotMove <- function(xy=xy, pxr=pxr, shp=FALSE) {
-  
+
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
 #---------------------------------------------------------------------------------------------------------------------#
@@ -53,7 +53,7 @@ hotMove <- function(xy=xy, pxr=pxr, shp=FALSE) {
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
-  
+
   # derive pixel coordinates
   ext <- extent(xy)
   nc <- round((ext[2]-ext[1]) / pxr) + 1 # number of columns
@@ -63,11 +63,11 @@ hotMove <- function(xy=xy, pxr=pxr, shp=FALSE) {
   sp <- (round((ext[4]-xy@coords[,2])/pxr)+1) + nr * round((xy@coords[,1]-ext[1])/pxr) # convert coordinates to pixel positions
   up <- unique(sp) # unique pixel positions
   if (length(up)==1) {stop('only one pixel with data. Processing aborted (is "pxr" correct?)')}
-  
+
 #---------------------------------------------------------------------------------------------------------------------#
 # 3. find unique sample regions
 #---------------------------------------------------------------------------------------------------------------------#
-  
+
   # evaluate pixel connectivity
   regions <- matrix(0, nr, nc)
   for (r in 1:length(up)) {
@@ -85,19 +85,19 @@ hotMove <- function(xy=xy, pxr=pxr, shp=FALSE) {
       for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
     } else {regions[rp,cp] <- max(regions)+1}
   }
-  
+
   # update region id
   uv = unique(regions[which(regions>0)])
   uregions = regions
   for (u in 1:length(uv)) {uregions[which(regions==uv[u])] <- u}
-  
+
 #   # convert region layer to raster
 #   ar <- (pxr/2)
 #   or = raster(uregions)
 #   extent(or) <- c(ext[1]-ar, ext[2]+ar, ext[3]-ar, ext[4]+ar) # map extent
 #   res(or) <- pxr
 #   crs(or) <- crs(xy)
-  
+
 #---------------------------------------------------------------------------------------------------------------------#
   # 4. produce classified samples
   #---------------------------------------------------------------------------------------------------------------------#
@@ -105,16 +105,16 @@ hotMove <- function(xy=xy, pxr=pxr, shp=FALSE) {
   # label smaples based on the value associated to each unique position
   rid <- vector('numeric', length(xy))
   for (r in 1:length(up)) {rid[which(sp==up[r])]<-uregions[up[r]]}
-  
+
   # dummy buffer (used if a region has only 1 point)
   d.buff <- pxr*0.001
-  
+
   # convert samples to polygons
   if (shp==T) {
-    
+
     # uniqu values
     uv <- sort(unique(rid))
-    
+
     # function to build polygons
     pc <- function(x) {
       ind <- which(rid==x) # target coordinates
@@ -125,11 +125,11 @@ hotMove <- function(xy=xy, pxr=pxr, shp=FALSE) {
       ch <- chull(ic) # determine polygon edge coordinates
       return(Polygons(list(Polygon(ic[c(ch,ch[1]),])), ID=x)) # build closed polygon
     }
-    
+
     # build/merge polygons
     uv <- sort(unique(rid))
     shp <- SpatialPolygons(lapply(uv, pc), proj4string=crs(xy))
-    
+
     # return output
     return(list(indices=rid, polygons=shp))
 

@@ -1,8 +1,11 @@
 #' @title tMoveRes
 #'
-#' @description Provides historical information on cloud cover.
+#' @description {Tool to support the selection of adequate satellite temporal
+#' resoltuon. Evaluates how the change in temporal resolution changes the
+#' amount of samples/sample regions based on a set of coordinate
+#' pairs and their observation dates.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param o.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
+#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param t.res Temporal resolution.
 #' @param s.res Spatial resolution.
 #' @import ggplot2 sp rgdal grDevices
@@ -25,14 +28,14 @@
 #'
 #'  # test function for 5, 10 20 and 30 m
 #'  obs.date <- as.Date(moveData@data$timestamp)
-#'  a.res <- tMoveRes(xy=moveData, o.time=obs.date, t.res=c(1,8,16), s.res=0.01)
+#'  a.res <- tMoveRes(xy=moveData, obs.time=obs.date, t.res=c(1,8,16), s.res=0.01)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res) {
+tMoveRes <- function(xy=xy, obs.time=obs.time, t.res=t.res, s.res=s.res) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
@@ -84,8 +87,8 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res) {
 # 4. determine pixel aggregations
 #---------------------------------------------------------------------------------------------------------------------#
 
-  st <- min(o.time) # start time
-  et <- max(o.time) # end time
+  st <- min(obs.time) # start time
+  et <- max(obs.time) # end time
 
   out <- list() # output variable
   for (r in 1:length(t.res)) {
@@ -98,8 +101,8 @@ tMoveRes <- function(xy=xy, o.time=o.time, t.res=t.res, s.res=s.res) {
     for (w in 1:nw) {
 
       # locate pixels within the temporal window
-      loc1 <- which(o.time >= (st+(t.res[r]*(w-1))) &
-                     o.time <= ((st+t.res[r])+(t.res[r]*(w-1))))
+      loc1 <- which(obs.time >= (st+(t.res[r]*(w-1))) &
+                     obs.time <= ((st+t.res[r])+(t.res[r]*(w-1))))
 
       # quantify unique samples
       upr <- unique(sp[loc1])

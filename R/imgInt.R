@@ -1,6 +1,7 @@
 #' @title imgInt
 #'
-#' @description Temporal linear interpolation of raster data.
+#' @description {Temporal linear interpolation of raster data for
+#' \emph{rasters}, \emph{SpatialPointsDataFrames} or \emph{data frames}.}
 #' @param img Object of class \emph{RasterStack} or \emph{RasterBrick}.
 #' @param obs.dates Target dates. Object of class \emph{Date}.
 #' @param r.dates Raster dates. Object of class \emph{Date}.
