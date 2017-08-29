@@ -4,7 +4,7 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param edata Object of class \emph{RasterLayer} or \emph{data.frame}.
 #' @param type Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).
-#' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
+#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param threshold Change threshold.
 #' @param b.size Buffer size expressed in the map units.
 #' @param s.fun Output summary function. Default is mean.
@@ -23,7 +23,7 @@
 #' a list containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the
 #' segment ID (\emph{sid}) associated to each sample and a data frame (\emph{$report})
 #' with the amount of points in each region and the value returned by \emph{s.fun}. If
-#' \emph{ot} is provided, the function also provides the elapsed time within each segment.
+#' \emph{obs.time} is provided, the function also provides the elapsed time within each segment.
 #' If \emph{fun} is set by the user, the provided function will be used to summarize the
 #' raster values at each segment. Also, if \emph{edata} is a \emph{RasterStack} or a
 #' \emph{RasterBrick}, \emph{r.fun} is used to reduce the multi-layered object to a single
@@ -47,14 +47,14 @@
 #'  o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(xy=moveData, ot=o.time, edata=r, type="cont", threshold=0.1)
+#'  seg <- moveSeg(xy=moveData, obs.time=o.time, edata=r, type="cont", threshold=0.1)
 #'
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, threshold=NULL, s.fun=NULL) {
+moveSeg <- function(xy=xy, edata=edata, type='cont', obs.time=NULL, b.size=NULL, threshold=NULL, s.fun=NULL) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -66,9 +66,9 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
   rProj <- crs(xy) # output projection
 
   # sample dates
-  if (!is.null(ot)) {
-    if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
-    if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}}
+  if (!is.null(obs.time)) {
+    if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
+    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}}
 
   # environmental data
   if (class(edata)[1]=='RasterLayer') {
@@ -174,10 +174,10 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
 
   # build region report
   uid <- sort(unique(id))
-  if (!is.null(ot)) {
+  if (!is.null(obs.time)) {
     f <- function(x) {
       ind <- which(id==x)
-      et <- difftime(ot[ind[length(ind)]], ot[ind[1]], units="mins")
+      et <- difftime(obs.time[ind[length(ind)]], obs.time[ind[1]], units="mins")
       np <- length(ind)
       return(list(time=as.numeric(et), count=np))}
     sstat <- lapply(uid, f)
@@ -195,7 +195,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
     df$sid <- factor(df$sid, levels=unique(df$sid))
 
     # plot with time
-    if (!is.null(ot)) {
+    if (!is.null(obs.time)) {
 
       # buid plot object
       p <- ggplot(df, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +
@@ -226,7 +226,7 @@ moveSeg <- function(xy=xy, edata=edata, type='cont', ot=NULL, b.size=NULL, thres
     df$value <- factor(df$value, levels=unique(df$value))
 
     # plot with time
-    if (!is.null(ot)) {
+    if (!is.null(obs.time)) {
 
       # buid plot object
       p <- ggplot(df, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +

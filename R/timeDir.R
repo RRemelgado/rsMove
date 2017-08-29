@@ -2,11 +2,11 @@
 #'
 #' @description Temporal directional raster analysis.
 #' @param xy Object of class "SpatialPoints" or "SpatialPointsDataFrame".
-#' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
+#' @param obs.date Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterStack} or \emph{RasterBrick}.
 #' @param edata Object of class \emph{data frame}.
-#' @param rt Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.
-#' @param mws Moving window size (expressed in days).
+#' @param r.date Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.
+#' @param window.size Moving window size (expressed in days).
 #' @param dir One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.
 #' @param fun Summary function.
 #' @import raster rgdal
@@ -14,12 +14,12 @@
 #' @seealso \code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{vector}.
 #' @details {This function evaluates how do environmental conditions change in time
-#' along a movement track. First, it compares the observation times (\emph{ot})
-#' of \emph{xy} against the acquisition times (\emph{rt}) of \emph{img} to search for relevant
-#' information within a pre-defined temporal window (\emph{mws}). The user can chose to
+#' along a movement track. First, it compares the observation times (\emph{obs.date})
+#' of \emph{xy} against the acquisition times (\emph{r.date}) of \emph{img} to search for relevant
+#' information within a pre-defined temporal window (\emph{window.size}). The user can chose to
 #' only consider time steps before (\emph{bwd}) or after (\emph{fwd} the target observation
 #' time or look at both directios (\emph{both}). If the latest is chosen, the function
-#' applies \emph{mws} equally to both directions. After selecting adequate temporal
+#' applies \emph{window.size} equally to both directions. After selecting adequate temporal
 #' information, a statistical metric (\emph{fun}) is used to summarize the selected
 #' time steps. By default, the slope will be used. The slope is estimated from
 #' a linear regression estimated between the acquisition times of \emph{img} and their
@@ -52,18 +52,18 @@
 #'  rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
-#'  ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.date <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  time.env <- timeDir(xy=moveData, ot=ot, img=rsStk, rt=rd, mws=10, dir="bwd", fun=of)
+#'  time.env <- timeDir(xy=moveData, obs.date=obs.date, img=rsStk, r.date=rd, window.size=10, dir="bwd", fun=of)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=NULL, fun=NULL) {
+timeDir <- function(xy=NULL, obs.date=obs.date, img=NULL, edata=NULL, r.date=r.date, window.size=NULL, dir=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -73,12 +73,12 @@ timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=N
   if (!is.null(xy)) {if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}}
 
   # sample dates
-  if (!exists('ot')) {stop('"ot" is missing')}
-  if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
-  if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}
+  if (!exists('obs.date')) {stop('"obs.date" is missing')}
+  if (!class(obs.date)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.date" is nof of a valid class')}
+  if (length(obs.date)!=length(xy)) {stop('errorr: "xy" and "obs.date" have different lengths')}
 
   # environmental data dates
-  if (!class(rt)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"rt" is nof of a valid class')}
+  if (!class(r.date)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"r.date" is nof of a valid class')}
 
   # environmental data
   if (is.null(edata)) {
@@ -86,15 +86,15 @@ timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=N
       if (is.null(xy)) {stop('"edata" missing and "img" required. Please define "xy" also')}
       if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
       if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
-      if (length(rt)!=nlayers(img)) {stop('errorr: "img" and "rt" have different lengths')}}
+      if (length(r.date)!=nlayers(img)) {stop('errorr: "img" and "r.date" have different lengths')}}
   } else {
     if (class(edata)[1]!='data.frame') {stop('"edata" provided but not a data frame')}
     if (!is.null(xy)) {if (length(xy)!=nrow(edata)) {stop('"xy" and "edata" have different lengths')}}
-    if (length(rt)!=ncol(edata)) {stop('errorr: "edata" and "rt" have different lengths')}}
+    if (length(r.date)!=ncol(edata)) {stop('errorr: "edata" and "r.date" have different lengths')}}
 
   # time information
-  if (is.null(mws)) {stop('"mws" is missing')} else {
-     if (!is.numeric(mws)) {stop('"mws" us not numeric')}}
+  if (is.null(window.size)) {stop('"window.size" is missing')} else {
+     if (!is.numeric(window.size)) {stop('"window.size" us not numeric')}}
 
   # query type
   if (!is.null(dir)) {
@@ -113,11 +113,11 @@ timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=N
   if (is.null(edata)) {
 
     # retrieve environmental variables
-    ot <- as.Date(ot)
-    rt <- as.Date(rt)
-    ind <- which(rt%in%seq.Date(min(ot-mws), max(ot+mws), by=1))
+    obs.date <- as.Date(obs.date)
+    r.date <- as.Date(r.date)
+    ind <- which(r.date%in%seq.Date(min(obs.date-window.size), max(obs.date+window.size), by=1))
     edata <- extract(img[[ind]], xy@coords)
-    rt <- rt[ind]
+    r.date <- r.date[ind]
 
     rm(img)
 
@@ -130,8 +130,8 @@ timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=N
   # backwards sampling
   if (dir=='bwd') {
     f <- function(i) {
-      ind <- which(rt >= (ot[i]-mws) & rt <= ot[i])
-      x <- as.numeric(rt[ind])
+      ind <- which(r.date >= (obs.date[i]-window.size) & r.date <= obs.date[i])
+      x <- as.numeric(r.date[ind])
       y <- edata[i,]
       u <- !is.na(y)
       if (sum(u)>1) {return(fun(x[u],y[u]))} else {return(NA)}}}
@@ -139,8 +139,8 @@ timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=N
   # forward sampling
   if (dir=='fwd') {
     f <- function(i) {
-      ind <- which(rt >= ot & rt <= (ot[i]+mws))
-      x <- as.numeric(rt[ind])
+      ind <- which(r.date >= obs.date & r.date <= (obs.date[i]+window.size))
+      x <- as.numeric(r.date[ind])
       y <- edata[i,]
       u <- !is.na(y)
       if (sum(u)>1) {return(fun(x[u],y[u]))} else {return(NA)}}}
@@ -148,8 +148,8 @@ timeDir <- function(xy=NULL, ot=ot, img=NULL, edata=NULL, rt=rt, mws=NULL, dir=N
   # Backward-Forward sampling
   if (dir=='both') {
   f <- function(i) {
-    ind <- which(rt >= (ot[i]-mws) & rt <= (ot[i]+mws))
-    x <- as.numeric(rt[ind])
+    ind <- which(r.date >= (obs.date[i]-window.size) & r.date <= (obs.date[i]+window.size))
+    x <- as.numeric(r.date[ind])
     y <- edata[i,]
     u <- !is.na(y)
     if (sum(u)>1) {return(fun(x[u],y[u]))} else {return(NA)}}}

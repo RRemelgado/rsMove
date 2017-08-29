@@ -2,7 +2,7 @@
 #'
 #' @description Compositing of remote sensing data based on GPS tracking dates.
 #' @param img Object of class \emph{RasterSpack} or \emph{RasterBrick}.
-#' @param rd Object of class \emph{Date} with \emph{img} observation dates.
+#' @param r.dates Object of class \emph{Date} with \emph{img} observation dates.
 #' @param o.time Object of class \emph{Date} with reference dates.
 #' @param n.dev Number of deviations from the target date. Default is 1.
 #' @param type One of "norm" or "pheno" or "pheno2".
@@ -47,20 +47,20 @@
 #'  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
 #'
 #'  # raster dates
-#'  rd = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), 45)
+#'  r.dates = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), 45)
 #'
 #'  # target date
 #'  o.time = as.Date("2013-06-01")
 #'
 #'  # build composite
-#'  r.comp <- rsComposite(rsStk, rd, o.time, d.buffer=90)
+#'  r.comp <- rsComposite(rsStk, r.dates, o.time, d.buffer=90)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-rsComposite <- function(img, rd, o.time, n.dev=1, type='norm', d.buffer=NULL) {
+rsComposite <- function(img, r.dates, o.time, n.dev=1, type='norm', d.buffer=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -71,9 +71,9 @@ rsComposite <- function(img, rd, o.time, n.dev=1, type='norm', d.buffer=NULL) {
   if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('error: "img" is not of a valid class')}
 
   # raster dates
-  if (!exists('rd')) {stop('error: "rd" is missing')}
-  if (!class(rd)[1]%in%c('Date')) {stop('error: "rd" is nof of a valid class')}
-  if (length(rd)!=nlayers(img)) {stop('errorr: "img" and "rd" have different lengths')}
+  if (!exists('r.dates')) {stop('error: "r.dates" is missing')}
+  if (!class(r.dates)[1]%in%c('Date')) {stop('error: "r.dates" is nof of a valid class')}
+  if (length(r.dates)!=nlayers(img)) {stop('errorr: "img" and "r.dates" have different lengths')}
 
   # reference dates
   if (!exists('o.time')) {stop('"o.time" is missing')}
@@ -91,12 +91,12 @@ rsComposite <- function(img, rd, o.time, n.dev=1, type='norm', d.buffer=NULL) {
   # determine date format
   if (type=='norm') {
     ot0 <- o.time
-    rd0 <- rd}
+    rd0 <- r.dates}
   if (type=='pheno' | type=='pheno2') {
     bd <- as.Date(paste0(as.character(format(o.time,'%Y')), '-01-01'))
     ot0 <- as.numeric((o.time-bd) + 1)
-    bd <- as.Date(paste0(as.character(format(rd,'%Y')), '-01-01'))
-    rd0 <- as.numeric((rd-bd) + 1)}
+    bd <- as.Date(paste0(as.character(format(r.dates,'%Y')), '-01-01'))
+    rd0 <- as.numeric((r.dates-bd) + 1)}
 
   # determine date range
   if (length(o.time)>1) {

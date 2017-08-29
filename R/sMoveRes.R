@@ -1,6 +1,6 @@
 #' @title sMoveRes
 #'
-#' @description Evaluates how a change in raster resolution impacst the availability of data points.
+#' @description Evaluates how a change in raster resolution changes the amount of samples/sample regions.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pxr vector of target resolutions.
 #' @import ggplot2 sp rgdal grDevices

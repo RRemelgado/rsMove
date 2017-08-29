@@ -2,11 +2,11 @@
 #'
 #' @description Spatial directional raster analysis.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param ot Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
+#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
 #' @param img Object of class \emph{RasterLayer}.
 #' @param dir One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.
 #' @param type One of 'cont' or 'cat'. Defines which type of variable is in use.
-#' @param dm One of 'm' or 'deg' specifying the projection unit. Default is 'm'.
+#' @param dist.method One of 'm' or 'deg' specifying the projection unit. Default is 'm'.
 #' @param b.size Buffer size expressed in the map units.
 #' @param fun Summary function.
 #' @param npx Minimum number of pixels used in \emph{fun}. Default is 2.
@@ -54,18 +54,18 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
 #'  # observation time
-#'  ot <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
 #'  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
-#'  s.sample <- spaceDir(xy=moveData, ot=ot, img=r, dir="bwd", type='cont', fun=of)
+#'  s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r, dir="bwd", type='cont', fun=of)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size=NULL, fun=NULL, npx=2) {
+spaceDir <- function(xy=xy, obs.time=NULL, img=img, dir=dir, type=type, dist.method='m', b.size=NULL, fun=NULL, npx=2) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -76,9 +76,9 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
 
   # sample dates
-  if (!is.null(ot)) {
-    if (!class(ot)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"ot" is nof of a valid class')}
-    if (length(ot)!=length(xy)) {stop('errorr: "xy" and "ot" have different lengths')}}
+  if (!is.null(obs.time)) {
+    if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
+    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}}
 
   # raster
   if (!exists('img')) {stop('"img" is missing')}
@@ -113,7 +113,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
       si <- i-1
       ei <- i
       d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
-      if (!is.null(ot)) {t0 <- difftime(ot[ei], ot[si], units='mins')} else {t0 <- NA}
+      if (!is.null(obs.time)) {t0 <- difftime(obs.time[ei], obs.time[si], units='mins')} else {t0 <- NA}
       x0 <- xy@coords[si:ei,1]
       y0 <- xy@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
@@ -129,7 +129,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
           if (dy>0) {cm<- -((0:round(abs(dy)/pxr[1]))*pxr[1])} else {cm<- ((0:round(abs(dy)/pxr[1]))*pxr[1])}
           y0 <- (y0[1]+cm)
           x0 <- m[1] + y0 * m[2]}}
-      if (dm=='deg') {
+      if (dist.method=='deg') {
         x00 <- xy@coords[si:ei,1]*pi/180
         y00 <- xy@coords[si:ei,2]*pi/180
         sf <- function(o) {
@@ -148,7 +148,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
       si <- i
       ei <- i+1
       d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
-      if (!is.null(ot)) {t0 <- difftime(ot[ei], ot[si], units='mins')} else {t0 <- NA}
+      if (!is.null(obs.time)) {t0 <- difftime(obs.time[ei], obs.time[si], units='mins')} else {t0 <- NA}
       x0 <- xy@coords[si:ei,1]
       y0 <- xy@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
@@ -164,7 +164,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
           if (dy>0) {cm<- -((0:round(abs(dy)/pxr[1]))*pxr[1])} else {cm<-((0:round(abs(dy)/pxr[1]))*pxr[1])}
           y0 <- (y0[1]+cm)
           x0 <- m[1] + y0 * m[2]}}
-      if (dm=='deg') {
+      if (dist.method=='deg') {
         x00 <- xy@coords[si:ei,1]*pi/180
         y00 <- xy@coords[si:ei,2]*pi/180
         sf <- function(o) {
@@ -183,7 +183,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
       si <- i-1
       ei <- i+1
       d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
-      if (!is.null(ot)) {t0 <- difftime(ot[ei], ot[si], units='mins')} else {t0 <- NA}
+      if (!is.null(obs.time)) {t0 <- difftime(obs.time[ei], obs.time[si], units='mins')} else {t0 <- NA}
       x0 <- xy@coords[si:ei,1]
       y0 <- xy@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
@@ -210,7 +210,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
               y00[(o-1)] <- ty}}
         x0 <- unlist(x00)
         y0 <- unlist(y00)}
-      if (dm=='deg') {
+      if (dist.method=='deg') {
         x00 <- xy@coords[si:ei,1]*pi/180
         y00 <- xy@coords[si:ei,2]*pi/180
         sf <- function(o) {
@@ -313,7 +313,7 @@ spaceDir <- function(xy=xy, ot=NULL, img=img, dir=dir, type=type, dm='m', b.size
   us0 <- unique(us)
 
   # subset variables (depends on sampling strategy)
-  df <- data.frame(x=xy@coords[us0,1], y=xy@coords[us0,2], timestamp=ot[us0], travel.distance=pd, travel.time=td, sid=us0)
+  df <- data.frame(x=xy@coords[us0,1], y=xy@coords[us0,2], timestamp=obs.time[us0], travel.distance=pd, travel.time=td, sid=us0)
   df <- cbind(df, ov)
 
   # build segment endpoint shapefile
