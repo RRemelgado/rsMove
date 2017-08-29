@@ -44,8 +44,8 @@
 #'  neo.var <- getEnv(d.source="NEO")
 #'
 #'  # download bathimetry data
-#'  getEnv(d.source="NEO", t.var="bat")
-#'  getEnv(d.source"CCI", t.var="2015")
+#'  getEnv(d.source="NEO", t.var="bat", d.path=".")
+#'  getEnv(d.source="CCI", t.var="2015", d.path=".")
 #'
 #' }
 #' @export
@@ -80,9 +80,6 @@ getEnv <- function(d.path=NULL, d.source=NULL, t.var=NULL, ref=NULL, p.raster=FA
   # check reference fil
   if (!is.null(ref)) {
     ext <- extent(projectExtent(ref, crs(var.ls$crs[ind])))} #  project extent
-
-
-  if (!is.)
 
   # check output path
   if (is.null(d.path)) {stop('"d.path" is missing')}
