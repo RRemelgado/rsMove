@@ -2,15 +2,15 @@
 #'
 #' @description Convert spatial polygons into point samples.
 #' @param pol Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
-#' @param re Object of class \emph{Extent} or a raster object from which an extent can be derived.
+#' @param ref.ext Object of class \emph{Extent} or a raster object from which an extent can be derived.
 #' @param mpc Minimum pixel cover (0-100). Default is 100.
 #' @param pr Pixel resolution.
 #' @import sp raster rgdal
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame}.
-#' @details {Determines coordinates of pixels within a given extent. If \emph{re} is missing the
+#' @details {Determines coordinates of pixels within a given extent. If \emph{ref.ext} is missing the
 #'            target extent corresponds to the extent of the polygon layer. In this case, \emph{pr}
-#'            is required. If \emph{re} is an \emph{Extent} object or \emph{re} is missing \emph{rp} is required.
+#'            is required. If \emph{ref.ext} is an \emph{Extent} object or \emph{ref.ext} is missing \emph{rp} is required.
 #'            \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the
 #'            percentage of area cover by a polygon is below the defined threshold.
 #'            The output provides the coordinates (\emph{x} and \emph{y}) the
@@ -28,14 +28,14 @@
 #'  roi <- shapefile(file)
 #'
 #'  # segment probabilities
-#'  samples <- poly2sample(pol=roi, re=img)
+#'  samples <- poly2sample(pol=roi, ref.ext=img)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
+poly2sample <- function(pol=pol, ref.ext=NULL, mpc=NULL, pr=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
@@ -44,26 +44,26 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
   if(!class(pol)[1]%in%c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
     stop('"pol" is not a valid input.')
   }
-  if (!is.null(re)) {
-    if(!class(re)[1]%in%c("RasterLayer", "RasterStack", "RasterBrick")) {
-      if (class(re)!='Extent') {stop('"ras" is not a valid input.')}
-      if (is.null(pr)) {stop('"re" is of class "Extent" object. "pr" is required.')}
-      if (is.null(rp)) {stop('"re" is of class "Extent" object. "rp" is required.')}
-      rr <- raster(re, crs=rp, res=pr) # build reference raster
-      nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
+  if (!is.null(ref.ext)) {
+    if(!class(ref.ext)[1]%in%c("RasterLayer", "RasterStack", "RasterBrick")) {
+      if (class(ref.ext)!='Extent') {stop('"ras" is not a valid input.')}
+      if (is.null(pr)) {stop('"ref.ext" is of class "Extent" object. "pr" is required.')}
+      if (is.null(rp)) {stop('"ref.ext" is of class "Extent" object. "rp" is required.')}
+      rr <- raster(ref.ext, crs=rp, res=pr) # build reference raster
+      nr <- round((ref.ext[4]-ref.ext[3]) / pr) + 1 # number of rows in raster
     } else {
-      pr <- res(re)[1] # check pixel resolution
-      rp <- crs(re) # check raster projection
-      nr <- dim(re)[1] # number of rows in raster
-      rr <- re # set variable with reference raster
-      re <- extent(rr) # extraxt extent
+      pr <- res(ref.ext)[1] # check pixel resolution
+      rp <- crs(ref.ext) # check raster projection
+      nr <- dim(ref.ext)[1] # number of rows in raster
+      rr <- ref.ext # set variable with reference raster
+      ref.ext <- extent(rr) # extraxt extent
     }
     if (rp@projargs!=crs(pol)@projargs) {stop('using different projections')}
   } else {
-    if (is.null(pr)) {stop('provide "pr" since "re" is missing')}
-    re <- extent(pol) # extent derived from
-    rr <- raster(re, crs=crs(pol), res=pr)
-    nr <- round((re[4]-re[3]) / pr) + 1 # number of rows in raster
+    if (is.null(pr)) {stop('provide "pr" since "ref.ext" is missing')}
+    ref.ext <- extent(pol) # extent derived from
+    rr <- raster(ref.ext, crs=crs(pol), res=pr)
+    nr <- round((ref.ext[4]-ref.ext[3]) / pr) + 1 # number of rows in raster
   }
   if (is.null(mpc)) {mpc <- 100}
   if (mpc < 0 | mpc > 100) {stop('"mpc" should be between 0 and 100')}
@@ -71,10 +71,10 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
   # update extent object
   # (correspond x/y to pixel center)
   ar <- pr / 2 # half resolution
-  re[1] <- re[1] + ar
-  re[2] <- re[2] - ar
-  re[3] <- re[3] + ar
-  re[4] <- re[4] - ar
+  ref.ext[1] <- ref.ext[1] + ar
+  ref.ext[2] <- ref.ext[2] - ar
+  ref.ext[3] <- ref.ext[3] + ar
+  ref.ext[4] <- ref.ext[4] - ar
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
@@ -83,7 +83,7 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
     r <- crop(rr, extent(pol[i,]))
     r <- rasterToPoints(rasterize(pol[i,], r, getCover=T))
     ind <- which(r[,3] > 0) # usable pixels
-    pp <- (round((re[4]-r[ind,2])/pr)) + nr * (round((r[ind,1]-re[1])/pr))
+    pp <- (round((ref.ext[4]-r[ind,2])/pr)) + nr * (round((r[ind,1]-ref.ext[1])/pr))
     pc <- r[ind,3] # percent cover
     return(list(pp=pp, pc=pc))
   }
@@ -114,8 +114,8 @@ poly2sample <- function(pol=pol, re=NULL, mpc=NULL, pr=NULL) {
 #------------------------------------------------------------------------------------------------------------------------#
 
   # build/return output
-  xc <- re[1] + (round(up/nr)*pr) # convert positions to x coordinates
-  yc <- re[4] - (round(up%%nr)*pr) # convert positions to y coordinates
+  xc <- ref.ext[1] + (round(up/nr)*pr) # convert positions to x coordinates
+  yc <- ref.ext[4] - (round(up%%nr)*pr) # convert positions to y coordinates
 
   os <- data.frame(x=xc, y=yc, index=up, cover=pc)
   return(SpatialPointsDataFrame(cbind(xc,yc), os, proj4string=crs(pol)))

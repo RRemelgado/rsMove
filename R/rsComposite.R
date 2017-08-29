@@ -3,8 +3,8 @@
 #' @description Compositing of remote sensing data based on GPS tracking dates.
 #' @param img Object of class \emph{RasterSpack} or \emph{RasterBrick}.
 #' @param rd Object of class \emph{Date} with \emph{img} observation dates.
-#' @param ot Object of class \emph{Date} with reference dates.
-#' @param cm Number of deviations from the target date. Default is 1.
+#' @param o.time Object of class \emph{Date} with reference dates.
+#' @param n.dev Number of deviations from the target date. Default is 1.
 #' @param type One of "norm" or "pheno" or "pheno2".
 #' @param d.buffer Search buffer (expressed in days).
 #' @import raster rgdal
@@ -13,12 +13,12 @@
 #' @return A \emph{list}.
 #' @details {The function uses a multi-layer raster object to build a composite.
 #' It looks at a ginve set of dates (e.g. GPS tracking dates) and estimates a
-#' reference date to build the composite for defined by the median of \emph{ot}.
+#' reference date to build the composite for defined by the median of \emph{o.time}.
 #' The median is then used to estimate Median Absolute Deviation (MAD) which
 #' specifies the size of the buffer set aroung the target date within which
-#' bands will be considered. Here, \emph{cm} is used as a multiplier to enlarge
+#' bands will be considered. Here, \emph{n.dev} is used as a multiplier to enlarge
 #' the temporal buffer. Alternatively, a user define temporal buffer is allowed
-#' by using the keyword \emph{d.buffer}. If \emph{ot} countains only one element,
+#' by using the keyword \emph{d.buffer}. If \emph{o.time} countains only one element,
 #' the function will use it as a reference date. In this case, if \emph{d.buffer}
 #' is NULL the function will set it to 30 by default. The way how the function handles
 #' temporal information depends on the \emph{type} keyword. If set to \emph{norm},
@@ -50,17 +50,17 @@
 #'  rd = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), 45)
 #'
 #'  # target date
-#'  ot = as.Date("2013-06-01")
+#'  o.time = as.Date("2013-06-01")
 #'
 #'  # build composite
-#'  r.comp <- rsComposite(rsStk, rd, ot, d.buffer=90)
+#'  r.comp <- rsComposite(rsStk, rd, o.time, d.buffer=90)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-rsComposite <- function(img, rd, ot, cm=1, type='norm', d.buffer=NULL) {
+rsComposite <- function(img, rd, o.time, n.dev=1, type='norm', d.buffer=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -76,11 +76,11 @@ rsComposite <- function(img, rd, ot, cm=1, type='norm', d.buffer=NULL) {
   if (length(rd)!=nlayers(img)) {stop('errorr: "img" and "rd" have different lengths')}
 
   # reference dates
-  if (!exists('ot')) {stop('"ot" is missing')}
-  if (!class(ot)[1]%in%c('Date')) {stop('error: "ot" is nof of a valid class')}
+  if (!exists('o.time')) {stop('"o.time" is missing')}
+  if (!class(o.time)[1]%in%c('Date')) {stop('error: "o.time" is nof of a valid class')}
 
   # auxiliary variables
-  if (!is.numeric(cm)) {stop('"cm" is not numeric')}
+  if (!is.numeric(n.dev)) {stop('"n.dev" is not numeric')}
   if (!is.null(d.buffer)) {if (!is.numeric(d.buffer)) {stop('"d.buffer" is not numeric')}}
   if (!type%in%c('norm', 'pheno')) {stop('"type" is not a valid keyword')}
 
@@ -90,18 +90,18 @@ rsComposite <- function(img, rd, ot, cm=1, type='norm', d.buffer=NULL) {
 
   # determine date format
   if (type=='norm') {
-    ot0 <- ot
+    ot0 <- o.time
     rd0 <- rd}
   if (type=='pheno' | type=='pheno2') {
-    bd <- as.Date(paste0(as.character(format(ot,'%Y')), '-01-01'))
-    ot0 <- as.numeric((ot-bd) + 1)
+    bd <- as.Date(paste0(as.character(format(o.time,'%Y')), '-01-01'))
+    ot0 <- as.numeric((o.time-bd) + 1)
     bd <- as.Date(paste0(as.character(format(rd,'%Y')), '-01-01'))
     rd0 <- as.numeric((rd-bd) + 1)}
 
   # determine date range
-  if (length(ot)>1) {
+  if (length(o.time)>1) {
     t.date <- median(ot0) # target date
-    if (is.null(d.buffer)) {d.buffer <- median(abs(ot0-t.date))*cm} # search buffer
+    if (is.null(d.buffer)) {d.buffer <- median(abs(ot0-t.date))*n.dev} # search buffer
   } else {
     t.date <- ot0
     if (is.null(d.buffer)) {d.buffer <- 30}
