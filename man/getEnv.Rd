@@ -20,7 +20,7 @@ getEnv(d.path = NULL, d.source = NULL, t.var = NULL, ref = NULL,
 
 \item{p.res}{Pixel resolution (used if p.raster is TRUE).}
 
-\item{pad}{Mi,ner pf cells used to pad the output raster when resampling.}
+\item{pad}{Number of cells used to pad the output raster when resampling.}
 }
 \value{
 One or multiple raster objects.

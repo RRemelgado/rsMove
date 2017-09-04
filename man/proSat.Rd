@@ -22,7 +22,7 @@ proSat(t.var = NULL, xy = NULL, o.time = NULL, d.path = NULL,
 
 \item{user.cred}{Two element character vector containing username and password.}
 
-\item{pad}{Padding expressed in number of pixels. Used when re-projecting and resampling.}
+\item{pad}{Number of cells used to pad the output raster when resampling.}
 }
 \value{
 One or multiple raster objects.

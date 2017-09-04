@@ -3,13 +3,14 @@
 #' @description Remote sensing based point segmentation that preserves periodic movements.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
-#' @param o.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @import raster rgdal
+#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
+#' @importFrom raster crs cellFromXY rasterize
+#' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{sampleMove}} \code{\link{moveSeg}}
 #' @return A \emph{list}.
 #' @details {SReduces a set of input samples (\emph{xy}) based on their assignment to unique pixels
 #' within a reference raster (\emph{img}). The function looks at consecutive points ordered by time
-#' (\emph{o.time}) and aggregates samples if they remain within the same pixel. If the same pixel is
+#' (\emph{obs.time}) and aggregates samples if they remain within the same pixel. If the same pixel is
 #' revisited on a later time, that observation is kept as a separate occurrence. For each temporal
 #' segment, the function returns mean x and y coordinates, the start and end timestamps, the mean
 #' timestamp and the elapsed time.}
@@ -25,17 +26,17 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
 #'  # observation time
-#'  o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(xy=moveData, o.timet=o.time, img=r)
+#'  move.reduce <- moveReduce(xy=moveData, obs.time=obs.time, img=r)
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------#
 
-moveReduce <- function(xy=xy, o.time=o.time, img=img) {
+moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
 
 #----------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -47,9 +48,9 @@ moveReduce <- function(xy=xy, o.time=o.time, img=img) {
   rProj <- crs(xy) # output projection
 
   # sample dates
-  if (!is.null(o.time)) {
-    if (!class(o.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"o.time" is nof of a valid class')}
-    if (length(o.time)!=length(xy)) {stop('errorr: "xy" and "o.time" have different lengths')}}
+  if (!is.null(obs.time)) {
+    if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
+    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}}
 
   # environmental data
   if (!class(img)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
@@ -61,9 +62,9 @@ moveReduce <- function(xy=xy, o.time=o.time, img=img) {
 #----------------------------------------------------------------------------------------------------------#
 
   # convert xy to single pixels
-  os <- order(o.time)
+  os <- order(obs.time)
   xy <- xy[os,]
-  o.time <- o.time[os]
+  obs.time <- obs.time[os]
   sp <- cellFromXY(img, xy@coords)
 
   rm(os)
@@ -86,11 +87,11 @@ moveReduce <- function(xy=xy, o.time=o.time, img=img) {
         ep <- (r-1)
         ux[[li]] <- mean(xy@coords[sp0:ep,1])
         uy[[li]] <- mean(xy@coords[sp0:ep,2])
-        if (!is.null(o.time)) {
-          ft[[li]] <- o.time[sp0]
-          lt[[li]] <- o.time[ep]
-          ut[[li]] <- mean(o.time[sp0:ep])
-          et[[li]] <- difftime(o.time[ep], o.time[sp0], units='mins')
+        if (!is.null(obs.time)) {
+          ft[[li]] <- obs.time[sp0]
+          lt[[li]] <- obs.time[ep]
+          ut[[li]] <- mean(obs.time[sp0:ep])
+          et[[li]] <- difftime(obs.time[ep], obs.time[sp0], units='mins')
         } else {
           ft[[li]] <- NA
           lt[[li]] <- NA
@@ -107,11 +108,11 @@ moveReduce <- function(xy=xy, o.time=o.time, img=img) {
         ep <- (r-1)
         ux[[li]] <- mean(xy@coords[sp0:ep,1])
         uy[[li]] <- mean(xy@coords[sp0:ep,2])
-        if (!is.null(o.time)) {
-          ft[[li]] <- o.time[sp0]
-          lt[[li]] <- o.time[ep]
-          ut[[li]] <- mean(o.time[sp0:ep])
-          et[[li]] <- difftime(o.time[ep], o.time[sp0], units='mins')
+        if (!is.null(obs.time)) {
+          ft[[li]] <- obs.time[sp0]
+          lt[[li]] <- obs.time[ep]
+          ut[[li]] <- mean(obs.time[sp0:ep])
+          et[[li]] <- difftime(obs.time[ep], obs.time[sp0], units='mins')
         } else {
           ft[[li]] <- NA
           lt[[li]] <- NA
@@ -126,11 +127,11 @@ moveReduce <- function(xy=xy, o.time=o.time, img=img) {
         ep <- r
         ux[[li]] <- mean(xy@coords[sp0:ep,1])
         uy[[li]] <- mean(xy@coords[sp0:ep,2])
-        if (!is.null(o.time)) {
-          ft[[li]] <- o.time[sp0]
-          lt[[li]] <- o.time[ep]
-          ut[[li]] <- mean(o.time[sp0:ep])
-          et[[li]] <- difftime(o.time[ep], o.time[sp0], units='mins')
+        if (!is.null(obs.time)) {
+          ft[[li]] <- obs.time[sp0]
+          lt[[li]] <- obs.time[ep]
+          ut[[li]] <- mean(obs.time[sp0:ep])
+          et[[li]] <- difftime(obs.time[ep], obs.time[sp0], units='mins')
         } else {
           ft[[li]] <- NA
           lt[[li]] <- NA

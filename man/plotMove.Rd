@@ -4,14 +4,14 @@
 \alias{plotMove}
 \title{plotMove}
 \usage{
-plotMove(x = x, y = y, o.time = NULL, value = NULL, type = NULL)
+plotMove(x = x, y = y, obs.time = NULL, value = NULL, type = NULL)
 }
 \arguments{
 \item{x}{Vector of x coordinates.}
 
 \item{y}{Vector of y coordinates.}
 
-\item{o.time}{Vector with time length.}
+\item{obs.time}{Vector with time length.}
 
 \item{value}{Vector with environmental data.edata Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
@@ -45,10 +45,10 @@ It will influence how the plots are built. The breaks a limits for the point siz
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 
  # observation time
- o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # reduce amount of samples
- move.reduce <- moveReduce(xy=moveData, ot=o.time, img=r)
+ move.reduce <- moveReduce(xy=moveData, obs.time=obs.time, img=r)
 
  # query data
  ov <- dataQuery(xy=move.reduce$points, img=r)
@@ -57,7 +57,7 @@ It will influence how the plots are built. The breaks a limits for the point siz
  x <- move.reduce$points@coords[,1]
  y <- move.reduce$points@coords[,2]
  et <- move.reduce$points@data$elapsed.time
- op <- plotMove(x=x, y=y, o.time=et, value=ov[,1], type="cont")
+ op <- plotMove(x=x, y=y, obs.time=et, value=ov[,1], type="cont")
 
 }
 }

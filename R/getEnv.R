@@ -7,7 +7,7 @@
 #' @param ref Projected spatial object from which an extent can be derived.
 #' @param p.raster Logical. Should the output be reprojected?
 #' @param p.res Pixel resolution (used if p.raster is TRUE).
-#' @param pad Mi,ner pf cells used to pad the output raster when resampling.
+#' @param pad Number of cells used to pad the output raster when resampling.
 #' @import grDevices sp rgdal raster
 #' @importFrom utils download.file read.csv unzip untar
 #' @return One or multiple raster objects.

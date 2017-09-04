@@ -8,7 +8,9 @@
 #' @param tUnit Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.
 #' @param method Method used to estimate polygon area.
 #' @return A \emph{data frame}.
-#' @import sp rgdal ggplot2
+#' @importFrom sp spTransform CRS
+#' @importFrom ggplot2 ggplot aes_string geom_bar scale_fill_gradientn xlab ylab theme_bw
+#' @importFrom grDevices colorRampPalette
 #' @details {This functions analysis the attributes of sample regions define by hotMove(). Alternatively,
 #' the user can keep \emph{rid} as NULL. This case, all information will be assumed as part of one region.
 #' For each sample region, the function returns the amount of samples (\emph{tns}. If a vector of unique
@@ -172,10 +174,10 @@ hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='
           uv = unique(zone)
           count <- sapply(uv, function(x){sum(zone==x)}) # zone code counts
           zone <- zone[which(count==max(count))] # dominant zone/orientation
-          refProj <- sp::CRS(paste0('+proj=utm +zone=', zone[1], ' +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'))
+          refProj <- CRS(paste0('+proj=utm +zone=', zone[1], ' +datum=WGS84 +units=m +no_defs +ellps=WGS84 +towgs84=0,0,0'))
 
           # project polygon and estimate area
-          shp <- sp::spTransform(rid$polygons[r], refProj)
+          shp <- spTransform(rid$polygons[r], refProj)
           ura[r] <- shp@polygons[[1]]@Polygons[[1]]@area * 0.000001
 
           rm(sc, zone, count, refProj)

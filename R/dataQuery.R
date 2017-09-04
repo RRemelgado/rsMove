@@ -8,7 +8,7 @@
 #' @param time.buffer Two element vector with temporal search buffer, expressed in days.
 #' @param spatial.buffer Buffer size (unit depends on the raster projection).
 #' @param fun Passes an external function.
-#' @import raster rgdal
+#' @importFrom raster crs extract nlayers
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
 #' @return A n object of class \emph{vector} or \emph{data.frame}.

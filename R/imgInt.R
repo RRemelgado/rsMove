@@ -8,7 +8,7 @@
 #' @param time.buffer wo element vector with temporal search buffer (expressed in days).
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param edata Object of class \emph{data frame} or \emph{matrix} with remote sensing data.
-#' @import raster sp rgdal
+#' @importFrom raster crs nlayers brick
 #' @importFrom stats lm
 #' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}.
@@ -44,7 +44,7 @@
 
 #-------------------------------------------------------------------------------------------------#
 
-imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=NULL, xy=NULL, edata=NULL) {
+imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=time.buffer, xy=NULL, edata=NULL) {
 
 #-------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -58,7 +58,6 @@ imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=N
     if (ncol(edata)!=length(r.dates)) {stop('mismatch in "edata" and "r.dates" dimensions')}
     xy <- NULL
     img <- NULL
-    time.buffer <- NULL
   } else {
     if (is.null(img)) {stop('"img" is missing')}
     if (!class(img)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
@@ -67,9 +66,9 @@ imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=N
         stop('"shp is nor a valid point shapefile object')}
       if (crs(xy)@projargs!=crs(img)@projargs) {
         stop('"xy" and "img" have different projections')}}
-    if (nlayers(img)!=length(r.dates)) {stop('length of "img" and "r.dates" do not match')}
-    if (!is.null(time.buffer)) {if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')}}}
-
+    if (nlayers(img)!=length(r.dates)) {stop('length of "img" and "r.dates" do not match')}}
+  if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')
+  
 #-------------------------------------------------------------------------------------------------#
 # 2. interpolate values
 #-------------------------------------------------------------------------------------------------#

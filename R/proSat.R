@@ -8,7 +8,7 @@
 #' @param p.raster Logical. Should the output be re-projected?
 #' @param p.res Target pixel resolution (if p.raster is TRUE).
 #' @param user.cred Two element character vector containing username and password.
-#' @param pad Padding expressed in number of pixels. Used when re-projecting and resampling.
+#' @param pad Number of cells used to pad the output raster when resampling.
 #' @import grDevices sp rgdal ncdf4
 #' @importFrom XML htmlParse readHTMLTable xmlRoot
 #' @importFrom httr GET write_disk authenticate

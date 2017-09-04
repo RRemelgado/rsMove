@@ -1,7 +1,7 @@
 #' @title segRaster
 #'
-#' @description {Connencte-region based raster segmentation
-#' that preserves spatial gradients and reports on region statistics.}
+#' @description {Connencte-region based raster segmentation that 
+#' preserves spatial gradients and reports on region statistics.}
 #' @param prob Object of class \emph{RasterLayer}.
 #' @param break.point Difference threshold. Default is 0.05.
 #' @param min.prob Minimum value. Default is 0.5.
@@ -36,7 +36,7 @@
 
 #-----------------------------------------------------------------------------------#
 
-segRaster <- function(prob, break.point=0.1, min.prob=0.5) {
+segRaster <- function(prob, break.point=0.1, min.prob=NULL) {
 
 #-----------------------------------------------------------------------------------#
 # 1. check input variables
@@ -52,28 +52,27 @@ segRaster <- function(prob, break.point=0.1, min.prob=0.5) {
   nc <- dim(prob)[2]
 
   # identify usable pixels
-  data <- as.matrix(prob)
-  pos <- which(data > min.prob)
-
+  if (is.null(min.prob)) {pos <- which.max(!is.na(prob))} else {pos <- which.max(prob >= min.prob)}
+  
   # evaluate pixel connectivity
-  regions <- matrix(0, nr, nc)
+  regions <- raster(extent(prob), vals=0, res=res(lc), crs=crs(prob))
   for (r in 1:length(pos)) {
-    rp <- ((pos[r]-1) %% nr)+1
-    cp <- ((pos[r]-1) %/% nr)+1
-    if (cp > 1) {sc<-cp-1} else {sc<-cp}
-    if (cp < nc) {ec<-cp+1} else {ec<-cp}
+    rp <- rowFromCell(prob, pos[r])
     if (rp > 1) {sr<-rp-1} else {sr<-rp}
     if (rp < nr) {er<-rp+1} else {er<-rp}
+    cp <- colFromCell(prob, pos[r])
+    if (cp > 1) {sc<-cp-1} else {sc<-cp}
+    if (cp < nc) {ec<-cp+1} else {ec<-cp}
     if (max(regions[sr:er,sc:ec])>0) {
-      diff <- abs(data[sr:er,sc:ec]-data[rp,cp]) <= break.point
-      uv <- unique(c(regions[sr:er,sc:ec]*diff))
+      diff <- abs(prob[sr:er,sc:ec]-prob[rp,cp]) <= break.point
+      uv <- unique(regions[sr:er,sc:ec][which(diff)])
       uv <- uv[which(uv>0)]
-      if (length(uv>0)) {
+      if (length(uv)>0) {
         mv <- min(uv)
         regions[rp,cp]<-min(uv)
-        for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
-      } else {regions[rp,cp]<-max(regions)+1}
-    } else {regions[rp,cp] <- max(regions)+1}
+        for (u in 1:length(uv)) {regions[which.max(regions==uv[u])] <- mv}
+      } else {regions[rp,cp]<- cellStats(regions,max, na.rm=T)+1}
+    } else {regions[rp,cp] <- cellStats(regions,max, na.rm=T)+1}
   }
 
 #-----------------------------------------------------------------------------------#
@@ -81,7 +80,8 @@ segRaster <- function(prob, break.point=0.1, min.prob=0.5) {
 #-----------------------------------------------------------------------------------#
 
   # update region id
-  uv <- sort(unique(regions[which(regions>0)]))
+  uv <- sort(unique(regions))
+  uv <- uv[which(uv > 0)]
   uregions = regions
   nr <- length(uv)
   pmn <- vector('numeric', nr) # min
@@ -90,16 +90,16 @@ segRaster <- function(prob, break.point=0.1, min.prob=0.5) {
   psd <- vector('numeric', nr) # sd
   npx <- vector('numeric', nr) # count
   for (u in 1:nr) {
-    pos <- which(regions==uv[u])
+    pos <- which.max(regions==uv[u])
     uregions[pos] <- u
-    pmn[u] <- min(data[pos], na.rm=T)
-    pmx[u] <- max(data[pos], na.rm=T)
-    pav[u] <- mean(data[pos], na.rm=T)
-    psd[u] <- sd(data[pos], na.rm=T)
-    npx[u] <- sum(!is.na(data[pos]))
+    pmn[u] <- min(prob[pos], na.rm=T)
+    pmx[u] <- max(prob[pos], na.rm=T)
+    pav[u] <- mean(prob[pos], na.rm=T)
+    psd[u] <- sd(prob[pos], na.rm=T)
+    npx[u] <- sum(!is.na(prob[pos]))
   }
 
-  rm(regions, data)
+  rm(regions, prob)
 
 #-----------------------------------------------------------------------------------#
 # 4. return output
@@ -112,9 +112,10 @@ segRaster <- function(prob, break.point=0.1, min.prob=0.5) {
   crs(uregions) <- crs(prob)
 
   # build/return data frame
-  df <- data.frame(segment=uv, min=pmn, max=pmx, mean=pav, sd=psd, cout=npx)
+  df <- data.frame(segment=uv, min=pmn, max=pmx, mean=pav, sd=psd, count=npx)
 
   # return matrix/df
   return(list(segment=uregions, stats=df))
 
 }
+

@@ -4,12 +4,12 @@
 \alias{moveReduce}
 \title{moveReduce}
 \usage{
-moveReduce(xy = xy, o.time = o.time, img = img)
+moveReduce(xy = xy, obs.time = obs.time, img = img)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{o.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 }
@@ -22,7 +22,7 @@ Remote sensing based point segmentation that preserves periodic movements.
 \details{
 {SReduces a set of input samples (\emph{xy}) based on their assignment to unique pixels
 within a reference raster (\emph{img}). The function looks at consecutive points ordered by time
-(\emph{o.time}) and aggregates samples if they remain within the same pixel. If the same pixel is
+(\emph{obs.time}) and aggregates samples if they remain within the same pixel. If the same pixel is
 revisited on a later time, that observation is kept as a separate occurrence. For each temporal
 segment, the function returns mean x and y coordinates, the start and end timestamps, the mean
 timestamp and the elapsed time.}
@@ -40,10 +40,10 @@ timestamp and the elapsed time.}
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 
  # observation time
- o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # reduce amount of samples
- move.reduce <- moveReduce(xy=moveData, o.timet=o.time, img=r)
+ move.reduce <- moveReduce(xy=moveData, obs.time=obs.time, img=r)
 
 }
 }

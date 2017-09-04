@@ -8,7 +8,7 @@
 #' @param n.dev Number of deviations from the target date. Default is 1.
 #' @param type One of "norm" or "pheno" or "pheno2".
 #' @param d.buffer Search buffer (expressed in days).
-#' @import raster rgdal
+#' @importFrom raster nlayers calc cellStats
 #' @importFrom stats lm
 #' @seealso \code{\link{imgInt}} \code{\link{dataQuery}} \code{\link{proSat}}
 #' @return A \emph{list}.

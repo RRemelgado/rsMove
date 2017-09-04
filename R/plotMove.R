@@ -4,7 +4,7 @@
 #'  and time spent for each sample given a set of coordinate pairs.}
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
-#' @param o.time Vector with time length.
+#' @param obs.time Vector with time length.
 #' @param value Vector with environmental data.edata Object of class \emph{RasterLayer} or \emph{data.frame}.
 #' @param type One of 'cont' or 'cat'. Defines the type of \emph{value}.
 #' @import raster rgdal ggplot2
@@ -28,10 +28,10 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
 #'  # observation time
-#'  o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(xy=moveData, ot=o.time, img=r)
+#'  move.reduce <- moveReduce(xy=moveData, obs.time=obs.time, img=r)
 #'
 #'  # query data
 #'  ov <- dataQuery(xy=move.reduce$points, img=r)
@@ -40,31 +40,31 @@
 #'  x <- move.reduce$points@coords[,1]
 #'  y <- move.reduce$points@coords[,2]
 #'  et <- move.reduce$points@data$elapsed.time
-#'  op <- plotMove(x=x, y=y, o.time=et, value=ov[,1], type="cont")
+#'  op <- plotMove(x=x, y=y, obs.time=et, value=ov[,1], type="cont")
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------#
 
-plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
+plotMove <- function(x=x, y=y, obs.time=NULL, value=NULL, type=NULL) {
 
 #----------------------------------------------------------------------------------------------------------#
 # 1. Check input data
 #----------------------------------------------------------------------------------------------------------#
 
   if (length(x)!=length(y)) {stop('"x" and "y" have different lengths')}
-  if(!is.null(o.time)) {
-    if (!is.numeric(o.time)) {stop('"o.time" is nof of a valid class')}
-    if (length(o.time)!=length(x)) {stop('coordinates and "o.time" have different lengths')}}
+  if(!is.null(obs.time)) {
+    if (!is.numeric(obs.time)) {stop('"obs.time" is nof of a valid class')}
+    if (length(obs.time)!=length(x)) {stop('coordinates and "obs.time" have different lengths')}}
   if (!is.null(value)) {
     if (is.null(type)) {stop('"value" is set. Please specify "type"')}
     if (!type%in%c('cont', 'cat')) {stop('"type" is not a recognized keyword')}
     if (length(value)!=length(x)) {stop('coordinates and "value" have different lengths')}}
 
   # abort function if no variable is provided
-  if (is.null(o.time) & is.null(value)) {
-    warning('neither "o.time" or "value" were specfied. aborted.')
+  if (is.null(obs.time) & is.null(value)) {
+    warning('neither "obs.time" or "value" were specfied. aborted.')
     return()
   }
 
@@ -73,8 +73,8 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
 #----------------------------------------------------------------------------------------------------------#
 
   # time breaks
-  if (!is.null(o.time)) {
-    mv <- round(max(o.time, na.rm=T))
+  if (!is.null(obs.time)) {
+    mv <- round(max(obs.time, na.rm=T))
     nc <- nchar(as.character(mv))
     m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
     mv <- mv / m
@@ -90,10 +90,10 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
 #----------------------------------------------------------------------------------------------------------#
 
   # time and environmental data
-  if (!is.null(o.time) & !is.null(value)) {
+  if (!is.null(obs.time) & !is.null(value)) {
 
     # build data frame
-    df <- data.frame(x=x, y=y, time=o.time, value=value)
+    df <- data.frame(x=x, y=y, time=obs.time, value=value)
 
     # build plot
     if (type=="cont") {
@@ -117,10 +117,10 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
 #----------------------------------------------------------------------------------------------------------#
 
   # only time
-  if (!is.null(o.time) & is.null(value)) {
+  if (!is.null(obs.time) & is.null(value)) {
 
     # build data frame
-    df <- data.frame(x=x, y=y, time=o.time)
+    df <- data.frame(x=x, y=y, time=obs.time)
 
     # build plot
     p <- ggplot(df) + theme_bw() + geom_point(aes_string(x="x", y="y", size="time", fill="red"), color="black", pch=21) +
@@ -133,7 +133,7 @@ plotMove <- function(x=x, y=y, o.time=NULL, value=NULL, type=NULL) {
 #----------------------------------------------------------------------------------------------------------#
 
   # only environmental data
-  if (is.null(o.time) & !is.null(value)) {
+  if (is.null(obs.time) & !is.null(value)) {
 
     # build data frame
     df <- data.frame(x=x, y=y, value=value)
