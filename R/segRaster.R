@@ -36,52 +36,55 @@
 
 #-----------------------------------------------------------------------------------#
 
-segRaster <- function(prob, break.point=0.1, min.prob=NULL) {
-
-#-----------------------------------------------------------------------------------#
-# 1. check input variables
-#-----------------------------------------------------------------------------------#
-
+function(prob, break.point=0.1, min.prob=0.5) {
+  
+  #-----------------------------------------------------------------------------------#
+  # 1. check input variables
+  #-----------------------------------------------------------------------------------#
+  
   if (class(prob)[1]!='RasterLayer') {stop('"prob" is not a "RasterLayer"')}
-
-#-----------------------------------------------------------------------------------#
-# 2. segment regions
-#-----------------------------------------------------------------------------------#
-
+  if (is.null(min.prob)) {min.prob <- 0}
+  
+  #-----------------------------------------------------------------------------------#
+  # 2. segment regions
+  #-----------------------------------------------------------------------------------#
+  
+  # raster dimensions
   nr <- dim(prob)[1]
   nc <- dim(prob)[2]
-
+  
   # identify usable pixels
-  if (is.null(min.prob)) {pos <- which.max(!is.na(prob))} else {pos <- which.max(prob >= min.prob)}
+  data <- as.matrix(prob)
+  pos <- which(data >= min.prob)
   
   # evaluate pixel connectivity
-  regions <- raster(extent(prob), vals=0, res=res(lc), crs=crs(prob))
+  regions <- matrix(0, nr, nc)
   for (r in 1:length(pos)) {
-    rp <- rowFromCell(prob, pos[r])
-    if (rp > 1) {sr<-rp-1} else {sr<-rp}
-    if (rp < nr) {er<-rp+1} else {er<-rp}
-    cp <- colFromCell(prob, pos[r])
+    rp <- ((pos[r]-1) %% nr)+1
+    cp <- ((pos[r]-1) %/% nr)+1
     if (cp > 1) {sc<-cp-1} else {sc<-cp}
     if (cp < nc) {ec<-cp+1} else {ec<-cp}
+    if (rp > 1) {sr<-rp-1} else {sr<-rp}
+    if (rp < nr) {er<-rp+1} else {er<-rp}
     if (max(regions[sr:er,sc:ec])>0) {
-      diff <- abs(prob[sr:er,sc:ec]-prob[rp,cp]) <= break.point
-      uv <- unique(regions[sr:er,sc:ec][which(diff)])
+      diff <- abs(data[sr:er,sc:ec]-data[rp,cp]) <= break.point & 
+        is.finite(data[sr:er,sc:ec])
+      uv <- unique(c(regions[sr:er,sc:ec][diff]))
       uv <- uv[which(uv>0)]
-      if (length(uv)>0) {
+      if (length(uv>0)) {
         mv <- min(uv)
         regions[rp,cp]<-min(uv)
-        for (u in 1:length(uv)) {regions[which.max(regions==uv[u])] <- mv}
-      } else {regions[rp,cp]<- cellStats(regions,max, na.rm=T)+1}
-    } else {regions[rp,cp] <- cellStats(regions,max, na.rm=T)+1}
+        for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
+      } else {regions[rp,cp]<-max(regions)+1}
+    } else {regions[rp,cp] <- max(regions)+1}
   }
-
-#-----------------------------------------------------------------------------------#
-# 3. derive segment statistics
-#-----------------------------------------------------------------------------------#
-
+  
+  #-----------------------------------------------------------------------------------#
+  # 3. derive segment statistics
+  #-----------------------------------------------------------------------------------#
+  
   # update region id
-  uv <- sort(unique(regions))
-  uv <- uv[which(uv > 0)]
+  uv <- sort(unique(regions[which(regions>0)]))
   uregions = regions
   nr <- length(uv)
   pmn <- vector('numeric', nr) # min
@@ -90,32 +93,31 @@ segRaster <- function(prob, break.point=0.1, min.prob=NULL) {
   psd <- vector('numeric', nr) # sd
   npx <- vector('numeric', nr) # count
   for (u in 1:nr) {
-    pos <- which.max(regions==uv[u])
+    pos <- which(regions==uv[u])
     uregions[pos] <- u
-    pmn[u] <- min(prob[pos], na.rm=T)
-    pmx[u] <- max(prob[pos], na.rm=T)
-    pav[u] <- mean(prob[pos], na.rm=T)
-    psd[u] <- sd(prob[pos], na.rm=T)
-    npx[u] <- sum(!is.na(prob[pos]))
+    pmn[u] <- min(data[pos], na.rm=T)
+    pmx[u] <- max(data[pos], na.rm=T)
+    pav[u] <- mean(data[pos], na.rm=T)
+    psd[u] <- sd(data[pos], na.rm=T)
+    npx[u] <- sum(!is.na(data[pos]))
   }
-
-  rm(regions, prob)
-
-#-----------------------------------------------------------------------------------#
-# 4. return output
-#-----------------------------------------------------------------------------------#
-
+  
+  rm(regions, data)
+  
+  #-----------------------------------------------------------------------------------#
+  # 4. return output
+  #-----------------------------------------------------------------------------------#
+  
   # convert data back to raster
   uregions <- raster(uregions)
   extent(uregions) <- extent(prob)
   res(uregions) <- res(prob)
   crs(uregions) <- crs(prob)
-
+  
   # build/return data frame
   df <- data.frame(segment=uv, min=pmn, max=pmx, mean=pav, sd=psd, count=npx)
-
+  
   # return matrix/df
   return(list(segment=uregions, stats=df))
-
+  
 }
-

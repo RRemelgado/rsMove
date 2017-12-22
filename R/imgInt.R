@@ -54,7 +54,7 @@ imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=t
   if(class(obs.dates)!='Date') {stop('"obs.dates" is not a "Date" object')}
   if(class(r.dates)!='Date') {stop('"r.dates" is not a "Date" object')}
   if (!is.null(edata)) {
-    if (class(edata)[1]!='data.frame') {stop('"edata" is neither a matrix or a data frame')}
+    if (!class(edata)[1]%in%c('matrix', 'data.frame')) {stop('"edata" is neither a matrix or a data frame')}
     if (ncol(edata)!=length(r.dates)) {stop('mismatch in "edata" and "r.dates" dimensions')}
     xy <- NULL
     img <- NULL
@@ -67,7 +67,8 @@ imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=t
       if (crs(xy)@projargs!=crs(img)@projargs) {
         stop('"xy" and "img" have different projections')}}
     if (nlayers(img)!=length(r.dates)) {stop('length of "img" and "r.dates" do not match')}}
-  if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')
+  if (is.null(time.buffer)) {stop('"time.buffer" is missing')}
+  if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')}
   
 #-------------------------------------------------------------------------------------------------#
 # 2. interpolate values
@@ -86,14 +87,14 @@ imgInt <- function(img=NULL, r.dates=r.dates, obs.dates=obs.dates, time.buffer=t
       } else {return(NA)}}}
 
   # apply function
-  if (is.null(xy) & !is.null(img)) {
+  if (is.null(xy) & is.null(edata)) { # to raster brick
     out<-brick(img[[1]], nl=length(obs.dates))
     for (r in 1:length(obs.dates)) {
       otd <- obs.dates[r]
       out[[r]] <- calc(img, int)}}
-  if (!is.null(xy)) {
+  if (!is.null(xy) | !is.null(edata)) { # to points from shapefile/data frame
     if (is.null(edata)) {edata <- extract(img, xy)}
-    out <- matrix(0, length(xy), length(obs.dates))
+    out <- matrix(0, nrow(edata), length(obs.dates))
     colnames(out) <- as.character(obs.dates)
     for (r in 1:length(obs.dates)) {
       otd <- obs.dates[r]

@@ -4,8 +4,8 @@
 #' pairs. The temporal information is adjusted to the sample observation date}.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}.
-#' @param d.path Output data path for downloaded data.
-#' @param b.size Two element vector with temporal buffer size (expressed in days).
+#' @param data.path Output data path for downloaded data.
+#' @param buffer.size Two element vector with temporal buffer size (expressed in days).
 #' @param remove.file Logical. Should the files be deleted after usage?
 #' @import ggplot2 sp rgdal grDevices
 #' @importFrom utils download.file
@@ -14,7 +14,7 @@
 #' @details {This function makes uses daily cloud fraction data from NASA's NEO service.
 #' For each observation date (\emph{obs.time}), the function downloads the correspondent image
 #' and extracts the percent of cloud cover for the samples acquired at the target date. If
-#' \emph{d.path} is specified, the function will look within the provided directory for the
+#' \emph{data.path} is specified, the function will look within the provided directory for the
 #' required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each
 #' date, the function will consider images before and after within a temporal buffer. \emph{d.buffer}
 #' requires two elements which specify the buffer size before and after the target date. These
@@ -45,14 +45,14 @@
 #'
 #'  # test function for 30 day buffer
 #'  od <- as.Date(moveData@data$date)
-#'  c.cover <- moveCloud(xy=moveData, obs.time=od, d.path=".", b.size=c(30,30))
+#'  c.cover <- moveCloud(xy=moveData, obs.time=od, data.path=".", buffer.size=c(30,30))
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-moveCloud <- function(xy=xy, obs.time=obs.time, d.path=NULL, b.size=NULL, remove.file=FALSE) {
+moveCloud <- function(xy=xy, obs.time=obs.time, data.path=NULL, buffer.size=NULL, remove.file=FALSE) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
@@ -61,13 +61,13 @@ moveCloud <- function(xy=xy, obs.time=obs.time, d.path=NULL, b.size=NULL, remove
   # input keywords
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (is.na(crs(xy))) {stop('"xy" does not have a valid projection')}
-  if (is.null(d.path)) {
-    d.path <- tempdir()
+  if (is.null(data.path)) {
+    data.path <- tempdir()
     remove.file <- TRUE
   } else {
-    if (!dir.exists(d.path)) {stop('"dpath" not found in file system')}
-    d.path <- paste0(file.path(d.path), .Platform$file.sep)}
-  if (!is.null(b.size)) {apply.buffer<-TRUE} else {apply.buffer<-FALSE}
+    if (!dir.exists(data.path)) {stop('"dpath" not found in file system')}
+    data.path <- paste0(file.path(data.path), .Platform$file.sep)}
+  if (!is.null(buffer.size)) {apply.buffer<-TRUE} else {apply.buffer<-FALSE}
 
   # ftp servers
   myd <- "ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/MYDAL2_D_CLD_FR/" # aqua
@@ -102,9 +102,9 @@ moveCloud <- function(xy=xy, obs.time=obs.time, d.path=NULL, b.size=NULL, remove
 
     # set file name
     ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", ud[d], ".FLOAT.TIFF")
-    ofile1 <- paste0(d.path, basename(ifile1))
+    ofile1 <- paste0(data.path, basename(ifile1))
     ifile2 <- paste0(myd, "MYDAL2_D_CLD_FR_", ud[d], ".FLOAT.TIFF")
-    ofile2 <- paste0(d.path, basename(ifile2))
+    ofile2 <- paste0(data.path, basename(ifile2))
 
     # check if file exists
     if (!file.exists(ofile1)) {
@@ -123,13 +123,13 @@ moveCloud <- function(xy=xy, obs.time=obs.time, d.path=NULL, b.size=NULL, remove
     if(apply.buffer) {
 
       # determine dates within the buffer
-      day.ls <- seq(ud[d]-b.size[1], ud[d]+b.size[2], 1)
+      day.ls <- seq(ud[d]-buffer.size[1], ud[d]+buffer.size[2], 1)
 
       df <- lapply(day.ls, function(x) {
         ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", x, ".FLOAT.TIFF")
-        ofile1 <- paste0(d.path, basename(ifile1))
+        ofile1 <- paste0(data.path, basename(ifile1))
         ifile2 <- paste0(myd, "MYDAL2_D_CLD_FR_", x, ".FLOAT.TIFF")
-        ofile2 <- paste0(d.path, basename(ifile2))
+        ofile2 <- paste0(data.path, basename(ifile2))
         if (!file.exists(ofile1)) {
           if (url.exists(ifile1)) {download.file(ifile1, ofile1, quiet=TRUE, mode="wb")
             mod.r <- TRUE} else {mod.r <- FALSE}}
@@ -194,7 +194,7 @@ moveCloud <- function(xy=xy, obs.time=obs.time, d.path=NULL, b.size=NULL, remove
       p.dt.a <- NA}
 
     # remove files if required
-    if (remove.file) {file.remove(list.files(d.path, '_D_CLD_FR_'))}
+    if (remove.file) {file.remove(list.files(data.path, '_D_CLD_FR_'))}
 
   }
 

@@ -69,111 +69,41 @@ moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
 
   rm(os)
 
-  # search for segments and return median values
-  sp0 <- 1
-  li <- 1
-  ux <- list() # x coordinates
-  uy <- list() # y coordinates
-  ft <- list() # observation time (first)
-  ut <- list() # observation time (mean)
-  lt <- list() # observation time (last)
-  et <- list() # elapsed time
-  sg <- list() # segment position
-  for (r in 2:length(sp)) {
+  # search for segments and return sample indices
+  pd <- rle(sp)$lengths
+  sg <- vector('numeric', length(sp))
+  for (p in 1:length(pd)) {sg[(sum(pd[0:(p-1)])+1):sum(pd[1:p])] <- p}
+  
+  rm(pd)
+  
+  # estimate 
+  df <- do.call(rbind, lapply(1:max(sg), function(s) {
+    ind <- which(sg==s)
+    mx <- median(xy@coords[ind,1])
+    my <- median(xy@coords[ind,2])
+    s.time <- obs.time[ind[1]]
+    e.time <- obs.time[ind[length(ind)]]
+    d.time <- difftime(e.time, s.time, units='mins')
+    return(data.frame(x=mx, y=my, start.time=s.time, end.time=e.time, diff.time=d.time, segment.id=s))}))
 
-    if (r < length(sp)) {
-
-      if (sp[r]!=sp[r-1]) {
-        ep <- (r-1)
-        ux[[li]] <- mean(xy@coords[sp0:ep,1])
-        uy[[li]] <- mean(xy@coords[sp0:ep,2])
-        if (!is.null(obs.time)) {
-          ft[[li]] <- obs.time[sp0]
-          lt[[li]] <- obs.time[ep]
-          ut[[li]] <- mean(obs.time[sp0:ep])
-          et[[li]] <- difftime(obs.time[ep], obs.time[sp0], units='mins')
-        } else {
-          ft[[li]] <- NA
-          lt[[li]] <- NA
-          ut[[li]] <- NA
-          et[[li]] <- NA}
-        sg[[li]] <- sp[r-1]
-        sp0 <- r
-        li <- li + 1
-      }
-
-    } else {
-
-      if (sp[r]!=sp[r-1]) {
-        ep <- (r-1)
-        ux[[li]] <- mean(xy@coords[sp0:ep,1])
-        uy[[li]] <- mean(xy@coords[sp0:ep,2])
-        if (!is.null(obs.time)) {
-          ft[[li]] <- obs.time[sp0]
-          lt[[li]] <- obs.time[ep]
-          ut[[li]] <- mean(obs.time[sp0:ep])
-          et[[li]] <- difftime(obs.time[ep], obs.time[sp0], units='mins')
-        } else {
-          ft[[li]] <- NA
-          lt[[li]] <- NA
-          ut[[li]] <- NA
-          et[[li]] <- NA}
-        sg[[li]] <- sp[r-1]
-        sp0 <- r
-        li <- li + 1
-
-      } else {
-
-        ep <- r
-        ux[[li]] <- mean(xy@coords[sp0:ep,1])
-        uy[[li]] <- mean(xy@coords[sp0:ep,2])
-        if (!is.null(obs.time)) {
-          ft[[li]] <- obs.time[sp0]
-          lt[[li]] <- obs.time[ep]
-          ut[[li]] <- mean(obs.time[sp0:ep])
-          et[[li]] <- difftime(obs.time[ep], obs.time[sp0], units='mins')
-        } else {
-          ft[[li]] <- NA
-          lt[[li]] <- NA
-          ut[[li]] <- NA
-          et[[li]] <- NA}
-        sg[[li]] <- sp[r-1]
-        sp0 <- r
-        li <- li + 1
-
-      }
-    }
-  }
-
-  # convert to vector
-  ux <- unlist(ux)
-  uy <- unlist(uy)
-  ft <- do.call("c", ft)
-  ut <- do.call("c", ut)
-  lt <- do.call("c", lt)
-  et <- unlist(et)
-  sg <- unlist(sg)
-
-  rm(sp, sp0, li)
-
+  # build statistic shapefile
+  r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(xy))
+    
 #----------------------------------------------------------------------------------------------------------#
 # 3. derive single raster
 #----------------------------------------------------------------------------------------------------------#
 
   # estimate time sum per cell
-  sp <- unique(sg)
-  t.sum <- sapply(sp, function(x) {sum(et[which(sg==x)])})
+  up <- unique(sp)
+  t.sum <- sapply(up, function(p) {sum(df$diff.time[which(sp==p)], na.rm=TRUE)})
 
   # build raster
-  t.sum.r <- rasterize(xyFromCell(img, sp), crop(img, extent(xy)), t.sum)
+  t.sum.r <- rasterize(xyFromCell(img, up), crop(img, extent(xy)), t.sum)
 
 #----------------------------------------------------------------------------------------------------------#
 # 4. build output
 #----------------------------------------------------------------------------------------------------------#
 
-  df <- data.frame(x=ux, y=uy, timestamp=ut, start.time=ft, end.time=lt, elapsed.time=et)
-  r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(xy))
-
-  return(list(points=r.shp, total.time=t.sum.r))
+  return(list(points=r.shp, total.time=t.sum.r, indices=sg))
 
 }

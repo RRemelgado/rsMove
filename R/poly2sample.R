@@ -1,20 +1,19 @@
 #' @title poly2sample
 #'
-#' @description Convert spatial polygons into point samples based on a pixel heterogeneity analysis.
+#' @description {Selection of samples from a reference grid based on a per 
+#' pixel estimate of the percentage of the pixel covered by polygons.}
 #' @param pol Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
 #' @param ref.ext Object of class \emph{Extent} or a raster object from which an extent can be derived.
-#' @param mpc Minimum pixel cover (0-100). Default is 100.
-#' @param pr Pixel resolution.
+#' @param min.cover Minimum pixel cover (0-100). Default is 100.
+#' @param pixel.res Pixel resolution.
 #' @import sp raster rgdal
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame}.
-#' @details {Determines coordinates of pixels within a given extent. If \emph{ref.ext} is missing the
-#'            target extent corresponds to the extent of the polygon layer. In this case, \emph{pr}
-#'            is required. If \emph{ref.ext} is an \emph{Extent} object or \emph{ref.ext} is missing \emph{rp} is required.
-#'            \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the
-#'            percentage of area cover by a polygon is below the defined threshold.
-#'            The output provides the coordinates (\emph{x} and \emph{y}) the
-#'            pixel percent cover (\emph{cover}) for each selected pixel.}
+#' @details {For each pixel overlaped by polygons (\emph{"pol"}) the functions returns the percent of the 
+#' pixel covered and returns the corresponding samples if a minimum percent is reached (\emph{min.cover}). 
+#' the function requires a reference extent (\emph{ref.ext}) and pixel resolution (\emph{pixel.res}) over 
+#' which this analysis will be performed. This function serves as a wrapper for the function 
+#' \code{\link[raster]{rasterize}} from the raster package.}
 #' @examples {
 #'
 #'  require(raster)
@@ -35,87 +34,63 @@
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample <- function(pol=pol, ref.ext=NULL, mpc=NULL, pr=NULL) {
+poly2sample <- function(pol=pol, ref.ext=NULL, min.cover=NULL, pixel.res=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------#
-
-  # check input
+# 1. Check input variables
+#-------------------------------------------------------------------------------------------------------------------------#
+  
+  # check shapefile
   if(is.null('pol')) {stop('"pol" is missing')}
   if(!class(pol)[1]%in%c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
-    stop('"pol" is not a valid input.')
-  }
+    stop('"pol" is not a valid input.')}
+  
+  # check pixel resolution
+  if (is.null(pixel.res)) {stop('"pixel.res"is missing')}
+  if (!is.numeric(pixel.res)) {stop('"pixel.res" is not numeric')}
+  
+  # check/derive reference extent
   if (!is.null(ref.ext)) {
-    if(!class(ref.ext)[1]%in%c("RasterLayer", "RasterStack", "RasterBrick")) {
-      if (class(ref.ext)!='Extent') {stop('"ras" is not a valid input.')}
-      if (is.null(pr)) {stop('"ref.ext" is of class "Extent" object. "pr" is required.')}
-      if (is.null(rp)) {stop('"ref.ext" is of class "Extent" object. "rp" is required.')}
-      rr <- raster(ref.ext, crs=rp, res=pr) # build reference raster
-      nr <- round((ref.ext[4]-ref.ext[3]) / pr) + 1 # number of rows in raster
-    } else {
-      pr <- res(ref.ext)[1] # check pixel resolution
-      rp <- crs(ref.ext) # check raster projection
-      nr <- dim(ref.ext)[1] # number of rows in raster
-      rr <- ref.ext # set variable with reference raster
-      ref.ext <- extent(rr) # extraxt extent
-    }
-    if (rp@projargs!=crs(pol)@projargs) {stop('using different projections')}
-  } else {
-    if (is.null(pr)) {stop('provide "pr" since "ref.ext" is missing')}
-    ref.ext <- extent(pol) # extent derived from
-    rr <- raster(ref.ext, crs=crs(pol), res=pr)
-    nr <- round((ref.ext[4]-ref.ext[3]) / pr) + 1 # number of rows in raster
-  }
-  if (is.null(mpc)) {mpc <- 100}
-  if (mpc < 0 | mpc > 100) {stop('"mpc" should be between 0 and 100')}
+    if (class(ref.ext)!='Extent') {stop('"ref.ext" is not a valid input')}
+  } else {ref.ext <- extent(pol)}
+  
+  # check cover value
+  if (is.null(min.cover)) {min.cover <- 100}
+  if (min.cover < 0 | min.cover > 100) {stop('"min.cover" should be between 0 and 100')}
 
-  # update extent object
-  # (correspond x/y to pixel center)
-  ar <- pr / 2 # half resolution
-  ref.ext[1] <- extend(ref.ext, ar)
-
+  # build reference raster
+  rr <- raster(ref.ext, res=pixel.res, crs=crs(pol))
+  
 #-------------------------------------------------------------------------------------------------------------------------#
-
-  # function to apply
+# 2. evaluate polygons
+#-------------------------------------------------------------------------------------------------------------------------#
+  
   lf <- function(i) {
     r <- crop(rr, extent(pol[i,]))
     r <- rasterToPoints(rasterize(pol[i,], r, getCover=T))
     ind <- which(r[,3] > 0) # usable pixels
-    pp <- (round((ref.ext[4]-r[ind,2])/pr)) + nr * (round((r[ind,1]-ref.ext[1])/pr))
-    pc <- r[ind,3] # percent cover
-    return(list(pp=pp, pc=pc))
-  }
-  np <- length(pol) # number of polygons
-  x <- lapply(1:np, lf) # evaluate polygons
-  pp <- unlist(sapply(x, function(x) {x$pp})) # positions
-  pc <- unlist(sapply(x, function(x) {x$pc})) # percent cover
-
-  rm(x)
+    return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3]))}
+  df0 <- do.call(rbind, lapply(1:length(pol), lf))
 
 #-------------------------------------------------------------------------------------------------------------------------#
-
-  # remove duplicated pixels and update pecent count
-
-  up <- unique(pp) # unique ppositions
-  pc <- sapply(up, function(x) {sum(pc[which(pp==x)])}) # update percentages
+# 3. remove duplicated pixels and update pecent count
+#-------------------------------------------------------------------------------------------------------------------------#
+  
+  pp <- cellFromXY(rr, df0[,1:2]) # pixel positions
+  up <- unique(pp) # unique positions
+  pc <- sapply(up, function(x) {sum(df0[which(pp==x),3])}) # update percentages
   pc[which(pc>100)] <- 100 # account for miss-calculations (related to e.g. overlapping polygons)
-
-  rm(pp)
-
-#-------------------------------------------------------------------------------------------------------------------------#
+  xy <- xyFromCell(rr, up) # convert unique positions to coordinates
+  df0 <- data.frame(x=xy[,1], y=xy[,2], cover=pc) # build final data frame
 
   # apply percent cover filter
-  ind <- which(pc >= mpc)
-  up <- up[ind]
-  pc <- pc[ind]
+  ind <- which(pc >= min.cover)
+  df0 <- df0[ind,]
 
-#------------------------------------------------------------------------------------------------------------------------#
-
-  # build/return output
-  xc <- ref.ext[1] + (round(up/nr)*pr) # convert positions to x coordinates
-  yc <- ref.ext[4] - (round(up%%nr)*pr) # convert positions to y coordinates
-
-  os <- data.frame(x=xc, y=yc, index=up, cover=pc)
-  return(SpatialPointsDataFrame(cbind(xc,yc), os, proj4string=crs(pol)))
+  rm(pp, up, pc, xy, ind)
+  
+  # return output
+  return(SpatialPointsDataFrame(df0[,1:2], df0, proj4string=crs(pol)))
 
 #------------------------------------------------------------------------------------------------------------------------#
 

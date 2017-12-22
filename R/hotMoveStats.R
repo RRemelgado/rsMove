@@ -3,10 +3,10 @@
 #' @description {Temporal segmentation and statistical reporting for
 #' sample regions such as the ones reported with hotMove().}
 #' @param rid List object as provided by \emph{hotMove()}.
-#' @param aid Optional. Unique identifiers.
+#' @param obs.id Optional. Unique identifiers.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.
-#' @param tUnit Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.
-#' @param method Method used to estimate polygon area.
+#' @param time.unit Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.
+#' @param distance.method Method used to estimate polygon area.
 #' @return A \emph{data frame}.
 #' @importFrom sp spTransform CRS
 #' @importFrom ggplot2 ggplot aes_string geom_bar scale_fill_gradientn xlab ylab theme_bw
@@ -14,14 +14,14 @@
 #' @details {This functions analysis the attributes of sample regions define by hotMove(). Alternatively,
 #' the user can keep \emph{rid} as NULL. This case, all information will be assumed as part of one region.
 #' For each sample region, the function returns the amount of samples (\emph{tns}. If a vector of unique
-#' identifiers is provided (\emph{aid}) the number of unique identifiers observed within each region is also
+#' identifiers is provided (\emph{obs.id}) the number of unique identifiers observed within each region is also
 #' reported. If temporal information is provided (\emph{time}) the function identifies unique temporal segment
 #' corresponding to periods of consecutive days with observations. For each segment, the function reports on the
 #' amount of segments (\emph{nts}) as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt})
 #' of the time segments and the total amount of time that they amount to (\emph{tts}). For each region, the function
 #' will also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide the
 #' sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for each
-#' region, the function also reports on the area of convex polygons. In this case, the user can use the \emph{method}
+#' region, the function also reports on the area of convex polygons. In this case, the user can use the \emph{distance.method}
 #' keyword to specify how the polygons should be handled. If the polygons are in lat-lon, method \emph{deg} can be used
 #' to re-project each polygon to its corresponding UTZ zone before retrieving the area. This is the default, if the polygons
 #' are in a cartesian coordinate system use \emph{m}.}
@@ -53,23 +53,23 @@
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='deg') {
+hotMoveStats <- function(rid=NULL, obs.time=NULL, time.unit=NULL, obs.id=NULL, distance.method='deg') {
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-  if(is.null(rid) & is.null(obs.time) & is.null(aid)) {stop('no information provided ("rid", "obs.time" and "aid" are NULL)')}
+  if(is.null(rid) & is.null(obs.time) & is.null(obs.id)) {stop('no information provided ("rid", "obs.time" and "obs.id" are NULL)')}
   if (!is.null(obs.time)) {
     if (!class(obs.time)[1]%in%c("Date", "POSIXlt", "POSIXt")) {stop('"obs.time" is not a valid "POSIXlt"/POSIXt" object')}
     pt <- TRUE} else {pt <- FALSE}
-  if(!is.null(obs.time) & !is.null(aid)) {if (length(aid)!=length(obs.time)) {stop('"obs.time" and "aid" have different lengths')}}
-  if (!(method %in% c('m', 'deg')) & !is.null(rid$polygons)) {stop(paste0('shapefile provided in "rid" but method ', method, ' not valid (choose between "m" and "deg")'))}
+  if(!is.null(obs.time) & !is.null(obs.id)) {if (length(obs.id)!=length(obs.time)) {stop('"obs.time" and "obs.id" have different lengths')}}
+  if (!(distance.method %in% c('m', 'deg')) & !is.null(rid$polygons)) {stop(paste0('shapefile provided in "rid" but method ', distance.method, ' not valid (choose between "m" and "deg")'))}
   if (!is.null(rid)) {
     if (!is.list(rid)) {stop('"rid" is not a list')}
     if (min(names(rid)%in%c('indices', 'polygons'))==0) {stop('names in "rid" are not valid (requires "indices" and/or "polygons"')}
     if (!is.null(obs.time)) {if (length(rid$indices)!=length(obs.time)) {stop('"obs.time" and "rid" have different lengths')}}
-    if (!is.null(aid)) {if (length(rid$indices)!=length(aid)) {stop('"aid" and "rid" have different lengths')}}
+    if (!is.null(obs.id)) {if (length(rid$indices)!=length(obs.id)) {stop('"obs.id" and "rid" have different lengths')}}
     ur <- sort(unique(rid$indices)) # unique regions
     nr <- length(ur) # number of unique regions
     pr <- TRUE
@@ -105,7 +105,7 @@ hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='
 
     # extract base stats
     if (pr) {ind <- which(rid$indices==ur[r])} else {ind <- 1:length(obs.time)}
-    if (!is.null(aid)) {nui[r] = length(unique(aid[ind]))} else {nui[r]<-NA}
+    if (!is.null(obs.id)) {nui[r] = length(unique(obs.id[ind]))} else {nui[r]<-NA}
     tns[r] = length(ind)
 
     # identify unique temporal segments and count number of days
@@ -115,9 +115,9 @@ hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='
       st <- sort(unique(obs.time[ind]))
       if (length(st) > 1) {
         for (t in 2:length(st)) {
-          diff <- as.numeric(difftime(st[t], st[(t-1)], units=tUnit))
+          diff <- as.numeric(difftime(st[t], st[(t-1)], units=time.unit))
           if (diff > 1) {
-            ts0[[(length(ts0)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units=tUnit)) + 1
+            ts0[[(length(ts0)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units=time.unit)) + 1
             ss1[[length(ss1)+1]] <- data.frame(start=st[sp], end=st[(t-1)], id=ur[r], count=length(sp:(t-1)))
             ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start &
                                             obs.time <= ss1[[length(ss1)]]$end &
@@ -132,7 +132,7 @@ hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='
           tts[r] <- sum(ts0)
           nts[r] <- length(ts0)
         } else {
-          tts[r] <- as.numeric(difftime(max(st), min(st), units=tUnit)) + 1
+          tts[r] <- as.numeric(difftime(max(st), min(st), units=time.unit)) + 1
           mnt[r] <- tts[r]
           avt[r] <- tts[r]
           mxt[r] <- tts[r]
@@ -166,7 +166,7 @@ hotMoveStats <- function(rid=NULL, obs.time=NULL, tUnit=NULL, aid=NULL, method='
       if (!is.null(rid$polygons)) {
 
         # if the data is in degrees, project it to UTM
-        if (method=='deg') {
+        if (distance.method=='deg') {
 
           # find target UTM zone
           sc <- rid$polygons[r]@polygons[[1]]@Polygons[[1]]@coords[,2] # polygon vertices

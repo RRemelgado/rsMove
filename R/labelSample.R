@@ -138,18 +138,21 @@ labelSample <- function(xy=xy, rad=rad, npt=NULL, npx=NULL, pxr=pxr) {
   rad <- round((rad/pxr)+0.1)
 
   # dilate samples
-  regions <- matrix(0, nr, nc)
-  for (p in 1:length(up)) {
-    rp <- ((up[p]-1)%%nr) + 1
-    cp <- ((up[p]-1)%/%nr) + 1
-    if (cp > rad) {sc<-cp-rad} else {sc<-cp}
-    if (cp < (nc-rad)) {ec<-cp+rad} else {ec<-cp}
-    if (rp > rad) {sr<-rp-rad} else {sr<-rp}
-    if (rp < (nr-rad)) {er<-rp+rad} else {er<-rp}
-    regions[sr:er,sc:ec]<- 1}
-
-  # dilated sample position
-  upd <- which(regions==1)
+  if (rad > 0) {
+    regions <- matrix(0, nr, nc)
+    for (p in 1:length(up)) {
+      rp <- ((up[p]-1)%%nr) + 1
+      cp <- ((up[p]-1)%/%nr) + 1
+      if (cp > rad) {sc<-cp-rad} else {sc<-cp}
+      if (cp < (nc-rad)) {ec<-cp+rad} else {ec<-cp}
+      if (rp > rad) {sr<-rp-rad} else {sr<-rp}
+      if (rp < (nr-rad)) {er<-rp+rad} else {er<-rp}
+      regions[sr:er,sc:ec]<- 1}
+    
+    # dilated sample position
+    upd <- which(regions==1)
+    
+  } else {upd <- up}
 
   # evaluate sample connectivity
   regions <- regions * 0

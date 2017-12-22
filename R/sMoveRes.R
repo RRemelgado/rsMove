@@ -4,10 +4,10 @@
 #' resoltuon. Evaluates how the change in spatial resolution changes the
 #' amount of samples/sample regions based on a set of coordinate pairs.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param pxr vector of target resolutions.
+#' @param pixel.res vector of target resolutions.
 #' @import ggplot2 sp rgdal grDevices
 #' @return A \emph{list}.
-#' @details {Given a vector of pixel resolutions (\emph{pxr}), the function determines
+#' @details {Given a vector of pixel resolutions (\emph{pixel.res}), the function determines
 #' the number of unique pixels and unique pixel groups. Additionaly, for each pixel,
 #' the function returns the corresponding pixel indices per resolution showing which
 #' samples would be grouped. The function returns a data frame (\emph{$stats}) and a
@@ -23,35 +23,35 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData)
 #'
 #'  # test function for 5, 10 20 and 30 m
-#'  a.res <- sMoveRes(xy=moveData, pxr=c(5, 10, 20, 30))
+#'  a.res <- sMoveRes(xy=moveData, pixel.res=c(5, 10, 20, 30))
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-sMoveRes <- function(xy=xy, pxr=pxr) {
+sMoveRes <- function(xy=xy, pixel.res=pixel.res) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
 #---------------------------------------------------------------------------------------------------------------------#
 
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  if (!is.numeric(pxr)) {stop('"pxr" is not numeric')}
-  if (!is.vector(pxr)) {stop('"pxr" is not a vector')}
+  if (!is.numeric(pixel.res)) {stop('"pixel.res" is not numeric')}
+  if (!is.vector(pixel.res)) {stop('"pixel.res" is not a vector')}
 
   # evaluate each resolution
   ext <- extent(xy) # reference extent
   out <- list() # output variable
-  for (p in 1:length(pxr)) {
+  for (p in 1:length(pixel.res)) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
 
-    nc <- round((ext[2]-ext[1]) / pxr[p]) + 1 # number of columns
-    nr <- round((ext[4]-ext[3]) / pxr[p]) + 1 # number of rows
-    sp <- (round((ext[4]-xy@coords[,2])/pxr[p])+1) + nr * round((xy@coords[,1]-ext[1])/pxr[p]) # convert coordinates to pixel positions
+    nc <- round((ext[2]-ext[1]) / pixel.res[p]) + 1 # number of columns
+    nr <- round((ext[4]-ext[3]) / pixel.res[p]) + 1 # number of rows
+    sp <- (round((ext[4]-xy@coords[,2])/pixel.res[p])+1) + nr * round((xy@coords[,1]-ext[1])/pixel.res[p]) # convert coordinates to pixel positions
     up <- unique(sp) # unique pixel positions
 
 #---------------------------------------------------------------------------------------------------------------------#
@@ -85,12 +85,12 @@ sMoveRes <- function(xy=xy, pxr=pxr) {
   # output data frame with statistics
   out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}),
                     n.regions=sapply(out, function(x) {x$regions}))
-  row.names(out1) <- as.character(pxr)
+  row.names(out1) <- as.character(pixel.res)
 
   # output data frame with sample indices
   out <- lapply(out, function(x) {x$indices})
   out2 <- do.call(cbind, lapply(out, data.frame, stringsAsFactors=FALSE))
-  colnames(out2) <- as.character(pxr)
+  colnames(out2) <- as.character(pixel.res)
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 4. plot output
@@ -123,8 +123,8 @@ sMoveRes <- function(xy=xy, pxr=pxr) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # build plot object
-  out1$pxr <- factor(pxr, levels=unique(pxr))
-  p <- ggplot(out1, aes_string(x="pxr", y="n.pixels", fill="n.regions")) +
+  out1$pixel.res <- factor(pixel.res, levels=unique(pixel.res))
+  p <- ggplot(out1, aes_string(x="Pixel Resolution", y="n.pixels", fill="n.regions")) +
     theme_bw() + scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr),
     limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (m)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat="identity") +

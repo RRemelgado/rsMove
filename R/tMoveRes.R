@@ -6,12 +6,12 @@
 #' pairs and their observation dates.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @param t.res Temporal resolution.
-#' @param s.res Spatial resolution.
+#' @param time.res Temporal resolution.
+#' @param pixel.res Spatial resolution.
 #' @import ggplot2 sp rgdal grDevices
 #' @importFrom utils download.file
 #' @return A \emph{list}.
-#' @details {Given a vector of temporal resolutions (\emph{t.res}), the function determines
+#' @details {Given a vector of temporal resolutions (\emph{time.res}), the function determines
 #' the number of unique pixels and unique pixel groups after their temporal agggation. The
 #' function returns the corresponding pixel indices per resolution showing which
 #' samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats})
@@ -28,28 +28,28 @@
 #'
 #'  # test function for 5, 10 20 and 30 m
 #'  obs.date <- as.Date(moveData@data$timestamp)
-#'  a.res <- tMoveRes(xy=moveData, obs.time=obs.date, t.res=c(1,8,16), s.res=0.01)
+#'  a.res <- tMoveRes(xy=moveData, obs.time=obs.date, time.res=c(1,8,16), pixel.res=0.01)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-tMoveRes <- function(xy=xy, obs.time=obs.time, t.res=t.res, s.res=s.res) {
+tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixel.res) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
 #---------------------------------------------------------------------------------------------------------------------#
 
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  if (length(s.res)>1) {stop('"s.res" has more than one element')}
-  if (!is.numeric(t.res)) {stop('"t.res" is not numeric')}
+  if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
+  if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
 
-  ext <- extend(raster(extent(xy), res=s.res, crs=crs(xy)), c(2,2)) # raster extent
+  ext <- extend(raster(extent(xy), res=pixel.res, crs=crs(xy)), c(2,2)) # raster extent
   rd <- dim(ext)# raster dimensions
   nr <- rd[1] # number of rows
   nc <- rd[2] # number of columns
@@ -91,18 +91,18 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, t.res=t.res, s.res=s.res) {
   et <- max(obs.time) # end time
 
   out <- list() # output variable
-  for (r in 1:length(t.res)) {
+  for (r in 1:length(time.res)) {
 
     id <- 0 # reference sample ID
     ind <- vector('numeric', length(xy)) # position index
-    nw <- as.numeric(((et - st) / t.res[r]) + 1) # number of temporal windows
+    nw <- as.numeric(((et - st) / time.res[r]) + 1) # number of temporal windows
     sc <- nr <- vector('numeric', nw) # number of regions
 
     for (w in 1:nw) {
 
       # locate pixels within the temporal window
-      loc1 <- which(obs.time >= (st+(t.res[r]*(w-1))) &
-                     obs.time <= ((st+t.res[r])+(t.res[r]*(w-1))))
+      loc1 <- which(obs.time >= (st+(time.res[r]*(w-1))) &
+                     obs.time <= ((st+time.res[r])+(time.res[r]*(w-1))))
 
       # quantify unique samples
       upr <- unique(sp[loc1])
@@ -125,11 +125,11 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, t.res=t.res, s.res=s.res) {
   # output data frame with statistics
   out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}),
                      n.regions=sapply(out, function(x) {x$regions}),
-                     resolution=t.res)
+                     resolution=time.res)
 
   # output data frame with sample indices
   out2 <- do.call(cbind, lapply(out, function(x) {x$indices}))
-  colnames(out2) <- as.character(t.res)
+  colnames(out2) <- as.character(time.res)
 
   # count per window
   out3 <- lapply(out, function(x) {list(regions.window=x$regions.window, count.window=x$count.window)})
@@ -153,7 +153,7 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, t.res=t.res, s.res=s.res) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # build plot object
-  p <- ggplot(out1, aes(x=factor(t.res), y=n.pixels, fill=n.regions)) + theme_bw() +
+  p <- ggplot(out1, aes(x=factor(time.res), y=n.pixels, fill=n.regions)) + theme_bw() +
     scale_fill_gradientn(colors=cr(10), name="Nr. Regions\n") + xlab("\nResolution (days)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") +
     theme(axis.text.x=element_text(size=12),
