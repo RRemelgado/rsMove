@@ -3,22 +3,26 @@
 #' @description Query environmental data for coordinate pairs using the nearest non NA value in time.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
-#' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
-#' @param r.date Object of class \emph{Date} with \emph{img} observation dates.
-#' @param time.buffer Two element vector with temporal search buffer, expressed in days.
-#' @param spatial.buffer Buffer size (unit depends on the raster projection).
-#' @param fun Passes an external function.
+#' @param env.data Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.
+#' @param env.date Object of class \emph{Date} with \emph{env.data} observation dates.
+#' @param time.buffer Two element vector with temporal search buffer (expressed in days).
+#' @param spatial.buffer Spatial buffer size used to smooth the returned values. The unit depends on the spatial projection.
+#' @param smooth.fun Smoothing function applied with \emph{spatial.buffer}.
 #' @importFrom raster crs extract nlayers
 #' @importFrom stats median
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
-#' @return A n object of class \emph{vector} or \emph{data.frame}.
-#' @details {Returns environmental variables from a raster object for a given set of x and y coordinates.
-#'          A buffer size (\emph{spatial.buffer}) and a user defined function (\emph{fun}) can be specified to sample
-#'          within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided
-#'          (\emph{r.date}) and the date of sampling (\emph{obs.date}). In this case, the function will treat the raster
-#'          data as a time series and search for clear pixel in time within the contraints of a temporal buffer
-#'          defined by \emph{time.buffer}. \emph{time.buffer} passes two values which represent the size of the buffer in two
-#'          directions: before and after the target date. This allows for bacward and forward sampling.}
+#' @return An object of class \emph{data.frame} with the selected values and their corresponding dates.
+#' @details {Returns environmental variables from a raster object for a given set of x and y coordinates depending on the
+#' temporal distance between the sample observation date (\emph{obs.date}) and the date on which the environmental data was
+#' collected (\emph{env.date}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
+#' non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
+#' are considred in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
+#' environmental information acquired after the sample observation date and limit the search to -30 days. If \emph{time.buffer}
+#' is set to null all acquisitions are considered. The user may also provide \emph{spatial.buffer} to spatially smooth the selected
+#' environmental information. In this case, for each sample, the function will consider the neighboring pixels within the selected
+#' acquisition and aplly a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
+#' will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
+#' \emph{env.date} should refer to each column.}
 #' @examples {
 #'
 #'  require(raster)
@@ -33,13 +37,13 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
 #'
 #'  # raster dates
-#'  r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+#'  env.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
 #'  obs.date <- as.Date(moveData@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, img=rsStk, r.date=r.date, time.buffer=c(30,30))
+#'  rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, env.data=rsStk, env.date=env.date, time.buffer=c(30,30))
 #'
 #' }
 #'
@@ -47,7 +51,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, obs.date=NULL, img=img, r.date=NULL, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
+dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.date=env.date, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
@@ -58,75 +62,60 @@ dataQuery <- function(xy=xy, obs.date=NULL, img=img, r.date=NULL, time.buffer=NU
   if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
 
   # raster
-  if (!exists('img')) {stop('"img" is missing')}
-  if (!class(img)[1]%in%c('RasterLayer','RasterStack', 'RasterBrick')) {stop('"img" is not of a valid class')}
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
+  if (!exists('env.data')) {stop('"env.data" is missing')}
+  if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"env.data" is not of a valid class')}
+  if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
 
-  # check if raster is a ts
-  if (!is.null(r.date)) {
-    if (class(r.date)[1]!='Date') {stop('"r.date" is not of a valid class')}
-    if (length(r.date)!=nlayers(img)) {stop('lengths of "r.date" and "img" differ')}
-    if (is.null(obs.date)) {stop('"obs.date" is missing')}
-    if (class(obs.date)[1]!='Date') {stop('"obs.date" is not of a valid class')}
-    if (length(obs.date)!=length(xy)) {stop('lengths of "obs.date" and "xy" differ')}
-    processTime <- TRUE
-  } else {processTime <- FALSE}
+  # check temporal information
+  if (!exists('env.date')) {stop('"env.date" is missing')}
+  if (class(env.date)[1]!='Date') {stop('"env.date" is not of a valid class')}
+  if (length(env.date)!=nlayers(env.data)) {stop('lengths of "env.date" and "env.data" differ')}
+  if (is.null(obs.date)) {stop('"obs.date" is missing')}
+  if (class(obs.date)[1]!='Date') {stop('"obs.date" is not of a valid class')}
+  if (length(obs.date)!=length(xy)) {stop('lengths of "obs.date" and "xy" differ')}
 
   # auxiliary
   if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {fun=NULL}
-  if (!is.null(spatial.buffer) & is.null(fun)) {fun <- function(x) {sum(x*x) / sum(x)}} else {
-  if (!is.null(fun)) {if (!is.function(fun)) {stop('"fun" is not a valid function')}}}
+  if (!is.null(spatial.buffer) & is.null(smooth.fun)) {smooth.fun <- function(x) {sum(x*x) / sum(x)}} else {
+  if (!is.null(smooth.fun)) {if (!is.function(smooth.fun)) {stop('"smooth.fun" is not a valid function')}}}
   if (!is.null(time.buffer)) {
     if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')}
     if (length(time.buffer)!=2) {stop('"time.buffer" should be a two element vector')}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
-
-  # output projection
-  op <- crs(xy)
+# extract environmental data
+#-------------------------------------------------------------------------------------------------------------------------------#
 
   # read data
-  edata <- as.data.frame(extract(img, xy@coords, buffer=spatial.buffer, fun=fun, na.rm=TRUE))
+  if (!is.data.frame(env.data) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, fun=smooth.fun, na.rm=TRUE))}
 
-  # extract environmental data
-  if (processTime) {
-
-    # number of samples
-    ns <- nrow(xy@coords)
-
-    # function to select pixels
-    if (is.null(time.buffer)) {
-      qf <- function(i) {
-        ind <- which(!is.na(edata[i,]))
-        if (length(ind)!=0) {
-          diff <- abs(obs.date[i]-r.date[ind])
-          loc <- which(diff==min(diff))[1]
-          return(list(value=edata[i,ind[loc]], date=r.date[ind[loc]]))
-        } else{return(list(value=NA, date=NA))}}
-    } else {
-      qf <- function(i) {
-        ind <- which(!is.na(edata[i,]))
-        if (length(ind)!=0) {
-          diff <- abs(obs.date[i]-r.date[ind])
-          loc <- r.date[ind] >= (obs.date[i]-time.buffer[1]) & r.date[ind] <= (obs.date[i]+time.buffer[2])
-          if (sum(loc)>0) {
-            loc <- which(diff==min(diff[loc]))[1]
-            return(list(value=edata[i,ind[loc]], date=r.date[ind[loc]]))
-          } else {return(list(value=NA, date=NA))}}
-        else {return(list(value=NA, date=NA))}}}
-
-    # retrieve values
-    edata <- lapply(1:ns, qf)
-    orv <- do.call('c', lapply(edata, function(x) {x$value}))
-    ord <- do.call('c', lapply(edata, function(x) {x$date}))
-
-    # derive shapefile
-    return(data.frame(value=orv, date=ord))
-
+  # function to select pixels
+  if (is.null(time.buffer)) {
+    qf <- function(i) {
+      ind <- which(!is.na(env.data[i,]))
+      if (length(ind)!=0) {
+        diff <- abs(obs.date[i]-env.date[ind])
+        loc <- which(diff==min(diff))[1]
+        return(list(value=env.data[i,ind[loc]], date=env.date[ind[loc]]))
+      } else{return(list(value=NA, date=NA))}}
   } else {
+    qf <- function(i) {
+      ind <- which(!is.na(env.data[i,]))
+      if (length(ind)!=0) {
+        diff <- abs(obs.date[i]-env.date[ind])
+        loc <- env.date[ind] >= (obs.date[i]-time.buffer[1]) & env.date[ind] <= (obs.date[i]+time.buffer[2])
+        if (sum(loc)>0) {
+          loc <- which(diff==min(diff[loc]))[1]
+          return(list(value=env.data[i,ind[loc]], date=env.date[ind[loc]]))
+        } else {return(list(value=NA, date=NA))}}
+      else {return(list(value=NA, date=NA))}}}
 
-    # simple query
-    return(edata)
+  # retrieve values
+  env.data <- lapply(1:length(xy), qf)
+  orv <- do.call('c', lapply(env.data, function(x) {x$value}))
+  ord <- do.call('c', lapply(env.data, function(x) {x$date}))
 
-  }
+  # derive shapefile
+  return(data.frame(value=orv, date=ord))
+
 }
