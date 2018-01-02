@@ -1,21 +1,22 @@
 #' @title tMoveRes
 #'
-#' @description {Tool to support the selection of adequate satellite temporal
-#' resoltuon. Evaluates how the change in temporal resolution changes the
-#' amount of samples/sample regions based on a set of coordinate
-#' pairs and their observation dates.}
+#' @description {Tool to support the selection of an adequate satellite temporal resoltuon. It evaluates how the change in temporal
+#' resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @param time.res Temporal resolution.
-#' @param pixel.res Spatial resolution.
-#' @import ggplot2 sp rgdal grDevices
+#' @param obs.time Object of class \emph{Date} with \emph{xy} observation dates.
+#' @param time.res Vector of temporal resolutions (expressed in days).
+#' @param pixel.res Spatial resolution (unit depends on spatial projection).
+#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
+#' @importFrom raster raster extent extend cellFromXY crs dim
 #' @importFrom utils download.file
-#' @return A \emph{list}.
-#' @details {Given a vector of temporal resolutions (\emph{time.res}), the function determines
-#' the number of unique pixels and unique pixel groups after their temporal agggation. The
-#' function returns the corresponding pixel indices per resolution showing which
-#' samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats})
-#' and a plot (\emph{$plot}) with the statistics per temporal resolution.}
+#' @importFrom grDevices colorRampPalette
+#' @return A \emph{list} object reporting on the amount and distribution of unique pixels and connected pixel regions per temporal resolution.
+#' @details {Given a base spatial resolution (\emph{pixel.res} and a vector of temporal resolutions (\emph{time.res}), the function determines
+#' the number of unique pixels and unique pixel regions after their temporal agggregation. For each temporal resolution, the function starts by
+#' converting \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number of
+#' samples and sample regions. The indices and the statistical information are returned as a \emph{data.frame} object where each column
+#' represents a different spatial resolution. Addionally, the function returns a plot reporting on the change in the number of samples and
+#' sample regions with each temporal resolution.}
 #' @seealso \code{\link{sMoveRes}}
 #' @examples {
 #'
@@ -44,6 +45,7 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
   if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
+  if (!class(obs.time)!="Date") {stop('"obs.time" is not of class "Date"')}
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels

@@ -13,7 +13,7 @@
 #' \emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
 #' by \emph{agg.radius} and proceeds to relable the pixels covered by samples. Finally, this information is used to label the original
 #' samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}
-#' and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may associate \emph{pixel.res} to a raster object.}
+#' and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may assign a raster object to \emph{pixel.res}.}
 #' @import raster rgdal
 #' @seealso \code{\link{sampleMove}} \code{\link{hotMove}}
 #' @examples {

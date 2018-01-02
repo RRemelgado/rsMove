@@ -1,18 +1,20 @@
 #' @title sMoveRes
 #'
-#' @description {Tool to support the selection of adequate satellite spatial
-#' resoltuon. Evaluates how the change in spatial resolution changes the
-#' amount of samples/sample regions based on a set of coordinate pairs.}
+#' @description {Tool to support the selection of an adequate satellite spatial resoltuon. Evaluates how the change
+#' in spatial resolution changes the amount of samples and sample regions based on a set of coordinate pairs.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param pixel.res vector of target resolutions.
+#' @param pixel.res vector of spatial resolutions (unit depends on spatial projection).
 #' @import ggplot2 sp rgdal grDevices
+#' @importFrom raster extent
+#' @importFrom grDevices colorRampPalette
+#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
 #' @return A \emph{list}.
-#' @details {Given a vector of pixel resolutions (\emph{pixel.res}), the function determines
-#' the number of unique pixels and unique pixel groups. Additionaly, for each pixel,
-#' the function returns the corresponding pixel indices per resolution showing which
-#' samples would be grouped. The function returns a data frame (\emph{$stats}) and a
-#' plot (\emph{$plot}) with the statistics per resolution as well as a data frame with
-#' the pixel indices per resolution (\emph{$indices}).}
+#' @details {Given a vector of pixel resolutions (\emph{pixel.res}), the function determines the number of unique pixels
+#' and unique pixel regions after their temporal agggregation. For each spatial resolution, the function starts by converting
+#' \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number
+#' of samples and sample regions. The indices and the statistical information are returned as a \emph{data.frame} object where each
+#' column represents a different spatial resolution. Addionally, the function returns a plot reporting on the change in the number
+#' of samples and sample regions with each spatial resolution.}
 #' @seealso \code{\link{tMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'

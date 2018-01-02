@@ -4,7 +4,7 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
 #' @param env.data Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.
-#' @param env.date Object of class \emph{Date} with \emph{env.data} observation dates.
+#' @param env.dates Object of class \emph{Date} with \emph{env.data} observation dates.
 #' @param time.buffer Two element vector with temporal search buffer (expressed in days).
 #' @param spatial.buffer Spatial buffer size used to smooth the returned values. The unit depends on the spatial projection.
 #' @param smooth.fun Smoothing function applied with \emph{spatial.buffer}.
@@ -14,7 +14,7 @@
 #' @return An object of class \emph{data.frame} with the selected values and their corresponding dates.
 #' @details {Returns environmental variables from a raster object for a given set of x and y coordinates depending on the
 #' temporal distance between the sample observation date (\emph{obs.date}) and the date on which the environmental data was
-#' collected (\emph{env.date}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
+#' collected (\emph{env.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
 #' non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
 #' are considred in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
 #' environmental information acquired after the sample observation date and limit the search to -30 days. If \emph{time.buffer}
@@ -22,7 +22,7 @@
 #' environmental information. In this case, for each sample, the function will consider the neighboring pixels within the selected
 #' acquisition and aplly a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
 #' will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
-#' \emph{env.date} should refer to each column.}
+#' \emph{env.dates} should refer to each column.}
 #' @examples {
 #'
 #'  require(raster)
@@ -37,13 +37,13 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
 #'
 #'  # raster dates
-#'  env.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+#'  env.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
 #'  obs.date <- as.Date(moveData@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, env.data=rsStk, env.date=env.date, time.buffer=c(30,30))
+#'  rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
 #'
 #' }
 #'
@@ -51,7 +51,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.date=env.date, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
+dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.dates=env.dates, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
@@ -67,9 +67,9 @@ dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.date=env.
   if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
 
   # check temporal information
-  if (!exists('env.date')) {stop('"env.date" is missing')}
-  if (class(env.date)[1]!='Date') {stop('"env.date" is not of a valid class')}
-  if (length(env.date)!=nlayers(env.data)) {stop('lengths of "env.date" and "env.data" differ')}
+  if (!exists('env.dates')) {stop('"env.dates" is missing')}
+  if (class(env.dates)[1]!='Date') {stop('"env.dates" is not of a valid class')}
+  if (length(env.dates)!=nlayers(env.data)) {stop('lengths of "env.dates" and "env.data" differ')}
   if (is.null(obs.date)) {stop('"obs.date" is missing')}
   if (class(obs.date)[1]!='Date') {stop('"obs.date" is not of a valid class')}
   if (length(obs.date)!=length(xy)) {stop('lengths of "obs.date" and "xy" differ')}
@@ -94,19 +94,19 @@ dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.date=env.
     qf <- function(i) {
       ind <- which(!is.na(env.data[i,]))
       if (length(ind)!=0) {
-        diff <- abs(obs.date[i]-env.date[ind])
+        diff <- abs(obs.date[i]-env.dates[ind])
         loc <- which(diff==min(diff))[1]
-        return(list(value=env.data[i,ind[loc]], date=env.date[ind[loc]]))
+        return(list(value=env.data[i,ind[loc]], date=env.dates[ind[loc]]))
       } else{return(list(value=NA, date=NA))}}
   } else {
     qf <- function(i) {
       ind <- which(!is.na(env.data[i,]))
       if (length(ind)!=0) {
-        diff <- abs(obs.date[i]-env.date[ind])
-        loc <- env.date[ind] >= (obs.date[i]-time.buffer[1]) & env.date[ind] <= (obs.date[i]+time.buffer[2])
+        diff <- abs(obs.date[i]-env.dates[ind])
+        loc <- env.dates[ind] >= (obs.date[i]-time.buffer[1]) & env.dates[ind] <= (obs.date[i]+time.buffer[2])
         if (sum(loc)>0) {
           loc <- which(diff==min(diff[loc]))[1]
-          return(list(value=env.data[i,ind[loc]], date=env.date[ind[loc]]))
+          return(list(value=env.data[i,ind[loc]], date=env.dates[ind[loc]]))
         } else {return(list(value=NA, date=NA))}}
       else {return(list(value=NA, date=NA))}}}
 
