@@ -1,21 +1,19 @@
 #' @title hotMove
 #'
-#' @description Regional detection of sample hotspots using a pixel based approach.
+#' @description Detection of geographic regions of samples using a pixel based approach.
 #' @param xy Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
 #' @param pixel.res Grid resolution. Unit depends on \emph{xy} projection.
-#' @param return.shp Logical. Should the function provide polygons? Default is FALSE.
-#' @return A list object.
+#' @param return.shp Logical. Should the function return polygons of the regions? Default is FALSE.
+#' @return List containing a vector of region ID's per ata point (\emph{$indices}) and region polygons (\emph{$polygons}).
 #' @importFrom sp Polygon Polygons SpatialPolygons
 #' @importFrom raster extent crs
 #' @importFrom grDevices chull
-#' @details {The function builds a matrix for a given resolution and a
-#' spatial extent derived from a set of samples (\emph{xy}). First, these
-#' samples are converted into unique pixel coordinates. Then, the
-#' spatial connectivity of these pixels is evaluated using a 8-neighboor
-#' connected component labelling algorithm. The function returns a vector
-#' with the region ID per sample (\emph{$indices}). If \emph{return.shp} is TRUE the
-#' function also returns a shapefile for each region defined by the
-#' convex hull of the samples within them (\emph{$polygons}).}
+#' @details {First, the function builds a raster with a resolution equal to \emph{pixel.res} and the
+#' spatial extent of \emph{xy}. Then, each point in \emph{xy} is converted into pixel coordinates. Based
+#' on the unique pixel oordinates, the function then evaluates the spatial connectivity of these pixels
+#' using a 8-neighboor connected component labelling algorithm to detect regions. Finally, the ID's are related
+#' back to each individual data point in \emph{xy} based on their pixel coordinates and - \emph{return.shp} is TRUE -
+#'  a polygon is derived from the convex hull of the points within each region.}
 #' @seealso \code{\link{sampleMove}} \code{\link{hotMoveStats}}
 #' @examples {
 #'
@@ -31,9 +29,6 @@
 #'
 #' # plot shapefile (color by region)
 #' plot(hm$polygons, col=hm$indices)
-#'
-#' # add new information to original shapefile
-#' moveData@data$indices <- hm$indices
 #'
 #' }
 #' @export

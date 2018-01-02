@@ -5,23 +5,30 @@
 #' @param region.id Vector of region identifyers for each sample.
 #' @param method One of \emph{random} or \emph{pca}. Default is \emph{random}.
 #' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
-#' @param n.samples Number of random background samples.
+#' @param nr.samples Number of random background samples.
 #' @importFrom raster cellFromXY xyFromCell crs ncell
 #' @importFrom sp SpatialPoints SpatialPointsDataFrame
 #' @importFrom stats complete.cases prcomp median
-#' @return A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
-#' @details {The function selects a set of n background samples where n is determined by
-#' \emph{n.samples}. If \emph{n.samples} is not provided all background pixels are considered. If the
-#' method is \emph{random} these samples are returned in the form of a \emph{SpatialPoints}
-#' object. If \emph{pca} is used, a PCA analysis is performed over all available samples
-#' (provided and random). For each unique region ID (\emph{region.id}) the median and the Median
-#' Absolute Deviation (MAD) is estimated for a given Principal Component (PC). Background
-#' samples where the difference between their variance and the variance of the region samples
-#' exceeds the MAD are selected. Only the samples that are selected by all unique regions are
-#' kept. This process is repeated for all PC's with eigenvalues greater than 1 (Kaiser rule).
-#' The final set of samples corresponds to the unique records selected by the different PC's.
-#' These samples are returned as a SpatialPointsDataFrame containing the variables extracted
-#' from \emph{img}.}
+#' @return A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame} of background samples for unique pixels in \emph{img}.
+#' @details {First, the function determines the unique pixel coordinates for \emph{xy} based on the dimensions
+#' of \emph{img} and retrieves n background samples where n is determined by \emph{nr.samples}. Then, the
+#' selection of samples is dependent on the method chosen by the user. If \emph{method} is set to \emph{random},
+#' the function will select samples randomly. However, if \emph{pca} is used, the function will use a Principal
+#' Components Analysis (PCA) over \emph{img} to evaluate the similarity between the samples associated to \emph{xy}
+#' and the intial set of random samples First, based on this PCA, the function selects the most important Principal Components
+#' (PC's) using the kaiser rule (i.e. PC's with eigenvalues greater than 1). Then, for each PC, the function estimates
+#' the median and the Median Absolute Deviation (MAD) for each unique identifier in \emph{region.id}) and selects background
+#' samples where the difference between their variance and the variance of the region samples exceeds the MAD. Then, the
+#' algorithm removes the background samples that were not selected by all sample regions.}
+#'
+#'
+#'
+#' these samples are returned in the form of a \emph{SpatialPoints}
+#'
+#' If
+#' \emph{nr.samples} is not provided all background pixels are returned
+#'
+#' object.
 #' @seealso \code{\link{labelSample}} \code{\link{hotMove}} \code{\link{dataQuery}}
 #' @examples {
 #'
@@ -47,7 +54,7 @@
 #'
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-backSample <- function(xy=xy, region.id=region.id, method=method, img=img, n.samples=NULL) {
+backSample <- function(xy=xy, region.id=region.id, method=method, img=img, nr.samples=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -65,7 +72,7 @@ backSample <- function(xy=xy, region.id=region.id, method=method, img=img, n.sam
   if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
   np <- ncell(img[[1]]) # number of pixels
   op <- crs(img) # output projection
-  if (!is.null(n.samples)) {if (!is.numeric(n.samples) | length(n.samples)!=1) {stop('"n.samples" is not a valid input')}}
+  if (!is.null(nr.samples)) {if (!is.numeric(nr.samples) | length(nr.samples)!=1) {stop('"nr.samples" is not a valid input')}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 2. extract random background samples
@@ -81,7 +88,7 @@ backSample <- function(xy=xy, region.id=region.id, method=method, img=img, n.sam
 
   # derice background samples
   ind <- which(!(1:np)%in%sp)
-  if (!is.null(n.samples)) {ind <- ind[sample(1:length(ind), n.samples, replace=TRUE)]}
+  if (!is.null(nr.samples)) {ind <- ind[sample(1:length(ind), nr.samples, replace=TRUE)]}
   xy <- rbind(xyFromCell(img[[1]], sp), xyFromCell(img[[1]], ind))
   region.id <- c(region.id, replicate(length(ind), 0))
 
