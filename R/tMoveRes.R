@@ -18,7 +18,7 @@
 #' \itemize{
 #'  \item{\emph{stats} - Summarity statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
 #'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}
-#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each temporal resolution.}}
+#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each temporal resolution.}}}
 #' @seealso \code{\link{sMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'

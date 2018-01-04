@@ -4,13 +4,13 @@
 #' @param xy Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
 #' @param pixel.res Grid resolution. Unit depends on \emph{xy} projection.
 #' @param return.shp Logical. Should the function return polygons of the regions? Default is FALSE.
-#' @return List containing a vector of region ID's per ata point (\emph{$indices}) and region polygons (\emph{$polygons}).
+#' @return List containing a vector of region ID's per data point (\emph{$indices}) and region polygons (\emph{$polygons}).
 #' @importFrom sp Polygon Polygons SpatialPolygons
 #' @importFrom raster extent crs
 #' @importFrom grDevices chull
 #' @details {First, the function builds a raster with a resolution equal to \emph{pixel.res} and the
 #' spatial extent of \emph{xy}. Then, each point in \emph{xy} is converted into pixel coordinates. Based
-#' on the unique pixel oordinates, the function then evaluates the spatial connectivity of these pixels
+#' on the unique pixel coordinates, the function then evaluates the spatial connectivity of these pixels
 #' using a 8-neighboor connected component labelling algorithm to detect regions. Finally, the ID's are related
 #' back to each individual data point in \emph{xy} based on their pixel coordinates and - \emph{return.shp} is TRUE -
 #'  a polygon is derived from the convex hull of the points within each region.}

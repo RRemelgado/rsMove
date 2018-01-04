@@ -5,7 +5,7 @@
 #' @param obs.time Object of class \emph{Date}.
 #' @param t.var Target variable.
 #' @import ggplot2
-#' @return One or multiple plots.
+#' @return \emph{data.frame} object reporting on the closest satellite acquisition dates for each sample.
 #' @details {This function compares a set of input dates (\emph{obs.time}) to the possible dates for
 #' which satellite data can be downloaded. This analysis is performed for the set of variables
 #' provided through the function proSat(). The function provides a report with the closest dates
