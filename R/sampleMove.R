@@ -1,6 +1,6 @@
 #' @title sampleMove
 #'
-#' @description Sampling of possible stops along a movement track using GPS error information.
+#' @description Remote sensing oriented sampling of stops along a movement track.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the same length as \emph{xy}.
 #' @param error Distance (in meters).
@@ -8,15 +8,16 @@
 #' @param tUnit Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.
 #' @import raster rgdal
 #' @importFrom stats median
-#' @return A \emph{SpatialPointsDataFrame}.
+#' @return A \emph{SpatialPointsDataFrame} with a reduced sample set.
 #' @seealso \code{\link{labelSample}} \code{\link{backSample}} \code{\link{dataQuery}}
-#' @details {This function offers a simple approach to sample from locati where an animal showed little or no movement
-#' based on GPS tracking data. It looks at the distance among consecutive samples (\emph{error}) and estimates mean coordinates
-#' for the temporal segments where the animal moved less than the defined distance from the first location of the segment.
-#' The user should selected \emph{method} in accordance with the projection system associated to the data. If 'm' it estimates
-#' the ecludian distance. If 'deg' it uses the haversine formula. The output reports on the mean sample coordinates for
-#' the sample locations ('x' and 'y'), the start, end and total time spent per sample ('time' expressed in minutes) and the
-#' total number of observations per sample ('count').}
+#' @details {This function finds location where an animal showed little or no movement based on GPS tracking data.
+#' It looks at the distance among consecutive samples and places pointer when the distance is bellow the defined
+#' threshold (\emph{error}). When a pointer is found, the function looks at the distance between the pointer and
+#' the following samples. While this is below the distance threshold, the samples are assigned to the same segment.
+#' Then, for each segment, the function summarizes the corresponding samples deriving mean coordinates, the start,
+#' end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{method}
+#' in accordance with the projection system associated to the data. If 'm' it bases this analysis on the the ecludian distance.
+#' However, if 'deg' it set, the function uses the haversine formula.}
 #' @examples {
 #'
 #'  require(raster)
