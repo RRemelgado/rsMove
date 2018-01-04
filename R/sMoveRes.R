@@ -12,9 +12,11 @@
 #' @details {Given a vector of pixel resolutions (\emph{pixel.res}), the function determines the number of unique pixels
 #' and unique pixel regions after their temporal agggregation. For each spatial resolution, the function starts by converting
 #' \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number
-#' of samples and sample regions. The indices and the statistical information are returned as a \emph{data.frame} object where each
-#' column represents a different spatial resolution. Addionally, the function returns a plot reporting on the change in the number
-#' of samples and sample regions with each spatial resolution.}
+#' of samples and sample regions. The output of the function consists of:
+#' \itemize{
+#'  \item{\emph{stats} - Summarity statistics reporting on the number of unique samples and sample regions per spatial resolution.}
+#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}
+#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each spatial resolution.}}
 #' @seealso \code{\link{tMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'

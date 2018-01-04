@@ -14,10 +14,12 @@
 #' @details {Given a base spatial resolution (\emph{pixel.res} and a vector of temporal resolutions (\emph{time.res}), the function determines
 #' the number of unique pixels and unique pixel regions after their temporal agggregation. For each temporal resolution, the function starts by
 #' converting \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number of
-#' samples and sample regions. The indices and the statistical information are returned as a \emph{data.frame} object where each column
-#' represents a different spatial resolution. Addionally, the function returns a plot reporting on the change in the number of samples and
-#' sample regions with each temporal resolution.}
-#' @seealso \code{\link{sMoveRes}}
+#' samples and sample regions. The output of the function consists of:
+#' \itemize{
+#'  \item{\emph{stats} - Summarity statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
+#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}
+#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each temporal resolution.}}
+#' @seealso \code{\link{sMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'
 #'  require(raster)
@@ -103,8 +105,7 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
     for (w in 1:nw) {
 
       # locate pixels within the temporal window
-      loc1 <- which(obs.time >= (st+(time.res[r]*(w-1))) &
-                     obs.time <= ((st+time.res[r])+(time.res[r]*(w-1))))
+      loc1 <- which(obs.time >= (st+(time.res[r]*(w-1))) & obs.time <= ((st+time.res[r])+(time.res[r]*(w-1))))
 
       # quantify unique samples
       upr <- unique(sp[loc1])
@@ -120,21 +121,18 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
     }
 
     # update output
-    out[[r]] <- list(indices=ind, regions=sum(nr), count=sum(sc), regions.window=nr, count.window=sc)
+    out[[r]] <- list(indices=ind, regions=sum(nr), count=sum(sc), window.count=nw)
 
   }
 
   # output data frame with statistics
   out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}),
                      n.regions=sapply(out, function(x) {x$regions}),
-                     resolution=time.res)
+                     n.windows=window.count, resolution=time.res)
 
   # output data frame with sample indices
   out2 <- do.call(cbind, lapply(out, function(x) {x$indices}))
   colnames(out2) <- as.character(time.res)
-
-  # count per window
-  out3 <- lapply(out, function(x) {list(regions.window=x$regions.window, count.window=x$count.window)})
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 4. plot output
@@ -166,6 +164,6 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
           legend.title=element_text(size=14)) + ylim(0,yr)
 
   # return data frame and plot
-  return(list(stats=out1, plot=p, indices=out2, window.stats=out3))
+  return(list(stats=out1, plot=p, indices=out2))
 
 }
