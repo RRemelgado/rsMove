@@ -18,8 +18,8 @@
 #' and extracts the percent of cloud cover for the corresponding samples in \emph{xy}. If
 #' \emph{data.path} is specified, the function will look within the provided directory for the
 #' cloud cover images. If they exist, they won't be downloaded reducing the amount of time required
-#' by the function. Moreover, if \emph{d.buffer} is specified, for each date, the function will only
-#' consider images that are within the specified temporal buffer. \emph{d.buffer} requires a two
+#' by the function. Moreover, if \emph{buffer.size} is specified, for each date, the function will only
+#' consider images that are within the specified temporal buffer. \emph{buffer.size} requires a two
 #' element vector which specifies the buffer size before and after the target dates. These additional
 #' images will be used to report on the closest time step with the lowest possible cloud cover. The
 #' final output provides a \emph{data.frame} ($report) with information on:

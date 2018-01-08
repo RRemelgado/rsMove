@@ -2,7 +2,7 @@
 #'
 #' @description Query environmental data for coordinate pairs using the nearest non NA value in time.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
+#' @param obs.dates Object of class \emph{Date} with \emph{xy} observation dates.
 #' @param env.data Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.
 #' @param env.dates Object of class \emph{Date} with \emph{env.data} observation dates.
 #' @param time.buffer Two element vector with temporal search buffer (expressed in days).
@@ -13,7 +13,7 @@
 #' @seealso \code{\link{sampleMove}} \code{\link{backSample}}
 #' @return An object of class \emph{data.frame} with the selected values and their corresponding dates.
 #' @details {Returns environmental variables from a raster object for a given set of x and y coordinates depending on the
-#' temporal distance between the sample observation date (\emph{obs.date}) and the date on which the environmental data was
+#' temporal distance between the sample observation date (\emph{obs.dates}) and the date on which the environmental data was
 #' collected (\emph{env.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
 #' non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
 #' are considred in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
@@ -40,10 +40,10 @@
 #'  env.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
-#'  obs.date <- as.Date(moveData@data$date)
+#'  obs.dates <- as.Date(moveData@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
+#'  rsQuery <- dataQuery(xy=moveData, obs.dates=obs.dates, env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
 #'
 #' }
 #'
@@ -51,7 +51,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.dates=env.dates, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
+dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=env.dates, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
@@ -70,9 +70,9 @@ dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.dates=env
   if (!exists('env.dates')) {stop('"env.dates" is missing')}
   if (class(env.dates)[1]!='Date') {stop('"env.dates" is not of a valid class')}
   if (length(env.dates)!=nlayers(env.data)) {stop('lengths of "env.dates" and "env.data" differ')}
-  if (is.null(obs.date)) {stop('"obs.date" is missing')}
-  if (class(obs.date)[1]!='Date') {stop('"obs.date" is not of a valid class')}
-  if (length(obs.date)!=length(xy)) {stop('lengths of "obs.date" and "xy" differ')}
+  if (is.null(obs.dates)) {stop('"obs.dates" is missing')}
+  if (class(obs.dates)[1]!='Date') {stop('"obs.dates" is not of a valid class')}
+  if (length(obs.dates)!=length(xy)) {stop('lengths of "obs.dates" and "xy" differ')}
 
   # auxiliary
   if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {fun=NULL}
@@ -87,14 +87,14 @@ dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.dates=env
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   # read data
-  if (!is.data.frame(env.data) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, fun=smooth.fun, na.rm=TRUE))}
+  if (!is.data.frame(env.data)) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, fun=smooth.fun, na.rm=TRUE))}
 
   # function to select pixels
   if (is.null(time.buffer)) {
     qf <- function(i) {
       ind <- which(!is.na(env.data[i,]))
       if (length(ind)!=0) {
-        diff <- abs(obs.date[i]-env.dates[ind])
+        diff <- abs(obs.dates[i]-env.dates[ind])
         loc <- which(diff==min(diff))[1]
         return(list(value=env.data[i,ind[loc]], date=env.dates[ind[loc]]))
       } else{return(list(value=NA, date=NA))}}
@@ -102,8 +102,8 @@ dataQuery <- function(xy=xy, obs.date=obs.date, env.data=env.data, env.dates=env
     qf <- function(i) {
       ind <- which(!is.na(env.data[i,]))
       if (length(ind)!=0) {
-        diff <- abs(obs.date[i]-env.dates[ind])
-        loc <- env.dates[ind] >= (obs.date[i]-time.buffer[1]) & env.dates[ind] <= (obs.date[i]+time.buffer[2])
+        diff <- abs(obs.dates[i]-env.dates[ind])
+        loc <- env.dates[ind] >= (obs.dates[i]-time.buffer[1]) & env.dates[ind] <= (obs.dates[i]+time.buffer[2])
         if (sum(loc)>0) {
           loc <- which(diff==min(diff[loc]))[1]
           return(list(value=env.data[i,ind[loc]], date=env.dates[ind[loc]]))

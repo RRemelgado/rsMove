@@ -3,7 +3,7 @@
 #' @description {Tool to support the selection of an adequate satellite temporal resoltuon. It evaluates how the change in temporal
 #' resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param obs.time Object of class \emph{Date} with \emph{xy} observation dates.
+#' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
 #' @param time.res Vector of temporal resolutions (expressed in days).
 #' @param pixel.res Spatial resolution (unit depends on spatial projection).
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
@@ -31,14 +31,14 @@
 #'
 #'  # test function for 5, 10 20 and 30 m
 #'  obs.date <- as.Date(moveData@data$timestamp)
-#'  a.res <- tMoveRes(xy=moveData, obs.time=obs.date, time.res=c(1,8,16), pixel.res=0.01)
+#'  a.res <- tMoveRes(xy=moveData, obs.date=obs.date, time.res=c(1,8,16), pixel.res=0.01)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixel.res) {
+tMoveRes <- function(xy=xy, obs.date=obs.date, time.res=time.res, pixel.res=pixel.res) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
@@ -47,7 +47,7 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
   if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
-  if (!class(obs.time)!="Date") {stop('"obs.time" is not of class "Date"')}
+  if (!class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
@@ -91,8 +91,8 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
 # 4. determine pixel aggregations
 #---------------------------------------------------------------------------------------------------------------------#
 
-  st <- min(obs.time) # start time
-  et <- max(obs.time) # end time
+  st <- min(obs.date) # start time
+  et <- max(obs.date) # end time
 
   out <- list() # output variable
   for (r in 1:length(time.res)) {
@@ -105,7 +105,7 @@ tMoveRes <- function(xy=xy, obs.time=obs.time, time.res=time.res, pixel.res=pixe
     for (w in 1:nw) {
 
       # locate pixels within the temporal window
-      loc1 <- which(obs.time >= (st+(time.res[r]*(w-1))) & obs.time <= ((st+time.res[r])+(time.res[r]*(w-1))))
+      loc1 <- which(obs.date >= (st+(time.res[r]*(w-1))) & obs.date <= ((st+time.res[r])+(time.res[r]*(w-1))))
 
       # quantify unique samples
       upr <- unique(sp[loc1])

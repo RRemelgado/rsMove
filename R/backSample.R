@@ -21,10 +21,6 @@
 #' samples where the difference between their variance and the variance of the region samples exceeds the MAD. Then, the
 #' algorithm removes the background samples that were not selected by all sample regions.}
 #'
-#'
-#'
-#' these samples are returned in the form of a \emph{SpatialPoints}
-#'
 #' If
 #' \emph{nr.samples} is not provided all background pixels are returned
 #'
@@ -43,7 +39,7 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 #'
 #'  # find sample regions
-#'  label <- labelSample(xy=moveData, rad=500, npx=2, pxr=30)
+#'  label <- labelSample(xy=moveData, agg.radius=500, nr.pixels=2, pixel.res=30)
 #'
 #'  # select background samples
 #'  ind <- which(label>0) # selected samples

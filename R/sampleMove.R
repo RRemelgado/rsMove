@@ -3,7 +3,7 @@
 #' @description Remote sensing oriented sampling of stops along a movement track.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the same length as \emph{xy}.
-#' @param error Distance (in meters).
+#' @param search.radius Sample search radius (in meters).
 #' @param method How should the disntance be estimated? One of 'm' or 'deg'. Default is 'm'.
 #' @param tUnit Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.
 #' @import raster rgdal
@@ -12,7 +12,7 @@
 #' @seealso \code{\link{labelSample}} \code{\link{backSample}} \code{\link{dataQuery}}
 #' @details {This function finds location where an animal showed little or no movement based on GPS tracking data.
 #' It looks at the distance among consecutive samples and places pointer when the distance is bellow the defined
-#' threshold (\emph{error}). When a pointer is found, the function looks at the distance between the pointer and
+#' threshold (\emph{search.radius}). When a pointer is found, the function looks at the distance between the pointer and
 #' the following samples. While this is below the distance threshold, the samples are assigned to the same segment.
 #' Then, for each segment, the function summarizes the corresponding samples deriving mean coordinates, the start,
 #' end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{method}
@@ -29,7 +29,7 @@
 #'
 #'  # sampling without reference grid
 #'  obs.time = strptime(moveData$timestamp, "%Y-%m-%d %H:%M:%S")
-#'  output <- sampleMove(xy=moveData, obs.time=obs.time, error=7, method='deg')
+#'  output <- sampleMove(xy=moveData, obs.time=obs.time, search.radius=7, method='deg')
 #'
 #'  # compare original vs new samples
 #'  plot(moveData, col="black", pch=16)
@@ -40,7 +40,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-sampleMove <- function(xy=xy, obs.time=obs.time, error=error, method='m', tUnit=NULL) {
+sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, method='m', tUnit=NULL) {
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -83,8 +83,8 @@ sampleMove <- function(xy=xy, obs.time=obs.time, error=error, method='m', tUnit=
       lDist <- sqrt((rc[2,1]-rc[1,1])^2 + (rc[2,2]-rc[1,2])^2)}
 
     # determine if the sample belongs to a new segment
-    if (lDist < error & sp0==0) {sp0 <- r-1}
-    if (lDist > error & sp0>0) {
+    if (lDist < search.radius & sp0==0) {sp0 <- r-1}
+    if (lDist > search.radius & sp0>0) {
       sc[[length(sc)+1]] <- c(sp0,(r-1))
       sp0 <- 0}
 

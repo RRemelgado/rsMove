@@ -24,10 +24,10 @@
 #'
 #'  # load example probability image
 #'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
-#'  probImg <- raster(file)
+#'  r <- raster(file)
 #'
 #'  # segment probabilities
-#'  rs <- segRaster(probImg)
+#'  rs <- segRaster(r)
 #'
 #' }
 #' @export
