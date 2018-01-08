@@ -11,11 +11,11 @@
 #' @import grDevices sp rgdal raster
 #' @importFrom utils download.file read.csv unzip untar
 #' @return One or multiple raster objects.
-#' @details {Downloads data from earthenv.org. To check which variables can be downloaded,
-#' run the function without specifying \emph{t.var} and specifying \emph{d.source}. This will
-#' return a data frame listing the existing variables for a given data source. Here, the user
-#' can refer to the column \emph{"code"} to retrieve the keywords that can be passed to
-#' the function through \emph{t.var}. The keywords recognized by \emph{d.source} are:
+#' @details {Downloads data from pre-selected sources. To check which variables can be downloaded,
+#' run the function by specifying only \emph{d.source}. This will return a data frame listing the
+#' existing variables for a given data source. Here, the user can refer to the column \emph{"code"}
+#' to retrieve the keywords that can be passed to the function through \emph{t.var}. The keywords
+#' recognized by \emph{d.source} are:
 #' \itemize{
 #' \item{\emph{"EarthEnv"} - EarthEnv project.}
 #' \item{\emph{"GFC"} - Maryland University Global Forest Change.}

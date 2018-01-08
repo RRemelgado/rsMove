@@ -13,9 +13,10 @@
 #' @return A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date. If a \emph{data.frame}, columns represent dates and rows represent samples.
 #' @details {Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{target.dates}).
 #' A temporal buffer (\emph{time.buffer}) is required to limit the search for reference data points (\emph{time.buffer}).
-#' This is defined by a two element vector which limits the search in the past and future. If \emph{xy} and \emph{env.data}
-#' is a \emph{raster} object the function only considers the pixels that overlaping pixels. Otherwise, all pixels are
-#' considered providing a \emph{RasterBrick}. However, if \emph{env.data} is a \emph{data.frame}, \emph{xy} is ignored.}
+#' This is defined by a two element vector which limits the search in the past and future. If \emph{xy} is provided and
+#' \emph{env.data} is a \emph{raster} object the function only considers the pixels that overlap with the shapefile.
+#' Otherwise, all pixels are considered providing a \emph{RasterBrick}. However, if \emph{env.data} is a \emph{data.frame},
+#' \emph{xy} is ignored.}
 #' @examples {
 #'
 #'  require(raster)
