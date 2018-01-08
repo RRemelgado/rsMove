@@ -9,16 +9,17 @@
 #' @importFrom caret train trainControl predict
 #' @return A \emph{list}.
 #' @references \href{http://onlinelibrary.wiley.com/doi/10.1002/rse2.70/full}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing – mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv. doi:10.1002/rse2.70}
-#' @details {For each unique label in \emph{sample.label}, the function keeps it for validation and uses the remaining
-#' samples for training. Then, the function evaluates the performance of this model reporting (internally) on the number
-#' of true positives, false positives and the number of validation and predicted cases for both presences and absences.
-#' Once all sample regions are used for validation, the reported values are summed and used to derive the F1-measure. The
-#' F1-measure is estimated as \emph{2 * (P * R) / (P + R)} where \emph{P} is the Precision (ratio of true positives within
-#' the number of predicted values) and \emph{R} is the Recall (ratio of true positives within the number of validation samples).
-#' As a consequence, rather than reporting on an average performance, the final performance assessment reported by \emph{stratModel}
-#' depicts an objective picture on how the model performed among the differents sets sample regions. This metric is provided for
-#' presences (\emph{presence.data}) and absences ({\emph{absence.data}}) separately offering an overview on the stability of the model. This
-#' analysis is performed using a Random Forest model as provided within the \code{\link[caret]{train}} function of the caret package.
+#' @details {Modeling of resource suitability using animal movement data following a recent paper (Remelgado et al, 2017). For each
+#' unique label in \emph{sample.label}, the function keeps it for validation and uses the remaining samples for training. Then, the
+#' function evaluates the performance of this model reporting (internally) on the number of true positives, false positives and the
+#' number of validation and predicted cases for both presences and absences. Once all sample regions are used for validation, the
+#' reported values are summed and used to derive the F1-measure. The F1-measure is estimated as \emph{2 * (P * R) / (P + R)} where
+#' \emph{P} is the Precision (ratio of true positives within the number of predicted values) and \emph{R} is the Recall (ratio of
+#' true positives within the number of validation samples). As a consequence, rather than reporting on an average performance, the
+#' final performance assessment reported by \emph{stratModel} depicts an objective picture on how the model performed among the
+#' differents sets sample regions. This metric is provided for presences (\emph{presence.data}) and absences ({\emph{absence.data}})
+#' separately offering an overview on the stability of the model. This analysis is performed using a Random Forest model as provided
+#' within the \code{\link[caret]{train}} function of the caret package. The final predictive model is then derived with all samples.
 #' The output of \emph{stratModel} is a list object consisting of:
 #' \itemize{
 #'  \item{\emph{f1} - \emph{data.frame} with final F1-measure for presences and absences.}
@@ -59,7 +60,7 @@
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 
-stratModel <-function(presence.data=presence.data, absence.data=absence.data, sample.label=NULL, pred.model=pred.model) {
+predictResources <-function(presence.data=presence.data, absence.data=absence.data, sample.label=NULL, env.data=NULL) {
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables and define auxiliary functions
@@ -78,6 +79,14 @@ stratModel <-function(presence.data=presence.data, absence.data=absence.data, sa
   presence.data <- presence.data[cc,]
   sample.label <- sample.label[cc]
   absence.data <- absence.data[complete.cases(absence.data),]
+
+  # check environmental data
+  if (!class(env.data)[1]%in%c("RasterStack", "RasterBrick")) {stop('"env.data" is not a valid raster object')}
+  if (nlayers(env.data)!=ncol(presence.data)) {stop('"env.data" has a different amount of variables from the training data')}
+  if (sum(names(presence.data))!=sum(names(env.data))) {stop('the variable names of "env.data" are differ from the predictive data')}
+
+  # training metric
+  tc <- trainControl(method='oob')
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 2. define class codes
@@ -116,8 +125,8 @@ stratModel <-function(presence.data=presence.data, absence.data=absence.data, sa
     i0.v <- i0[si[seq(from=2, to=length(i0), by=2)]]
 
     # build model for training set
-    m.ls[[v]] <- train(rbind(presence.data[i1.t,], absence.data[i0.t,]), as.factor(c(i1[i1.t],i0[i0.t])),
-                                method="rf", trControl=trainControl(method='oob'))
+    m.ls[[v]] <- train(rbind(presence.data[i1.t,], absence.data[i0.t,]),
+                       as.factor(c(i1[i1.t],i0[i0.t])), method="rf", trControl=tc)
 
     # estimate/store accuracies
     vi <- c(i1[i1.v], i0[i0.v])
@@ -150,7 +159,7 @@ stratModel <-function(presence.data=presence.data, absence.data=absence.data, sa
   rm(p, r, cp, pp, tp, ca, pa, ta)
 
   # write output
-  model <-
+  model <- train(rbind(presence.data, absence.data), as.factor(c(i1,i0)), method="rf", trControl=tc)
   if (!is.null(env.data)) {prob <-  predict(env.data, model)} else {prob <- NULL}
   return(list(f1=mean.acc, validation=val.set, iteration.models=m.ls, final.model=model, probabilities=prob))
 
