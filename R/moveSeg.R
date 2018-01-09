@@ -39,7 +39,8 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+#'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
 #'  seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, type="cont", threshold=0.1)

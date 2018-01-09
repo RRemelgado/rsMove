@@ -4,39 +4,43 @@
 \alias{backSample}
 \title{backSample}
 \usage{
-backSample(xy = xy, region.id = region.id, method = method, img = img,
-  n.samples = NULL)
+backSample(xy = xy, region.id = region.id,
+  sampling.method = sampling.method, env.data = env.data,
+  nr.samples = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
 \item{region.id}{Vector of region identifyers for each sample.}
 
-\item{method}{One of \emph{random} or \emph{pca}. Default is \emph{random}.}
+\item{sampling.method}{One of \emph{random} or \emph{pca}. Default is \emph{random}.}
 
-\item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+\item{env.data}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{n.samples}{Number of random background samples.}
+\item{nr.samples}{Number of random background samples.}
 }
 \value{
-A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
+A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame} of background samples for unique pixels in \emph{env.data}.
 }
 \description{
 Background sample selection.
 }
 \details{
-{The function selects a set of n background samples where n is determined by
-\emph{n.samples}. If \emph{n.samples} is not provided all background pixels are considered. If the
-method is \emph{random} these samples are returned in the form of a \emph{SpatialPoints}
-object. If \emph{pca} is used, a PCA analysis is performed over all available samples
-(provided and random). For each unique region ID (\emph{region.id}) the median and the Median
-Absolute Deviation (MAD) is estimated for a given Principal Component (PC). Background
-samples where the difference between their variance and the variance of the region samples
-exceeds the MAD are selected. Only the samples that are selected by all unique regions are
-kept. This process is repeated for all PC's with eigenvalues greater than 1 (Kaiser rule).
-The final set of samples corresponds to the unique records selected by the different PC's.
-These samples are returned as a SpatialPointsDataFrame containing the variables extracted
-from \emph{img}.}
+{First, the function determines the unique pixel coordinates for \emph{xy} based on the dimensions
+of \emph{env.data} and retrieves n background samples where n is determined by \emph{nr.samples}. Then, the
+selection of samples is dependent on the method chosen by the user. If \emph{sampling.method} is set to \emph{random},
+the function will select samples randomly. However, if \emph{pca} is used, the function will use a Principal
+Components Analysis (PCA) over \emph{env.data} to evaluate the similarity between the samples associated to \emph{xy}
+and the intial set of random samples First, based on this PCA, the function selects the most important Principal Components
+(PC's) using the kaiser rule (i.e. PC's with eigenvalues greater than 1). Then, for each PC, the function estimates
+the median and the Median Absolute Deviation (MAD) for each unique identifier in \emph{region.id}) and selects background
+samples where the difference between their variance and the variance of the region samples exceeds the MAD. Then, the
+algorithm removes the background samples that were not selected by all sample regions.}
+
+If
+\emph{nr.samples} is not provided all background pixels are returned
+
+object.
 }
 \examples{
 {
@@ -52,11 +56,12 @@ from \emph{img}.}
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 
  # find sample regions
- label <- labelSample(xy=moveData, rad=500, npx=2, pxr=30)
+ label <- labelSample(xy=moveData, agg.radius=500, nr.pixels=2, pixel.res=30)
 
  # select background samples
  ind <- which(label>0) # selected samples
- bSamples <- backSample(xy=moveData[ind,], region.id=label[ind], img=rsStk, method='random')
+ bSamples <- backSample(xy=moveData[ind,], region.id=label[ind],
+ env.data=rsStk, sampling.method='random')
 
 }
 }

@@ -4,34 +4,32 @@
 \alias{segRaster}
 \title{segRaster}
 \usage{
-segRaster(prob, break.point = 0.1, min.prob = 0.5)
+segRaster(img, break.point = 0.1, min.value = 0.5)
 }
 \arguments{
-\item{prob}{Object of class \emph{RasterLayer}.}
+\item{img}{Object of class \emph{RasterLayer}.}
 
 \item{break.point}{Difference threshold. Default is 0.05.}
 
-\item{min.prob}{Minimum value. Default is 0.5.}
+\item{min.value}{Minimum value. Default is 0.5.}
 }
 \value{
 A list object.
 }
 \description{
-{Connencte-region based raster segmentation
-that preserves spatial gradients and reports on region statistics.}
+{Connencted-region based raster segmentation that preserves spatial gradients.}
 }
 \details{
-{The function segments an input layer using a connected
-component region labeling approach. For each pixel, the function
-estimates the difference between it and its imediate 8 neighbors.
-The pixels where the difference is below the defined threshold
-(\emph{ct}) are aggregated into a single region. The user can define
-a minimum pixel value using \emph{min.prob} which will limit the range of
-pixels under evaluation. The result contains a raster with unique
-values for each segment region region (\emph{$segment}) as well as a
-data frame (\emph{$stats}) with statistics for each region. The data
-frame report on the minimum (\emph{min}), maximum (\emph{max}), mean (\emph{mean})
-and standard deviation (\emph{sd}) of the pixels contained in each region.}
+{The function segments an input raster layer (\emph{img}) using a
+connected component region labeling approach. For each pixel, the function
+estimates the difference between it and its imediate neighbors. If the
+difference is below the threshold defined by \emph{break.point} these are
+aggregated into a single region. Moreover, the user can define a minimum pixel
+value using \emph{min.value} which will ignore all pixels below that value. The
+output of this function consists of:
+\itemize{
+ \item{\emph{regions} - Region raster image.}
+ \item{\emph{stats} - Basic statistics (i.e. min, max, mean, sd) for each region.}}}
 }
 \examples{
 {
@@ -40,13 +38,13 @@ and standard deviation (\emph{sd}) of the pixels contained in each region.}
 
  # load example probability image
  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
- probImg <- raster(file)
+ r <- raster(file)
 
  # segment probabilities
- rs <- segRaster(probImg)
+ rs <- segRaster(r)
 
 }
 }
 \seealso{
-\code{\link{moveModel}} \code{\link{modelApply}}
+\code{\link{predictResources}}
 }

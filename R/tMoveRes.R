@@ -7,7 +7,7 @@
 #' @param time.res Vector of temporal resolutions (expressed in days).
 #' @param pixel.res Spatial resolution (unit depends on spatial projection).
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
-#' @importFrom raster raster extent extend cellFromXY crs dim
+#' @importFrom raster raster extent extend cellFromXY crs
 #' @importFrom utils download.file
 #' @importFrom grDevices colorRampPalette
 #' @return A \emph{list} object reporting on the amount and distribution of unique pixels and connected pixel regions per temporal resolution.
@@ -47,7 +47,7 @@ tMoveRes <- function(xy=xy, obs.date=obs.date, time.res=time.res, pixel.res=pixe
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
   if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
-  if (!class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
+  if (class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 2. determine grid coordinates for given pixels
@@ -128,7 +128,8 @@ tMoveRes <- function(xy=xy, obs.date=obs.date, time.res=time.res, pixel.res=pixe
   # output data frame with statistics
   out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}),
                      n.regions=sapply(out, function(x) {x$regions}),
-                     n.windows=window.count, resolution=time.res)
+                     n.windows=sapply(out, function(x) {x$regions}),
+                     resolution=time.res)
 
   # output data frame with sample indices
   out2 <- do.call(cbind, lapply(out, function(x) {x$indices}))
@@ -153,7 +154,8 @@ tMoveRes <- function(xy=xy, obs.date=obs.date, time.res=time.res, pixel.res=pixe
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # build plot object
-  p <- ggplot(out1, aes(x=factor(time.res), y=n.pixels, fill=n.regions)) + theme_bw() +
+  out1$resolution <- as.factor(out1$resolution)
+  p <- ggplot(out1, aes_string(x="resolution", y="n.pixels", fill="n.regions")) + theme_bw() +
     scale_fill_gradientn(colors=cr(10), name="Nr. Regions\n") + xlab("\nResolution (days)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") +
     theme(axis.text.x=element_text(size=12),

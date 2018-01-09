@@ -10,8 +10,10 @@
 #' @param sample.direction One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.
 #' @param stat.fun Output statistical metric.
 #' @param min.count Minimum number of samples required by \emph{stat.fun}. Default is 2.
-#' @import raster rgdal
+#' @importFrom raster crs extract
 #' @importFrom stats lm
+#' @importFrom grDevices colorRampPalette
+#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab
 #' @seealso \code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{vector} with a requested statistical metric for each point in \emph{xy}.
 #' @details {This function evaluates how environmental conditions change in time along a movement track.
@@ -41,11 +43,12 @@
 #'  r.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
-#'  obs.dates <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.dates <- as.Date(moveData@data$date)
 #'
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  time.env <- timeDir(xy=moveData, obs.dates=obs.dates, img=rsStk, env.dates=r.dates, window.size=10, sample.direction="backward", stat.fun=of)
+#'  time.env <- timeDir(xy=moveData, obs.dates=obs.dates, env.data=rsStk,
+#'  env.dates=r.dates, window.size=10, sample.direction="backward", stat.fun=of)
 #'
 #' }
 #' @export
@@ -98,10 +101,8 @@ timeDir <- function(xy=NULL, obs.dates=obs.dates, img=NULL, env.data=NULL, env.d
 
     # retrieve environmental variables
     ind <- which(env.dates%in%seq.Date(min(obs.dates-window.size), max(obs.dates+window.size), by=1))
-    env.data <- extract(img[[ind]], xy@coords)
+    env.data <- extract(env.data[[ind]], xy@coords)
     env.dates <- env.dates[ind]
-
-    rm(img)
 
   }
 

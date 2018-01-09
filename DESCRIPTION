@@ -1,14 +1,17 @@
 Package: rsMove
 Type: Package
 Title: Remote Sensing for Movement Ecology
-Version: 0.2.1.9000
-Date: 2017-08-19
+Version: 0.2.2.9000
+Date: 2018-01-09
 Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de")
 URL: https://github.com/RRemelgado/rsMove/tree/master/
 BugReports: https://github.com/RRemelgado/rsMove/issues/
 Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>
-Description: Tools to analyze animal tracking data with remote sensing.
+Description: Tools that support the combined use of animal movement and remote sensing data.
 LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr
 RoxygenNote: 6.0.1
 License: GPL (>= 3)
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr

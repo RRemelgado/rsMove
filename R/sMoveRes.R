@@ -4,7 +4,6 @@
 #' in spatial resolution changes the amount of samples and sample regions based on a set of coordinate pairs.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pixel.res vector of spatial resolutions (unit depends on spatial projection).
-#' @import ggplot2 sp rgdal grDevices
 #' @importFrom raster extent
 #' @importFrom grDevices colorRampPalette
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
@@ -16,7 +15,7 @@
 #' \itemize{
 #'  \item{\emph{stats} - Summarity statistics reporting on the number of unique samples and sample regions per spatial resolution.}
 #'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}
-#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each spatial resolution.}}
+#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each spatial resolution.}}}
 #' @seealso \code{\link{tMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'
@@ -128,7 +127,7 @@ sMoveRes <- function(xy=xy, pixel.res=pixel.res) {
 
   # build plot object
   out1$pixel.res <- factor(pixel.res, levels=unique(pixel.res))
-  p <- ggplot(out1, aes_string(x="Pixel Resolution", y="n.pixels", fill="n.regions")) +
+  p <- ggplot(out1, aes_string(x="pixel.res", y="n.pixels", fill="n.regions")) +
     theme_bw() + scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr),
     limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (m)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat="identity") +

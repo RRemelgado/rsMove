@@ -4,7 +4,6 @@
 #' @param region.id Region unique identifiers. Vector of class \emph{numeric}.
 #' @param individual.id Individual identifier. Vector of class \emph{character}.
 #' @param obs.time Observation time. Object of class \emph{Date}.
-#' @param distance.method Method used to estimate polygon area.
 #' @return A list containing statistical information for each region (\emph{region.stats}) and for each temporal segment (\emph{temporal.segment.stats}) and sample indices for each segment (temporal.segment.indices)
 #' @importFrom sp spTransform CRS
 #' @importFrom ggplot2 ggplot aes_string geom_bar scale_fill_gradientn xlab ylab theme_bw
@@ -29,13 +28,14 @@
 #' hm <- hotMove(xy=moveData, pixel.res=0.1, return.shp=TRUE)
 #'
 #' # plot shapefile (color by region)
-#' plot(hm$polygons, col=hm$indices)
+#' plot(hm$polygons)
 #'
 #' # add new information to original shapefile
 #' moveData@data <- cbind(moveData@data, hm$indices)
 #'
 #' # derive statistics
-#' hm.region.stats <- hotMoveStats(region.id=hm$indices, obs.time=as.Date(moveData@data$timestamp))
+#' hm.region.stats <- hotMoveStats(region.id=hm$indices,
+#' obs.time=as.Date(moveData@data$timestamp))
 #'
 #' }
 #' @export
@@ -49,7 +49,6 @@ hotMoveStats <- function(region.id=region.id, obs.time=obs.time, individual.id=N
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   if(is.null(region.id) & is.null(obs.time) & is.null(individual.id)) {stop('no information provided ("region.id", "obs.time" and "individual.id" are NULL)')}
-
   if (!class(region.id)%in%c("numeric", "character")) {stop('"region.id" is not of a valid class')}
   if (class(obs.time)[1]!="Date") {stop('"obs.time" is not of a valid class')}
   if (!is.null(individual.id)) {if (!class(individual.id)%in%c("numeric", "character")) {stop('"individual.id" is not of a valid class')}}
@@ -69,11 +68,8 @@ hotMoveStats <- function(region.id=region.id, obs.time=obs.time, individual.id=N
   mxt <- matrix(0, nr) # largest obs.time segment per region
   tts <- matrix(0, nr) # sum of recorded obs.time
   nts <- matrix(0, nr) # number of obs.time segments
-
-  if (pt) {
-    ss1 <- list() # temporal segment stats
-    ss2 <- list() # temporal segment indices
-  }
+  ss1 <- list() # temporal segment stats
+  ss2 <- list() # temporal segment indices
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 3. evaluate each region
@@ -135,27 +131,27 @@ hotMoveStats <- function(region.id=region.id, obs.time=obs.time, individual.id=N
 
   # build data frame with statistics
   df <- data.frame(region.id=ur, tns=tns, nui=nui, mnt=mnt, avt=avt, mxt=mxt, tts=tts, nts=nts)
-  colnames(df) <- c("Region ID", "Nr. Samples", "Nr. Individuals", "Min. Time", "Average Time", "Max. Time", "Total Time", "Nr. Segments")
 
   # temporal segments
   time.seg <- do.call(rbind, ss1)
-  colnames(time.seg) <- c("Start Time", "End Time", "Region ID", "Nr. Samples", "Nr. Individuals")
+  colnames(time.seg) <- c("Start Time", "End Time", "Region ID", "Nr Samples", "Nr Individuals")
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 5. build output data frames
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
-  df["Region ID"] <- factor(df["Region ID"], levels=unique(df["Region ID"]))
-  p <- ggplot(df, aes_string(x="Region ID", y="Nr. Segments", fill="Nr. Samples")) + theme_bw() +
-    geom_bar(stat="identity") + xlab("\nRegion ID") + ylab("Number of Days") +
-    scale_fill_gradientn(name="Nr. Samples", colours=cr(10))
+  df$region.id <- factor(df$region.id, levels=unique(df$region.id))
+  p <- ggplot(df, aes(x=region.id, y=nts, fill=tns)) +
+    theme_bw() + geom_bar(stat="identity") + xlab("\nRegion ID") +
+    ylab("Number of Days") + scale_fill_gradientn(name="Nr. Samples", colours=cr(10))
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 6. derive output
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # return output
+  colnames(df) <- c("Region ID", "Nr Samples", "Nr Individuals", "Min Time", "Average Time", "Max Time", "Total Time", "Nr Segments")
   return(list(region.stats=df, plot=p, temporal.segment.stats=time.seg, temporal.segment.indices=ss2))
 
 }

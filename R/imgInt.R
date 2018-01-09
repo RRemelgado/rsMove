@@ -37,7 +37,8 @@
 #'  target.dates = as.Date("2012-04-01")
 #'
 #'  # interpolate raster data to target dates
-#'  i.env.data <- imgInt(env.data=rsStk, env.dates=env.dates, target.dates=target.dates, time.buffer=c(60,60), xy=moveData)
+#'  i.env.data <- imgInt(env.data=rsStk, env.dates=env.dates,
+#'  target.dates=target.dates, time.buffer=c(60,60), xy=moveData)
 #'
 #' }
 #' @export
@@ -58,12 +59,12 @@ imgInt <- function(env.data=env.data, env.dates=env.dates, target.dates=target.d
 
   # check environmnetal information
   if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick', 'data.frame')) {stop('"env.data" is not of a valid class')}
-  if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick')) {
+  if (class(env.data)[1]%in%c('RasterStack', 'RasterBrick')) {
     if (!is.null(xy)) {
+      processRaster=TRUE
       if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"shp is nor a valid point shapefile object')}
       if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
-      if (nlayers(env.data)!=length(env.dates)) {stop('length of "env.data" and "env.dates" do not match')}}
-    processRaster=TRUE}
+      if (nlayers(env.data)!=length(env.dates)) {stop('length of "env.data" and "env.dates" do not match')}}}
   if (is.data.frame(env.data)) {
     if (ncol(env.data)!=length(env.dates)) {stop('mismatch in "env.data" and "env.dates" dimensions')}
     processRaster=FALSE}

@@ -6,9 +6,10 @@
 #' @param sample.label Numeric or character vector with sample region labels. If missing, "presence.data" is assumed as one region.
 #' @param env.data Object of class \emph{RasterStack} or \emph{RasterBrick} with environmental variables in \emph{presence.data} and \emph{absence.data}.
 #' @importFrom stats complete.cases
-#' @importFrom caret train trainControl predict
+#' @importFrom caret train trainControl
+#' @importFrom raster predict
 #' @return A \emph{list}.
-#' @references \href{http://onlinelibrary.wiley.com/doi/10.1002/rse2.70/full}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing – mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv. doi:10.1002/rse2.70}
+#' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @details {Modeling of resource suitability using animal movement data following a recent paper (Remelgado et al, 2017). For each
 #' unique label in \emph{sample.label}, the function keeps it for validation and uses the remaining samples for training. Then, the
 #' function evaluates the performance of this model reporting (internally) on the number of true positives, false positives and the
@@ -27,7 +28,7 @@
 #'  \item{\emph{iteration.models} - List of models estimated at each iteration.}
 #'  \item{\emph{final.model} - Final predictive model based on all samples.}
 #'  \item{\emph{probabilities} - Predicted probability image. Given if \emph{env.data} is set.}}}
-#' @seealso \code{\link{sampleMove}} \code{\link{labelSample}} \code{\link{backSample}} \code{\link{modelApply}} \code{\link[caret]{train}}
+#' @seealso \code{\link{sampleMove}} \code{\link{labelSample}} \code{\link{backSample}} \code{\link[caret]{train}}
 #' @examples \dontrun{
 #'
 #'  require(rgdal)
@@ -42,18 +43,27 @@
 #'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 #'
+#'  # observation time
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+#'  format="%Y/%m/%d %H:%M:%S")
+#'
+#'  # remove redundant samples
+#'  moveData <- moveReduce(xy=moveData, obs.time=obs.time, img=rsStk)$points
+#'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData,img=rsStk, remove.dup=TRUE)
+#'  rsQuery <- extract(rsStk, moveData)
 #'
 #'  # identify unique sample regions
-#'  label <- labelSample(xy=rsQuery, rad=3000, pxr=rsStk)
+#'  label <- labelSample(xy=moveData, agg.radius=90, pixel.res=rsStk)
 #'
 #'  # select background samples
-#'  ind <- which(label>0) # selected samples
-#'  bSamples <- backSample(xy=moveData[ind,], rid=label[ind], img=rsStk, method='pca')
+#'  ind <- which(!is.na(label)) # selected samples
+#'  bSamples <- backSample(xy=moveData[ind,], region.id=label[ind],
+#'  img=rsStk, sampling.method='pca')
 #'
 #'  # derive model predictions
-#'  out <- stratModel(presence.data=rsQuery@data, absence.data=bSamples@data, sample.label=label)
+#'  out <- predictResources(presence.data=rsQuery,
+#'  absence.data=bSamples@data, sample.label=label, env.data=rsStk)
 #'
 #' }
 #' @export
@@ -81,9 +91,10 @@ predictResources <-function(presence.data=presence.data, absence.data=absence.da
   absence.data <- absence.data[complete.cases(absence.data),]
 
   # check environmental data
-  if (!class(env.data)[1]%in%c("RasterStack", "RasterBrick")) {stop('"env.data" is not a valid raster object')}
-  if (nlayers(env.data)!=ncol(presence.data)) {stop('"env.data" has a different amount of variables from the training data')}
-  if (sum(names(presence.data))!=sum(names(env.data))) {stop('the variable names of "env.data" are differ from the predictive data')}
+  if (!is.null(env.data)) {
+    if (!class(env.data)[1]%in%c("RasterStack", "RasterBrick")) {stop('"env.data" is not a valid raster object')}
+    if (nlayers(env.data)!=ncol(presence.data)) {stop('"env.data" has a different amount of variables from the training data')}
+    if (length(colnames(presence.data))!=length(names(env.data))) {stop('the variable names of "env.data" are differ from the predictive data')}}
 
   # training metric
   tc <- trainControl(method='oob')
@@ -101,8 +112,7 @@ predictResources <-function(presence.data=presence.data, absence.data=absence.da
 #----------------------------------------------------------------------------------------------------------------------------------#
 
   # initiate outputs
-  mean.acc <- data.frame(presence=vector('numeric',length(uv)), background=vector('numeric', length(uv)))
-  val.set <- data.frame(region=vector(class(label), length(uv)), count=vector('numeric', length(uv)))
+  val.set <- data.frame(region=vector(class(sample.label), length(uv)), count=vector('numeric', length(uv)))
   m.ls <- vector('list', length(uv)) # model list
 
   pp <- 0
@@ -150,17 +160,18 @@ predictResources <-function(presence.data=presence.data, absence.data=absence.da
   # estimate final accuracy list
   p <- cp / pp
   r <- cp / tp
-  mean.acc$presence = 2 * ((p * r) / (p + r))
+  ap = 2 * ((p * r) / (p + r))
   p <- ca / pa
   r <- ca / ta
-  mean.acc$absence = 2 * ((p * r) / (p + r))
+  aa = 2 * ((p * r) / (p + r))
+  acc <- data.frame(presence=ap, absence=aa)
 
   # remove temporary variables
-  rm(p, r, cp, pp, tp, ca, pa, ta)
+  rm(p, r, cp, pp, tp, ca, pa, ta, ap, aa)
 
   # write output
   model <- train(rbind(presence.data, absence.data), as.factor(c(i1,i0)), method="rf", trControl=tc)
-  if (!is.null(env.data)) {prob <-  predict(env.data, model)} else {prob <- NULL}
-  return(list(f1=mean.acc, validation=val.set, iteration.models=m.ls, final.model=model, probabilities=prob))
+  if (!is.null(env.data)) {prob <-  calc(env.data, function(x){predict(model, x, type='prob')$'1'})} else {prob <- NULL}
+  return(list(f1=acc, validation=val.set, iteration.models=m.ls, final.model=model, probabilities=prob))
 
 }

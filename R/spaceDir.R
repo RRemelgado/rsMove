@@ -10,8 +10,10 @@
 #' @param buffer.size Spatial buffer size expressed in the map units.
 #' @param stat.fun Output statistical metric.
 #' @param min.count Minimum number of pixels required by \emph{stat.fun}. Default is 2.
-#' @import raster sp rgdal
+#' @importFrom raster extract
 #' @importFrom stats lm
+#' @importFrom grDevices colorRampPalette
+#' @importFrom ggplot2 aes_string geom_line theme scale_color_gradientn xlab ylab
 #' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list} containing shapefiles with information on environmental change and travel distance/time and a plot of the results.
 #' @details {This function evaluates how do environmental conditions change in space along a movement track. For
@@ -41,11 +43,13 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time),
+#'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
 #'  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
-#'  s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r, sample.direction="backward", data.type='cont', stat.fun=of)
+#'  s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r,
+#'  sample.direction="backward", data.type='cont', stat.fun=of)
 #'
 #' }
 #' @export

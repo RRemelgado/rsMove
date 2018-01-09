@@ -6,7 +6,7 @@
 #' @param search.radius Sample search radius (in meters).
 #' @param method How should the disntance be estimated? One of 'm' or 'deg'. Default is 'm'.
 #' @param tUnit Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.
-#' @import raster rgdal
+#' @importFrom sp SpatialPointsDataFrame
 #' @importFrom stats median
 #' @return A \emph{SpatialPointsDataFrame} with a reduced sample set.
 #' @seealso \code{\link{labelSample}} \code{\link{backSample}} \code{\link{dataQuery}}

@@ -4,38 +4,43 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(xy = xy, obs.date = NULL, img = img, r.date = NULL,
-  time.buffer = NULL, spatial.buffer = NULL, fun = NULL)
+dataQuery(xy = xy, obs.dates = obs.dates, env.data = env.data,
+  env.dates = env.dates, time.buffer = NULL, spatial.buffer = NULL,
+  smooth.fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{obs.date}{Object of class \emph{Date} with \emph{xy} observation dates.}
+\item{obs.dates}{Object of class \emph{Date} with \emph{xy} observation dates.}
 
-\item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+\item{env.data}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
 
-\item{r.date}{Object of class \emph{Date} with \emph{img} observation dates.}
+\item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
 
-\item{time.buffer}{Two element vector with temporal search buffer, expressed in days.}
+\item{time.buffer}{Two element vector with temporal search buffer (expressed in days).}
 
-\item{spatial.buffer}{Buffer size (unit depends on the raster projection).}
+\item{spatial.buffer}{Spatial buffer size used to smooth the returned values. The unit depends on the spatial projection.}
 
-\item{fun}{Passes an external function.}
+\item{smooth.fun}{Smoothing function applied with \emph{spatial.buffer}.}
 }
 \value{
-A n object of class \emph{vector} or \emph{data.frame}.
+An object of class \emph{data.frame} with the selected values and their corresponding dates.
 }
 \description{
 Query environmental data for coordinate pairs using the nearest non NA value in time.
 }
 \details{
-{Returns environmental variables from a raster object for a given set of x and y coordinates.
-         A buffer size (\emph{spatial.buffer}) and a user defined function (\emph{fun}) can be specified to sample
-         within an area. The defaut is to estimate a weighted mean. If raster acquisition times are provided
-         (\emph{r.date}) and the date of sampling (\emph{obs.date}). In this case, the function will treat the raster
-         data as a time series and search for clear pixel in time within the contraints of a temporal buffer
-         defined by \emph{time.buffer}. \emph{time.buffer} passes two values which represent the size of the buffer in two
-         directions: before and after the target date. This allows for bacward and forward sampling.}
+{Returns environmental variables from a raster object for a given set of x and y coordinates depending on the
+temporal distance between the sample observation date (\emph{obs.dates}) and the date on which the environmental data was
+collected (\emph{env.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
+non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
+are considred in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
+environmental information acquired after the sample observation date and limit the search to -30 days. If \emph{time.buffer}
+is set to null all acquisitions are considered. The user may also provide \emph{spatial.buffer} to spatially smooth the selected
+environmental information. In this case, for each sample, the function will consider the neighboring pixels within the selected
+acquisition and aplly a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
+will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
+\emph{env.dates} should refer to each column.}
 }
 \examples{
 {
@@ -52,13 +57,14 @@ Query environmental data for coordinate pairs using the nearest non NA value in 
  moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
 
  # raster dates
- r.date <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+ env.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 
  # sample dates
- obs.date <- as.Date(moveData@data$date)
+ obs.dates <- as.Date(moveData@data$date)
 
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData, obs.date=obs.date, img=rsStk, r.date=r.date, time.buffer=c(30,30))
+ rsQuery <- dataQuery(xy=moveData, obs.dates=obs.dates,
+ env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
 
 }
 

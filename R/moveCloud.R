@@ -215,7 +215,7 @@ moveCloud <- function(xy=xy, obs.dates=obs.dates, data.path=NULL, buffer.size=NU
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # plot
-  p <- ggplot(df0, aes(x=date, y=cover, fill=count)) + theme_bw() +
+  p <- ggplot(df0, aes_string(x="date", y="cover", fill="count")) + theme_bw() +
     scale_fill_gradientn(colors=cr(10), name="Nr. Samples") +
     xlab("Observation dates") + ylab("Cloud cover (%)") +
     geom_bar(width=0.7, stat = "identity") +
@@ -224,7 +224,7 @@ moveCloud <- function(xy=xy, obs.dates=obs.dates, data.path=NULL, buffer.size=NU
           axis.text.y=element_text(size=12),
           axis.title.y =element_text(size=14),
           legend.text=element_text(size=12),
-          legend.title=element_text(size=14)) + ylim(0,yr)
+          legend.title=element_text(size=14)) + ylim(0,100)
 
 #   p <- ggplot(df, aes_string(x="date (original)", y="cloud cover % (day)")) +
 #     theme_bw() + geom_bar(stat="identity", colour="black", fill="grey80") +

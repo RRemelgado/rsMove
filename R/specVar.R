@@ -5,7 +5,8 @@
 #' @param img Object of class \emph{RasterLayer}.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pixel.res vector of target resolutions.
-#' @import ggplot2 sp raster rgdal grDevices
+#' @importFrom raster extent xyFromCell crs aggregate crop disaggregate getValues setValues res extract
+#' @importFrom ggplot2 ggplot aes_string geom_boxplot ylim
 #' @return A \emph{list}.
 #' @details {Given a raster object (\emph{img}), the function determines how degrading its spatial resolution impacts
 #' our ability to perceive the complexity of the landscape. For each pixel resolution given by \emph{pixel.res}, The

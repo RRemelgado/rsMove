@@ -4,42 +4,34 @@
 \alias{labelSample}
 \title{labelSample}
 \usage{
-labelSample(xy = xy, rad = rad, npt = NULL, npx = NULL, pxr = pxr)
+labelSample(xy = xy, agg.radius = agg.radius, nr.points = NULL,
+  nr.pixels = NULL, pixel.res = pixel.res)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
-\item{rad}{Minimum radius. Unit depends on the projection of the data.}
+\item{agg.radius}{Minimum radius for pixel aggregation. Unit depends on the projection of the data.}
 
-\item{npt}{Minimum pixel count per pixel.}
+\item{nr.points}{Minimum number of samples per pixel.}
 
-\item{npx}{Minimum number of pixels.}
+\item{nr.pixels}{Minimum number of pixels per region.}
 
-\item{pxr}{Pixel resolution os a valid raster layer.}
+\item{pixel.res}{Pixel resolution os a valid raster layer.}
 }
 \value{
-A \emph{vector}.
+A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 }
 \description{
-{Region labeling of pixels based on their spatial connectivity
-for the identification and splitting of training and validation samples}.
+{Pixel-based labeling of spatialy connected groups of samples for splitting them between training and validation.}
 }
 \details{
-{First, the samples are converted to pixel coordinates and then one
-of two occur: 1) if \emph{npt} is set, the function removes pixels with a pixel
-count smaller than the one specified; 2) If \emph{npx} is set, the connectivity
-between neighboring samples is evaluated and regions with a count small than the
-specified value are filtered. Only one option may be set at a time. Then, the
-remaining pixels are dilated and the samples are again labeled accounting for
-regions that are not connected but are near to each other. Regions within a given
-distance of each other (defined by \emph{rad}) are aggregated. The grid used for
-this analysis is built from the spatial extent of \emph{xy} and a given pixel
-resolution (\emph{pxr}). If \emph{pxr} is a raster, this will be used to define
-the dimensions of the grid. Doing so can be of use when the user has pre-select
-environmental predictors that will be used for modeling. Note that the finer the
-resolution the more independent regions are likely to be returned. The output is
-a vector with ID's assigning each sample to its region. Samples filtered by
-\emph{npt} or \emph{npx} will be returned as zeros.}
+{First, the samples are converted to pixel coordinates and removes pixels with a corresponding number of points greater
+than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internaly, the
+function will label groups of pixels based on their connectivety and regions with a pixel count smaller than the one specified by
+\emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
+by \emph{agg.radius} and proceeds to relable the pixels covered by samples. Finally, this information is used to label the original
+samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}
+and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may assign a raster object to \emph{pixel.res}.}
 }
 \examples{
 {
@@ -54,7 +46,7 @@ a vector with ID's assigning each sample to its region. Samples filtered by
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 
  # derive region labels
- labels <- labelSample(xy=moveData, rad=90, npx=2, pxr=30)
+ labels <- labelSample(xy=moveData, agg.radius=90, nr.pixels=2, pixel.res=30)
 
 }
 }

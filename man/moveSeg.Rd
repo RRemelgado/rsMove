@@ -4,53 +4,47 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = xy, edata = edata, type = "cont", obs.time = NULL,
-  b.size = NULL, threshold = NULL, s.fun = NULL)
+moveSeg(xy = xy, env.data = env.data, type = "cont",
+  threshold = threshold, obs.time = NULL, summary.fun = NULL,
+  buffer.size = NULL, smooth.fun = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{edata}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
+\item{env.data}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
-\item{type}{Raster data type. One of \emph{cont} (continues) or \emph{cat} (for categorical).}
+\item{type}{Raster data type. One of \emph{cont} (continous) or \emph{cat} (for categorical).}
+
+\item{threshold}{Change threshold. Required if \emph{type} is set to \emph{cat}.}
 
 \item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
-\item{b.size}{Buffer size expressed in the map units.}
+\item{summary.fun}{Summary function used to summarize the values within each segment when \emph{method} is \emph{cont}. Default is mean.}
 
-\item{threshold}{Change threshold.}
+\item{buffer.size}{Spatial buffer size applied around each segment (unit depends on spatial projection).}
 
-\item{s.fun}{Output summary function. Default is mean.}
+\item{smooth.fun}{Smoothing function applyed with \emph{buffer.size} when \emph{method} is \emph{cont}. Default is mean.}
 }
 \value{
 A \emph{list}.
 }
 \description{
-{Segmentation of spatial points using categorigal
-or continuous remote sensing data with reporting of time spend per segment.}
+Pixel based segmentation of movement data using environmental data.
 }
 \details{
-{Segmentation of a point shapefile based on the spatial variability
-of a raster dataset. When the \emph{method} is set to \emph{'cont'}, the raster
-data is assumed to be continuous. Then, the function determines the percentual
-change between each pair of two consecutive coordinate pairs. If this change is
-above a predifined \emph{threshold}, a new pointer is added and the previous
-sequence of samples is labeled as a unique segment. If \emph{method} is set as
-\emph{'cat'}, the function assumes the raster data is categorical ignoring the
-\emph{theshold} and \emph{s.fun} keywords. In this case, a new segment is identified
-if the any change is observed between two consecutife points. The output consists of
-a list containing a \emph{SpatialPointsDataFrame} (\emph{$points}) reporting on the
-segment ID (\emph{sid}) associated to each sample and a data frame (\emph{$report})
-with the amount of points in each region and the value returned by \emph{s.fun}. If
-\emph{obs.time} is provided, the function also provides the elapsed time within each segment.
-If \emph{fun} is set by the user, the provided function will be used to summarize the
-raster values at each segment. Also, if \emph{edata} is a \emph{RasterStack} or a
-\emph{RasterBrick}, \emph{r.fun} is used to reduce the multi-layered object to a single
-layer. he user can either use a Principal Component Analysis (PCA) analysis by setting
-\emph{r.fun} to \emph{pca} or provide a function. If \emph{pca} is selected, the first
-Principal Conponent (PC) \emph{threshold} will be set automatically to the standard
-deviation of the first PC. This is the default. If \emph{method} is \emph{cat} the
-function will assume the data is categorical and wil define segments whenever a change occurres.}
+{This function identifies segments of comparable environmental conditions along the movement track given by \emph{xy}.
+Looking at consective data points, the function queries \emph{env.data} and proceeds to identify a new segment if \emph{threshold}
+is exceeded. Then, for each segment, the function summarizes \emph{env.data} using \emph{summary.fun} and reports on the amount
+of points found within it. Moreover, if \emph{obs.time} is set, the function reports on the start and end timestamps and the elapsed time.
+If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
+define \emph{theshold} which indicates when the difference between consecutive points should be considered a change.
+In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
+each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{type} is set to \emph{cat} \emph{smooth.fun} is ignored.
+In this case, the function will report on the majority value within the buffer. The output of this function consists of:
+\itemize{
+ \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{xy}.}
+ \item{\emph{stats} - Statistical information for each segment reporting on the conrresponding environmental and temporal information.}
+ \item{\emph{plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
 }
 \examples{
 {
@@ -65,10 +59,11 @@ function will assume the data is categorical and wil define segments whenever a 
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 
  # observation time
- o.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+ format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(xy=moveData, obs.time=o.time, edata=r, type="cont", threshold=0.1)
+ seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, type="cont", threshold=0.1)
 
 }
 }

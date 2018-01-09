@@ -176,6 +176,6 @@ labelSample <- function(xy=xy, agg.radius=agg.radius, nr.points=NULL, nr.pixels=
   rid <- matrix(0,length(sp))
   for (r in 1:length(up)) {rid[which(sp==up[r])] <- uregions[r]}
   rid[which(rid==0)] <- NA
-  return(rid)
+  return(as.vector(rid))
 
 }

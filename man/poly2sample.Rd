@@ -4,31 +4,30 @@
 \alias{poly2sample}
 \title{poly2sample}
 \usage{
-poly2sample(pol = pol, ref.ext = NULL, mpc = NULL, pr = NULL)
+poly2sample(pol.shp = pol.shp, ref.ext = ref.ext, min.cover = NULL,
+  pixel.res = NULL)
 }
 \arguments{
-\item{pol}{Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.}
+\item{pol.shp}{Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.}
 
-\item{ref.ext}{Object of class \emph{Extent} or a raster object from which an extent can be derived.}
+\item{ref.ext}{Object of class \emph{Extent} or a \emph{RasterLayer} from which an extent can be derived.}
 
-\item{mpc}{Minimum pixel cover (0-100). Default is 100.}
+\item{min.cover}{Minimum percent a pixel should be covered by a polygon for sampling (0-100). Default is 100.}
 
-\item{pr}{Pixel resolution.}
+\item{pixel.res}{Pixel resolution. Required if \emph{ref.ext} is an \emph{Extent} object. Unit depends on spatial projection.}
 }
 \value{
-A \emph{SpatialPointsDataFrame}.
+A \emph{SpatialPointsDataFrame} with sampled pixels reporting on polygon percent coverage.
 }
 \description{
-Convert spatial polygons into point samples based on a pixel heterogeneity analysis.
+{Converts a raster grid to points depending on how much each pixel is covered by a polygon.}
 }
 \details{
-{Determines coordinates of pixels within a given extent. If \emph{ref.ext} is missing the
-           target extent corresponds to the extent of the polygon layer. In this case, \emph{pr}
-           is required. If \emph{ref.ext} is an \emph{Extent} object or \emph{ref.ext} is missing \emph{rp} is required.
-           \emph{mpc} can be used to filter pixels with low purity, i.e. pixels where the
-           percentage of area cover by a polygon is below the defined threshold.
-           The output provides the coordinates (\emph{x} and \emph{y}) the
-           pixel percent cover (\emph{cover}) for each selected pixel.}
+{\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making it more efficient
+over large areas and converting its output into point samples rather than a raster object. For each polygon in (\emph{"pol.shp"}),
+\emph{poly2sample} extracts the overlapping pixels derived from \emph{ref.ext}. Then, for each pixel, the function estimates the
+percentage of it that is covered by the reference polygon. Finnally, the function extracts coordinate pairs for pixels that has a
+percent coverage equal to or greater than \emph{min.cover}.}
 }
 \examples{
 {
@@ -44,7 +43,7 @@ Convert spatial polygons into point samples based on a pixel heterogeneity analy
  roi <- shapefile(file)
 
  # segment probabilities
- samples <- poly2sample(pol=roi, ref.ext=img)
+ samples <- poly2sample(pol.shp=roi, ref.ext=img)
 
 }
 }

@@ -3,8 +3,8 @@
 #' @description {Connencted-region based raster segmentation that preserves spatial gradients.}
 #' @param img Object of class \emph{RasterLayer}.
 #' @param break.point Difference threshold. Default is 0.05.
-#' @param min.prob Minimum value. Default is 0.5.
-#' @import raster rgdal
+#' @param min.value Minimum value. Default is 0.5.
+#' @importFrom raster raster extent crs res
 #' @importFrom stats sd
 #' @return A list object.
 #' @details {The function segments an input raster layer (\emph{img}) using a
@@ -12,12 +12,12 @@
 #' estimates the difference between it and its imediate neighbors. If the
 #' difference is below the threshold defined by \emph{break.point} these are
 #' aggregated into a single region. Moreover, the user can define a minimum pixel
-#' value using \emph{min.prob} which will ignore all pixels below that value. The
+#' value using \emph{min.value} which will ignore all pixels below that value. The
 #' output of this function consists of:
 #' \itemize{
 #'  \item{\emph{regions} - Region raster image.}
 #'  \item{\emph{stats} - Basic statistics (i.e. min, max, mean, sd) for each region.}}}
-#' @seealso \code{\link{moveModel}} \code{\link{modelApply}}
+#' @seealso \code{\link{predictResources}}
 #' @examples {
 #'
 #'  require(raster)
@@ -34,26 +34,26 @@
 
 #-----------------------------------------------------------------------------------#
 
-function(prob, break.point=0.1, min.prob=0.5) {
+segRaster <- function(img, break.point=0.1, min.value=0.5) {
 
   #-----------------------------------------------------------------------------------#
   # 1. check input variables
   #-----------------------------------------------------------------------------------#
 
-  if (class(prob)[1]!='RasterLayer') {stop('"prob" is not a "RasterLayer"')}
-  if (is.null(min.prob)) {min.prob <- 0}
+  if (class(img)[1]!='RasterLayer') {stop('"img" is not a "RasterLayer"')}
+  if (is.null(min.value)) {min.value <- 0}
 
   #-----------------------------------------------------------------------------------#
   # 2. segment regions
   #-----------------------------------------------------------------------------------#
 
   # raster dimensions
-  nr <- dim(prob)[1]
-  nc <- dim(prob)[2]
+  nr <- dim(img)[1]
+  nc <- dim(img)[2]
 
   # identify usable pixels
-  data <- as.matrix(prob)
-  pos <- which(data >= min.prob)
+  data <- as.matrix(img)
+  pos <- which(data >= min.value)
 
   # evaluate pixel connectivity
   regions <- matrix(0, nr, nc)
@@ -108,9 +108,9 @@ function(prob, break.point=0.1, min.prob=0.5) {
 
   # convert data back to raster
   uregions <- raster(uregions)
-  extent(uregions) <- extent(prob)
-  res(uregions) <- res(prob)
-  crs(uregions) <- crs(prob)
+  extent(uregions) <- extent(img)
+  res(uregions) <- res(img)
+  crs(uregions) <- crs(img)
 
   # build/return data frame
   df <- data.frame(segment=uv, min=pmn, max=pmx, mean=pav, sd=psd, count=npx)

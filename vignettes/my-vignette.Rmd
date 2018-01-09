@@ -1,0 +1,59 @@
+---
+title: "rsMove - Remote Sensing for Movement Ecology"
+author: "Ruben Remelgado"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+### Why develop rsMove?
+<p align="justify" style="line-height:200%;">
+Remote sensing becomes a fundamental tool in the scope of movement ecology. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the differences in the spatial and temporal scales at which they are acquired. satellite images are often collected with a relatively rough temporal and spatial resolution failing to reflect the landscape as perceived by an animal. However, when used adequately, remote sensing can represent the spatial and temporal characteristics of the environmental factors that affect animal behavior. To achieve this, deciding which remote sensing data to use demands careful consideration. In particular, two important questions should be considered: 1) Does the spatial and temporal resolution of a satellite preserve sufficient, non-replicated samples ? 2) which environmental variables do I need to consider? *rsMove* addresses these questions by providing users with tools that help selection of adequate satellite data sources as well as of suitable environmental variables. Moreover, this package offers tools that are sensitive to the technical constraints of remote sensing introducing a remote sensing perspective into animal movement research ^[*rsMove* was developed as part of the Opt4Environment project financed by the funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant 50 EE 1403. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo).].
+</p>
+
+### Data
+<p align="justify">
+*rsMove* was developed using movement data from five populations of White Storks (*ciconia ciconia*). This data consists of 48 juveniles tracked between 26 June 2013 and 15 September 2013 while nesting using solar-powered, high-resolution GPS devices. The data was collected by the Max Planck Institute for Ornithology (MPIo) and it is accessible through MoveBank ([https://doi.org/10.5441/001/1.78152p3q](https://doi.org/10.5441/001/1.78152p3q))
+</p>
+
+## Styles
+
+The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
+
+    output: 
+      rmarkdown::html_vignette:
+        css: mystyles.css
+
+## Figures
+
+The figure sizes have been customised so that you can easily put two images side-by-side. 
+
+```{r, fig.show='hold'}
+plot(1:10)
+plot(10:1)
+```
+
+You can enable figure captions by `fig_caption: yes` in YAML:
+
+    output:
+      rmarkdown::html_vignette:
+        fig_caption: yes
+
+Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+
+## More Examples
+
+You can write math expressions, e.g. $Y = X\beta + \epsilon$, and tables, e.g. using `knitr::kable()`.
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(mtcars, 10))
+```
+
+Also a quote using `>`:
+
+> "He who gives up [code] safety for [code] speed deserves neither."
+([via](https://twitter.com/hadleywickham/status/504368538874703872))

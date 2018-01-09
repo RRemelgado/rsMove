@@ -43,7 +43,8 @@
 #'  obs.dates <- as.Date(moveData@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=moveData, obs.dates=obs.dates, env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
+#'  rsQuery <- dataQuery(xy=moveData, obs.dates=obs.dates,
+#'  env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
 #'
 #' }
 #'
@@ -51,7 +52,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=env.dates, time.buffer=NULL, spatial.buffer=NULL, fun=NULL) {
+dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=env.dates, time.buffer=NULL, spatial.buffer=NULL, smooth.fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
@@ -75,7 +76,7 @@ dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=e
   if (length(obs.dates)!=length(xy)) {stop('lengths of "obs.dates" and "xy" differ')}
 
   # auxiliary
-  if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {fun=NULL}
+  if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {smooth.fun=NULL}
   if (!is.null(spatial.buffer) & is.null(smooth.fun)) {smooth.fun <- function(x) {sum(x*x) / sum(x)}} else {
   if (!is.null(smooth.fun)) {if (!is.function(smooth.fun)) {stop('"smooth.fun" is not a valid function')}}}
   if (!is.null(time.buffer)) {
@@ -87,7 +88,7 @@ dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=e
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   # read data
-  if (!is.data.frame(env.data)) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, fun=smooth.fun, na.rm=TRUE))}
+  if (!is.data.frame(env.data)) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, smooth.fun=smooth.fun, na.rm=TRUE))}
 
   # function to select pixels
   if (is.null(time.buffer)) {

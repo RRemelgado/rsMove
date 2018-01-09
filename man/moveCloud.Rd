@@ -4,47 +4,46 @@
 \alias{moveCloud}
 \title{moveCloud}
 \usage{
-moveCloud(xy = xy, obs.time = obs.time, d.path = NULL, b.size = NULL,
-  remove.file = FALSE)
+moveCloud(xy = xy, obs.dates = obs.dates, data.path = NULL,
+  buffer.size = NULL, remove.file = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{obs.time}{Object of class \emph{Date}.}
+\item{obs.dates}{Object of class \emph{Date} with observation dates of \emph{xy}.}
 
-\item{d.path}{Output data path for downloaded data.}
+\item{data.path}{Output data path for downloaded data.}
 
-\item{b.size}{Two element vector with temporal buffer size (expressed in days).}
+\item{buffer.size}{Two element vector with temporal buffer size (expressed in days).}
 
 \item{remove.file}{Logical. Should the files be deleted after usage?}
 }
 \value{
-A \emph{list}.
+A \emph{list} object reporting on the variability of cloud cover within and around each observation dates.
 }
 \description{
 {Provides historical information on cloud cover for a set of coordinate
 pairs. The temporal information is adjusted to the sample observation date}.
 }
 \details{
-{This function makes uses daily cloud fraction data from NASA's NEO service.
-For each observation date (\emph{obs.time}), the function downloads the correspondent image
-and extracts the percent of cloud cover for the samples acquired at the target date. If
-\emph{d.path} is specified, the function will look within the provided directory for the
-required files. If so, they won't be downloaded. If \emph{d.buffer} is specified, for each
-date, the function will consider images before and after within a temporal buffer. \emph{d.buffer}
-requires two elements which specify the buffer size before and after the target date. These
-new images will be used to report on the closest time step with the lowest possible cloud
-cover. The final report provides information on:
+{This function uses daily cloud fraction data from NASA's NEO service.
+For each observation date in \emph{obs.dates}, the function downloads the correspondent image
+and extracts the percent of cloud cover for the corresponding samples in \emph{xy}. If
+\emph{data.path} is specified, the function will look within the provided directory for the
+cloud cover images. If they exist, they won't be downloaded reducing the amount of time required
+by the function. Moreover, if \emph{buffer.size} is specified, for each date, the function will only
+consider images that are within the specified temporal buffer. \emph{buffer.size} requires a two
+element vector which specifies the buffer size before and after the target dates. These additional
+images will be used to report on the closest time step with the lowest possible cloud cover. The
+final output provides a \emph{data.frame} ($report) with information on:
 \itemize{
- \item{\emph{day.cover}: cloud cover for the observation date}
- \item{\emph{p.day.before}: date before the obsertation date with the lowest cloud cover}
- \item{\emph{p.cover.before}: cloud cover for \emph{p.day.before}}
- \item{\emph{p.day.after}: date after the obsertation date with the lowest cloud cover}
- \item{\emph{p.cover.after}: cloud cover for \emph{p.day.after}}}
- The output will also contain a two plots with information on the distance between the
- observation dates and the closest date with the lowest cloud cover. The plots show the
- amount of samples that are covered in each of the target dates for the best dates before
- (\emph{$plot.before}) and after (\emph{$plot.after}) the observation dates.}
+ \item{\emph{cloud cover \% (day)}: cloud cover for the observation dates.}
+ \item{\emph{best date (after)}: dates before the obsertation dates with the lowest cloud cover.}
+ \item{\emph{best date cloud cover \% (before)}: cloud cover for best before dates.}
+ \item{\emph{best date (after)}: dates after the obsertation dates with the lowest cloud cover.}
+ \item{\emph{best date cloud cover \% (after)}: cloud cover best after dates.}}
+ Finally, the function generates a plot ($plot) reporting on the variability of cloud cover
+ within the dates provided by \emph{obs.dates} and the number of samples registered within them.}
 }
 \examples{
 \dontrun{
@@ -60,7 +59,7 @@ cover. The final report provides information on:
 
  # test function for 30 day buffer
  od <- as.Date(moveData@data$date)
- c.cover <- moveCloud(xy=moveData, obs.time=od, d.path=".", b.size=c(30,30))
+ c.cover <- moveCloud(xy=moveData, obs.dates=od, data.path=".", buffer.size=c(30,30))
 
 }
 }

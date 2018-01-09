@@ -4,42 +4,29 @@
 \alias{hotMoveStats}
 \title{hotMoveStats}
 \usage{
-hotMoveStats(rid = NULL, obs.time = NULL, tUnit = NULL, aid = NULL,
-  method = "deg")
+hotMoveStats(region.id = region.id, obs.time = obs.time,
+  individual.id = NULL)
 }
 \arguments{
-\item{rid}{List object as provided by \emph{hotMove()}.}
+\item{region.id}{Region unique identifiers. Vector of class \emph{numeric}.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.}
+\item{obs.time}{Observation time. Object of class \emph{Date}.}
 
-\item{tUnit}{Time unit for stats. Default is \emph{days}. See \code{\link[base]{difftime}} for additional keywords.}
-
-\item{aid}{Optional. Unique identifiers.}
-
-\item{method}{Method used to estimate polygon area.}
+\item{individual.id}{Individual identifier. Vector of class \emph{character}.}
 }
 \value{
-A \emph{data frame}.
+A list containing statistical information for each region (\emph{region.stats}) and for each temporal segment (\emph{temporal.segment.stats}) and sample indices for each segment (temporal.segment.indices)
 }
 \description{
-{Temporal segmentation and statistical reporting for
-sample regions such as the ones reported with hotMove().}
+{Segmentation and statistical analysis of the time spent by an animal within a geographical region.}
 }
 \details{
-{This functions analysis the attributes of sample regions define by hotMove(). Alternatively,
-the user can keep \emph{rid} as NULL. This case, all information will be assumed as part of one region.
-For each sample region, the function returns the amount of samples (\emph{tns}. If a vector of unique
-identifiers is provided (\emph{aid}) the number of unique identifiers observed within each region is also
-reported. If temporal information is provided (\emph{time}) the function identifies unique temporal segment
-corresponding to periods of consecutive days with observations. For each segment, the function reports on the
-amount of segments (\emph{nts}) as well as the minimum (\emph{mnt}), maximum (\emph{mxt}) and mean (\emph{avt})
-of the time segments and the total amount of time that they amount to (\emph{tts}). For each region, the function
-will also report on the start and end of each temporal segment (\emph{$temporal.segments}) and will provide the
-sample indices for associated to each segment (\emph{$segment.indices}). If \emph{rid} contains polygons for each
-region, the function also reports on the area of convex polygons. In this case, the user can use the \emph{method}
-keyword to specify how the polygons should be handled. If the polygons are in lat-lon, method \emph{deg} can be used
-to re-project each polygon to its corresponding UTZ zone before retrieving the area. This is the default, if the polygons
-are in a cartesian coordinate system use \emph{m}.}
+{For each unique region defined by \emph{region.id}, the function identifies unique temporal segments
+defined as periods of consecutive days with observations. Then, for each region, the function uses the identified segments
+to repoprt on the minimum, maximum and mean time spent as well as the total amount of time spent within the region.
+Moreover, the function provides a detailed report of each segment and informs on the corresponding sample indices. If
+\emph{individual.id} is specified, the function will in addition count the number of individuals found within each region
+and within each temporal segment.}
 }
 \examples{
 {
@@ -52,17 +39,17 @@ moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMov
 moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 
 # extract regions
-hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
+hm <- hotMove(xy=moveData, pixel.res=0.1, return.shp=TRUE)
 
 # plot shapefile (color by region)
-plot(hm$polygons, col=hm$indices)
+plot(hm$polygons)
 
 # add new information to original shapefile
 moveData@data <- cbind(moveData@data, hm$indices)
 
 # derive statistics
-hm.region.stats <- hotMoveStats(rid=hm, obs.time=as.Date(moveData@data$timestamp))
-hm.time.stats <- hotMoveStats(obs.time=as.Date(moveData@data$timestamp))
+hm.region.stats <- hotMoveStats(region.id=hm$indices,
+obs.time=as.Date(moveData@data$timestamp))
 
 }
 }

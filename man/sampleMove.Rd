@@ -4,34 +4,35 @@
 \alias{sampleMove}
 \title{sampleMove}
 \usage{
-sampleMove(xy = xy, obs.time = obs.time, error = error, method = "m",
-  tUnit = NULL)
+sampleMove(xy = xy, obs.time = obs.time, search.radius = search.radius,
+  method = "m", tUnit = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the same length as \emph{xy}.}
 
-\item{error}{Distance (in meters).}
+\item{search.radius}{Sample search radius (in meters).}
 
 \item{method}{How should the disntance be estimated? One of 'm' or 'deg'. Default is 'm'.}
 
 \item{tUnit}{Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.}
 }
 \value{
-A \emph{SpatialPointsDataFrame}.
+A \emph{SpatialPointsDataFrame} with a reduced sample set.
 }
 \description{
-Sampling of possible stops along a movement track using GPS error information.
+Remote sensing oriented sampling of stops along a movement track.
 }
 \details{
-{This function offers a simple approach to sample from locati where an animal showed little or no movement
-based on GPS tracking data. It looks at the distance among consecutive samples (\emph{error}) and estimates mean coordinates
-for the temporal segments where the animal moved less than the defined distance from the first location of the segment.
-The user should selected \emph{method} in accordance with the projection system associated to the data. If 'm' it estimates
-the ecludian distance. If 'deg' it uses the haversine formula. The output reports on the mean sample coordinates for
-the sample locations ('x' and 'y'), the start, end and total time spent per sample ('time' expressed in minutes) and the
-total number of observations per sample ('count').}
+{This function finds location where an animal showed little or no movement based on GPS tracking data.
+It looks at the distance among consecutive samples and places pointer when the distance is bellow the defined
+threshold (\emph{search.radius}). When a pointer is found, the function looks at the distance between the pointer and
+the following samples. While this is below the distance threshold, the samples are assigned to the same segment.
+Then, for each segment, the function summarizes the corresponding samples deriving mean coordinates, the start,
+end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{method}
+in accordance with the projection system associated to the data. If 'm' it bases this analysis on the the ecludian distance.
+However, if 'deg' it set, the function uses the haversine formula.}
 }
 \examples{
 {
@@ -45,7 +46,7 @@ moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 
  # sampling without reference grid
  obs.time = strptime(moveData$timestamp, "\%Y-\%m-\%d \%H:\%M:\%S")
- output <- sampleMove(xy=moveData, obs.time=obs.time, error=7, method='deg')
+ output <- sampleMove(xy=moveData, obs.time=obs.time, search.radius=7, method='deg')
 
  # compare original vs new samples
  plot(moveData, col="black", pch=16)

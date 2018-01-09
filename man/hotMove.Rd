@@ -4,30 +4,28 @@
 \alias{hotMove}
 \title{hotMove}
 \usage{
-hotMove(xy = xy, pxr = pxr, shp = FALSE)
+hotMove(xy = xy, pixel.res = pixel.res, return.shp = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
-\item{pxr}{Grid resolution. Unit depends on \emph{xy} projection.}
+\item{pixel.res}{Grid resolution. Unit depends on \emph{xy} projection.}
 
-\item{shp}{Logical. Should the function provide polygons? Default is FALSE.}
+\item{return.shp}{Logical. Should the function return polygons of the regions? Default is FALSE.}
 }
 \value{
-A list object.
+List containing a vector of region ID's per data point (\emph{$indices}) and region polygons (\emph{$polygons}).
 }
 \description{
-Regional detection of sample hotspots using a pixel based approach.
+Detection of geographic regions of samples using a pixel based approach.
 }
 \details{
-{The function builds a matrix for a given resolution and a
-spatial extent derived from a set of samples (\emph{xy}). First, these
-samples are converted into unique pixel coordinates. Then, the
-spatial connectivity of these pixels is evaluated using a 8-neighboor
-connected component labelling algorithm. The function returns a vector
-with the region ID per sample (\emph{$indices}). If \emph{shp} is TRUE the
-function also returns a shapefile for each region defined by the
-convex hull of the samples within them (\emph{$polygons}).}
+{First, the function builds a raster with a resolution equal to \emph{pixel.res} and the
+spatial extent of \emph{xy}. Then, each point in \emph{xy} is converted into pixel coordinates. Based
+on the unique pixel coordinates, the function then evaluates the spatial connectivity of these pixels
+using a 8-neighboor connected component labelling algorithm to detect regions. Finally, the ID's are related
+back to each individual data point in \emph{xy} based on their pixel coordinates and - if \emph{return.shp} is TRUE -
+ a polygon is derived from the convex hull of the points within each region.}
 }
 \examples{
 {
@@ -40,13 +38,10 @@ moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMov
 moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 
 # extract regions
-hm <- hotMove(xy=moveData, pxr=0.1, shp=TRUE)
+hm <- hotMove(xy=moveData, pixel.res=0.1, return.shp=TRUE)
 
 # plot shapefile (color by region)
 plot(hm$polygons, col=hm$indices)
-
-# add new information to original shapefile
-moveData@data$indices <- hm$indices
 
 }
 }

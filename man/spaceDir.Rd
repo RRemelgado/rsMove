@@ -4,8 +4,10 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(xy = xy, obs.time = NULL, img = img, dir = dir, type = type,
-  dist.method = "m", b.size = NULL, fun = NULL, npx = 2)
+spaceDir(xy = xy, obs.time = NULL, img = img,
+  sample.direction = sample.direction, data.type = data.type,
+  distance.method = "m", buffer.size = NULL, stat.fun = NULL,
+  min.count = 2)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -14,53 +16,39 @@ spaceDir(xy = xy, obs.time = NULL, img = img, dir = dir, type = type,
 
 \item{img}{Object of class \emph{RasterLayer}.}
 
-\item{dir}{One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.}
+\item{sample.direction}{One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.}
 
-\item{type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
+\item{data.type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
 
-\item{dist.method}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
+\item{distance.method}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
 
-\item{b.size}{Buffer size expressed in the map units.}
+\item{buffer.size}{Spatial buffer size expressed in the map units.}
 
-\item{fun}{Summary function.}
+\item{stat.fun}{Output statistical metric.}
 
-\item{npx}{Minimum number of pixels used in \emph{fun}. Default is 2.}
+\item{min.count}{Minimum number of pixels required by \emph{stat.fun}. Default is 2.}
 }
 \value{
-A \emph{list}.
+A \emph{list} containing shapefiles with information on environmental change and travel distance/time and a plot of the results.
 }
 \description{
 Analysis of environmental change in space along a set of coordinate pairs.
 }
 \details{
-{This function evaluates how do environmental conditions change in space
-along a movement track. First, it looks at consectuve observations to define spatial segments.
-All the pixels between the two endpoints of the segment are considered in this process.
-The user can use the argument \emph{dir} to prompt the function to focus on previous
-(\emph{bwd}) or following (\emph{fwd}) observations or to look in both directions (\emph{both})
-when defining the segments. The output consists of a list containing two shapefiles, one
-\emph{SpatialPointsDataFrame} (\emph{$endpoints}) with the endpoints of each segment and a
-\emph{SpatialLinesDataFrame} (\emph{$segments}) representing each segment. The data frames provided
-with these shapefiles reports on:
+{This function evaluates how do environmental conditions change in space along a movement track. For
+each set of consecutive points, the function applies a spatial moving window which boundaries depend on the
+definition of \emph{sample.direction}. Then, whithin each segment, the function extracts all pixels within it.
+If \emph{buffer.size} is defined, the function will consider a buffer when performing this extraction. Finally,
+the the extracted \emph{NA} values are summarized into a given metric. If \emph{data.type} is \emph{cont}, a
+statistical function can be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the
+function will report on the dominant class and on the shannon index for each segment. Note that the function
+will work with the raster value associated to each class. On top of this, \emph{spaceDir} will also report on
+the linear distance traveled between endpoints (in meters) and the travel time (in minutes). The output of the
+function is a list consisting of:
 \itemize{
- \item{\emph{x} - mean x coordinates}
- \item{\emph{y} - mean y coordinates}
- \item{\emph{timestamp} - mean observation time}
- \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
- \item{\emph{travel.distance} - distance between a segment endpoints}
- \item{\emph{travel.time} - elapsed time between a segment endpoints}}
- The additionaly information added to the data frame depends on the type of data. If \emph{type} is set
- to \emph{'cont'}, the function will assume the input raster is a continuous variable as estimate a
- statistical metric for each segment. If none is provided throught the keyword \emph{fun}, the slope
- will be returned by default and assigned to the column \emph{'stat'} within the output data frame. If
- \emph{type} is set to '\emph{'cat'}, the function will assume the data is categorical. As a result,
- the keyword \emph{fun} is ignored. Instead, the function will return the proportion of pixels occupied
- by each class for each segment. In addition, the dominant class (\emph{'main'}) and the shannon index
- (\emph{'shannon'}) will be returned for each segment within the output data frame. In order to include
- the area surrounding the sample points in this analysis, \emph{d.buffer} can be used. This keyword
- dilates the interpolated sample points by a given distance transforming the initial line into a polygon.}
- @note {If \emph{d.buffer} is used, the default \emph{fun} (the slope) is not adequate given that spatial
- order of the samples is not preserved. This should be considered when using these keywords simulaneously,}
+ \item{\emph{endpoints} - Point shapefile with endpoints of each spatial segment. Reports on a given statistical metric, traveled distance, travel time and the mean timestamp.}
+ \item{\emph{segments} - Line shapefile with spatial segments. Reports on the same information as \emph{endpoints}.
+ \item{\emph{plot} - Ploting of \emph{segments} where each segment is colored according to its corresponding statistical value.}}}}
 }
 \examples{
 {
@@ -75,11 +63,13 @@ with these shapefiles reports on:
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 
  # observation time
- obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time),
+ format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
- s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r, dir="bwd", type='cont', fun=of)
+ s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r,
+ sample.direction="backward", data.type='cont', stat.fun=of)
 
 }
 }

@@ -33,7 +33,8 @@
 #'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+#'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
 #'  move.reduce <- moveReduce(xy=moveData, obs.time=obs.time, img=r)
@@ -90,8 +91,10 @@ moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
     my <- median(xy@coords[ind,2])
     s.time <- obs.time[ind[1]]
     e.time <- obs.time[ind[length(ind)]]
-    d.time <- difftime(e.time, s.time, units='mins')
+    d.time <- as.numeric(difftime(e.time, s.time, units='mins'))
     return(data.frame(x=mx, y=my, start.time=s.time, end.time=e.time, diff.time=d.time, segment.id=s))}))
+  colnames(df) <- c("x", "y", "Timeststamp (start)", "Timeststamp (end)",
+                    "Elapsed time (minutes)", "Segment ID")
 
   # build statistic shapefile
   r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(xy))

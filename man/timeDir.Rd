@@ -4,55 +4,46 @@
 \alias{timeDir}
 \title{timeDir}
 \usage{
-timeDir(xy = NULL, obs.date = obs.date, img = NULL, edata = NULL,
-  r.date = r.date, window.size = NULL, dir = NULL, fun = NULL)
+timeDir(xy = NULL, obs.dates = obs.dates, img = NULL, env.data = NULL,
+  env.dates = env.dates, window.size = NULL, sample.direction = NULL,
+  stat.fun = NULL, min.count = 2)
 }
 \arguments{
 \item{xy}{Object of class "SpatialPoints" or "SpatialPointsDataFrame".}
 
-\item{obs.date}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.dates}{Object of class \emph{Date} with \emph{xy} observation dates.}
 
-\item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
+\item{img}{Object of class}
 
-\item{edata}{Object of class \emph{data frame}.}
+\item{env.data}{Object of class \emph{RasterStack} or \emph{RasterBrick} or \emph{data.frame}.}
 
-\item{r.date}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{img} observation dates.}
+\item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
 
-\item{window.size}{Moving window size (expressed in days).}
+\item{window.size}{Temporal moving window size (expressed in days).}
 
-\item{dir}{One of \emph{fwd}, \emph{bwd} or \emph{both}. Default is \emph{both}.}
+\item{sample.direction}{One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.}
 
-\item{fun}{Summary function.}
+\item{stat.fun}{Output statistical metric.}
+
+\item{min.count}{Minimum number of samples required by \emph{stat.fun}. Default is 2.}
 }
 \value{
-A \emph{vector}.
+A \emph{vector} with a requested statistical metric for each point in \emph{xy}.
 }
 \description{
 Analysis of environmental change in time for a set of coordinate pairs.
 }
 \details{
-{This function evaluates how do environmental conditions change in time
-along a movement track. First, it compares the observation times (\emph{obs.date})
-of \emph{xy} against the acquisition times (\emph{r.date}) of \emph{img} to search for relevant
-information within a pre-defined temporal window (\emph{window.size}). The user can chose to
-only consider time steps before (\emph{bwd}) or after (\emph{fwd} the target observation
-time or look at both directios (\emph{both}). If the latest is chosen, the function
-applies \emph{window.size} equally to both directions. After selecting adequate temporal
-information, a statistical metric (\emph{fun}) is used to summarize the selected
-time steps. By default, the slope will be used. The slope is estimated from
-a linear regression estimated between the acquisition times of \emph{img} and their
-corresponding values. When providing a new function, set x for time and y for
-the raster values. The output reports on:
-\itemize{
- \item{\emph{x} - mean x coordinates}
- \item{\emph{y} - mean y coordinates}
- \item{\emph{timestamp} - mean observation time}
- \item{\emph{pixel.time} - elapsed time within a pixel for a given segment}
- \item{\emph{stat}: statistical metric}}
-If \emph{edata} is provided, \emph{img} will be ignores as \emph{edata} will contain the environmental data
-with each column representing a different variable. Otherwise, this data will be retrieved from \emph{img}.
-Also, if \emph{edata} is provided, \emph{xy} is not required. However, it can be provided to built a spatial
-plot with the results of the analysis.}
+{This function evaluates how environmental conditions change in time along a movement track.
+First, for each point in \emph{xy}, the function compares its observation date (\emph{obs.dates}) against
+the acquisition dates (\emph{env.dates}) of \emph{env.data} to select non \emph{NA} timesteps within a
+pre-defined temporal window (\emph{window.size}). The user can chose to only consider time steps before
+(\emph{backward}) or after (\emph{forward} the target observation time or look at both directios (\emph{both}).
+If the latest is chosen, the function applies \emph{window.size} equally to both directions. After selecting
+adequate temporal information for each data point, a statistical metric is estimated. The statistical metric
+is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression between the
+acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
+for \emph{env.dates} and y for \emph{env.data}.}
 }
 \examples{
 {
@@ -69,14 +60,15 @@ plot with the results of the analysis.}
  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
 
  # raster dates
- rd <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+ r.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 
  # sample dates
- obs.date <- strptime(paste0(moveData@data$date, ' ',moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ obs.dates <- as.Date(moveData@data$date)
 
  # perform directional sampling
  of <- function(x,y) {lm(y~x)$coefficients[2]}
- time.env <- timeDir(xy=moveData, obs.date=obs.date, img=rsStk, r.date=rd, window.size=10, dir="bwd", fun=of)
+ time.env <- timeDir(xy=moveData, obs.dates=obs.dates, env.data=rsStk,
+ env.dates=r.dates, window.size=10, sample.direction="backward", stat.fun=of)
 
 }
 }

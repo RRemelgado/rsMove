@@ -4,32 +4,34 @@
 \alias{tMoveRes}
 \title{tMoveRes}
 \usage{
-tMoveRes(xy = xy, obs.time = obs.time, t.res = t.res, s.res = s.res)
+tMoveRes(xy = xy, obs.date = obs.date, time.res = time.res,
+  pixel.res = pixel.res)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.date}{Object of class \emph{Date} with \emph{xy} observation dates.}
 
-\item{t.res}{Temporal resolution.}
+\item{time.res}{Vector of temporal resolutions (expressed in days).}
 
-\item{s.res}{Spatial resolution.}
+\item{pixel.res}{Spatial resolution (unit depends on spatial projection).}
 }
 \value{
-A \emph{list}.
+A \emph{list} object reporting on the amount and distribution of unique pixels and connected pixel regions per temporal resolution.
 }
 \description{
-{Tool to support the selection of adequate satellite temporal
-resoltuon. Evaluates how the change in temporal resolution changes the
-amount of samples/sample regions based on a set of coordinate
-pairs and their observation dates.}
+{Tool to support the selection of an adequate satellite temporal resoltuon. It evaluates how the change in temporal
+resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
 }
 \details{
-{Given a vector of temporal resolutions (\emph{t.res}), the function determines
-the number of unique pixels and unique pixel groups after their temporal agggation. The
-function returns the corresponding pixel indices per resolution showing which
-samples would be grouped (\emph{$indices}). The function returns a data frame (\emph{$stats})
-and a plot (\emph{$plot}) with the statistics per temporal resolution.}
+{Given a base spatial resolution (\emph{pixel.res} and a vector of temporal resolutions (\emph{time.res}), the function determines
+the number of unique pixels and unique pixel regions after their temporal agggregation. For each temporal resolution, the function starts by
+converting \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number of
+samples and sample regions. The output of the function consists of:
+\itemize{
+ \item{\emph{stats} - Summarity statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
+ \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}
+ \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each temporal resolution.}}}
 }
 \examples{
 {
@@ -43,10 +45,10 @@ and a plot (\emph{$plot}) with the statistics per temporal resolution.}
 
  # test function for 5, 10 20 and 30 m
  obs.date <- as.Date(moveData@data$timestamp)
- a.res <- tMoveRes(xy=moveData, obs.time=obs.date, t.res=c(1,8,16), s.res=0.01)
+ a.res <- tMoveRes(xy=moveData, obs.date=obs.date, time.res=c(1,8,16), pixel.res=0.01)
 
 }
 }
 \seealso{
-\code{\link{sMoveRes}}
+\code{\link{sMoveRes}} \code{\link{specVar}}
 }
