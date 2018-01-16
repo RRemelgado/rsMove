@@ -3,9 +3,9 @@
 #' @description Pixel based segmentation of movement data using environmental data.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param env.data Object of class \emph{RasterLayer} or \emph{data.frame}.
-#' @param type Raster data type. One of \emph{cont} (continous) or \emph{cat} (for categorical).
+#' @param data.type Raster data data.type. One of \emph{cont} (continous) or \emph{cat} (for categorical).
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @param threshold Change threshold. Required if \emph{type} is set to \emph{cat}.
+#' @param threshold Change threshold. Required if \emph{data.type} is set to \emph{cat}.
 #' @param summary.fun Summary function used to summarize the values within each segment when \emph{method} is \emph{cont}. Default is mean.
 #' @param buffer.size Spatial buffer size applied around each segment (unit depends on spatial projection).
 #' @param smooth.fun Smoothing function applyed with \emph{buffer.size} when \emph{method} is \emph{cont}. Default is mean.
@@ -21,7 +21,7 @@
 #' If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
 #' define \emph{theshold} which indicates when the difference between consecutive points should be considered a change.
 #' In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
-#' each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{type} is set to \emph{cat} \emph{smooth.fun} is ignored.
+#' each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
 #' In this case, the function will report on the majority value within the buffer. The output of this function consists of:
 #'\itemize{
 #'  \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{xy}.}
@@ -43,14 +43,14 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, type="cont", threshold=0.1)
+#'  seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, data.type="cont", threshold=0.1)
 #'
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, env.data=env.data, type='cont', threshold=threshold, obs.time=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
+moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=threshold, obs.time=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 1. check input variables
@@ -76,20 +76,20 @@ moveSeg <- function(xy=xy, env.data=env.data, type='cont', threshold=threshold, 
     prd=FALSE}
 
   # check threshold
-  if (type=='cont') {
-    if (is.null(threshold)) {stop('"type" is set to "cont". Please define "threshold"')}
+  if (data.type=='cont') {
+    if (is.null(threshold)) {stop('"data.type" is set to "cont". Please define "threshold"')}
     if (!is.numeric(threshold)) {stop('"threshold" is not numeric')}}
-  if (type=='cat') {threshold <- 1}
+  if (data.type=='cat') {threshold <- 1}
 
-  # check query type
-  if (!type%in%c('cont', 'cat')) {stop('"type" is not  avalid keyword')}
-  if (type=='cont') {
+  # check query data.type
+  if (!data.type%in%c('cont', 'cat')) {stop('"data.type" is not  avalid keyword')}
+  if (data.type=='cont') {
     if (!is.null(smooth.fun)) {if (!is.function(smooth.fun)){stop('"smooth.fun" is not a valid keyword or function')}}
     if (is.null(smooth.fun)) {smooth.fun <- function(x) {return(mean(x, na.rm=T))}}
     if (!is.null(summary.fun)) {if (!is.function(smooth.fun)){stop('"summary.fun" is not a valid keyword or function')}}
     if (is.null(summary.fun)) {summary.fun <- function(x) {return(mean(x, na.rm=T))}}}
 
-  if (type=='cat') {
+  if (data.type=='cat') {
     if (!is.null(summary.fun)) {if (!is.function(smooth.fun)){stop('"summary.fun" is not a valid keyword or function')}}
     summary.fun <- function(x) {return(mean(x, na.rm=T))}}
 
@@ -103,10 +103,10 @@ moveSeg <- function(xy=xy, env.data=env.data, type='cont', threshold=threshold, 
     if (!is.null(buffer.size)) {
 
       # average samples within buffer
-      if (type=='cont') {env.data <- extract(env.data, xy@coords, buffer=buffer.size, fun=smooth.fun, na.rm=T)}
+      if (data.type=='cont') {env.data <- extract(env.data, xy@coords, buffer=buffer.size, fun=smooth.fun, na.rm=T)}
 
       # determine main class within the buffer
-      if (type=='cat') {
+      if (data.type=='cat') {
 
         # dilate samples
         tmp <- lapply(1:length(xy), function(x) {
@@ -188,7 +188,7 @@ moveSeg <- function(xy=xy, env.data=env.data, type='cont', threshold=threshold, 
   # 5. build plot
   #---------------------------------------------------------------------------------------------------------------------#
 
-  if (type=='cont') {
+  if (data.type=='cont') {
 
     df$sid <- factor(df$sid, levels=unique(df$sid))
 
@@ -218,7 +218,7 @@ moveSeg <- function(xy=xy, env.data=env.data, type='cont', threshold=threshold, 
         theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
 
-  if (type=='cat') {
+  if (data.type=='cat') {
 
     df$sid <- factor(df$sid, levels=unique(df$sid))
     df$value <- factor(df$value, levels=unique(df$value))

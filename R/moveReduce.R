@@ -105,7 +105,7 @@ moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
 
   # estimate time sum per cell
   up <- unique(sp)
-  t.sum <- sapply(up, function(p) {sum(df$diff.time[which(sp==p)], na.rm=TRUE)})
+  t.sum <- sapply(up, function(p) {sum(df$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
 
   # build raster
   t.sum.r <- rasterize(xyFromCell(img, up), crop(img, extent(xy)), t.sum)

@@ -9,9 +9,7 @@ specVar(img = img, xy = NULL, pixel.res = pixel.res)
 \arguments{
 \item{img}{Object of class \emph{RasterLayer}.}
 
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
-
-\item{pixel.res}{vector of target resolutions.}
+\item{pixel.res}{Spatial resolution (unit depends on the spatial projection).}
 }
 \value{
 A \emph{list}.
@@ -22,16 +20,14 @@ how the spectral variability within a pixel change with the change in spatial re
 }
 \details{
 {Given a raster object (\emph{img}), the function determines how degrading its spatial resolution impacts
-our ability to perceive the complexity of the landscape. For each pixel resolution given by \emph{pixel.res}, The
-function resamples \emph{img} and estimates the Mean Absolute Error (MAE) for each pixel based on the differences
-between the original and aggregated values. If a point shapefile is provided (\emph{xy}), the function will only
-report on the values that overlap with it. The output of the function consists of:
+our ability to perceive the complexity of the landscape. For the pixel resolution given by \emph{pixel.res}, The
+function resamples \emph{img} and estimates the Mean Absolute Percentage Error (MAPE) for each pixel. The MAPE is
+estimated as \eqn{100 / n * sum(abs(O - A / O)} where \emph{O} are the original value in \emph{img}, \emph{A} the
+aggregated value in the aggregated image and \emph{n} the number of non-NA pixels in the original image The
+output of the function consists of:
 \itemize{
- \item{\emph{mae} - MAE for all pixels or for the points within \emph{xy}.}
- \item{\emph{pixel.optimal} - raster reporting on the resolution with the lowest MAE for each pixel.}
- \item{\emph{pixel.optimal.stats} - Proportion of samples per resolution derived from \emph{pixel.optimal}.}
- \item{\emph{plot} - boxplots of the variability of the MAE per resolution.}
- \item{\emph{sample.optial} - optimal resolution per sample (available if \emph{xy} is provided).}}}
+ \item{\emph{mape} - MAPE raster.}
+ \item{\emph{plot} - Histogram of \emph{mape}.}}}
 }
 \examples{
 \dontrun{
@@ -41,12 +37,8 @@ report on the values that overlap with it. The output of the function consists o
  # read raster data
  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
 
- # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
-
  # apply function
- s.var <- specVar(img=r, xy=moveData, pixel.res=60)
+ s.var <- specVar(img=r, pixel.res=60)
 
 }
 }

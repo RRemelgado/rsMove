@@ -1,0 +1,250 @@
+---
+title: "rsMove - Remote Sensing for Movement Ecology"
+author: "Ruben Remelgado"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{rsMove - Remote Sensing for Movement Ecology}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+</br>
+<p align="center"><img src="C:\Users\rus14jh.UNI-WUERZBURG\Desktop\Untitled.png" height="100%" width="100%"/></p>
+</br>
+
+### Why develop rsMove?
+<p align="justify" style="line-height:200%;">
+Remote sensing becomes a fundamental tool in the scope of movement ecology. It provides information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the differences in the spatial and temporal scales at which they are acquired. satellite images are often collected with a relatively rough temporal and spatial resolution failing to reflect the landscape as perceived by an animal. However, when used adequately, remote sensing can represent the spatial and temporal characteristics of the environmental factors that affect animal behavior. To achieve this, deciding which remote sensing data to use demands careful consideration. In particular, two important questions should be considered: 1) Does the spatial and temporal resolution of a satellite preserve sufficient, non-replicated samples ? 2) which environmental variables do I need to consider? *rsMove* addresses these questions by providing users with tools that help selection of adequate satellite data sources as well as of suitable environmental variables. Moreover, this package offers tools that are sensitive to the technical constraints of remote sensing introducing a remote sensing perspective into animal movement research ^[*rsMove* was developed as part of the Opt4Environment project financed by the funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant 50 EE 1403. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo).].
+</p>
+
+</br>
+</br>
+
+### Reference Data
+<p align="justify" style="line-height:200%;">
+*rsMove* was developed using movement data from five populations of White Storks (*ciconia ciconia*). This data consists of 48 juveniles tracked between 26 June 2013 and 15 September 2013 while nesting using solar-powered, high-resolution GPS devices. The data was collected by the Max Planck Institute for Ornithology ([MPIo](http://www.orn.mpg.de/en)) and it can be accessed  [here](https://doi.org/10.5441/001/1.78152p3q) through MoveBank. Regarding remote sensing data, we used Landsat surface reflectances provided by the United States Geological Survey ([USGS](https://landsat.usgs.gov/)). The following example shows how to access the example data. We provide one set of remote sensing layers and two sets of animal movement data: one for migratory movements and one for within-habitat movements.
+</p>
+
+</br>
+
+```{r message=FALSE}
+# load package
+library(rsMove)
+library(raster)
+library(sp)
+require(ggplot2)
+```
+
+```{r message=FALSE}
+# read remote sensing data
+files <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
+r.stk <- stack(files)
+
+# read animal movement data (migratory movements)
+proj1 <- crs("+proj=longlat +ellps=WGS84 +no_defs")
+move1 <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
+move1 <- SpatialPointsDataFrame(move1[,2:3], move1, proj4string=proj1)
+
+# read animal movement data (within-habitat movements)
+proj2 <- crs(r.stk)
+move2 <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
+move2 <- SpatialPointsDataFrame(move2[,1:2], move2, proj4string=proj2)
+```
+
+</br>
+</br>
+
+### Input and output data
+<p align="justify" style="line-height:200%;">
+*rsMove* extends existing spatial analysis packages into movement ecology. Specifically, we focuses on the packages *raster* and *sp* as they are commonly used for image analysis thus facilitating the integration of rsMove in existing workflows. As a consequence, the input and processed movement data is often requested in *SpatialPoints* format while remote sensing data is provided in *raster* format. Moreover, *rsMove* provides a series of graphical outputs that accompany most of its functions. These plots are built with *ggplot2* serving as a template that can be easily edited by the user.
+</p>
+
+</br>
+</br>
+
+### Too much data, too little time. Where to start?
+<p align="justify" style="line-height:200%;">
+As GPS tracking technologies evolve, we are able to track animals at a fine-temporal scale. Depending on the species and on the durability of the tracker, the observation periods can be extensive leading to massive amounts of data to analyze. Nowadays, such issues have become smaller. The free access to top processing capabilities such as cloud-computing platforms have made it easy to handle large volumes of data. However, when dealing with remote sensing, choosing the right combination of variables to explain a species behavior requires an iterative process of trial and error and a careful visual assessment. As a consequence, selecting representative test sites is essential.
+</p>
+<p align="justify" style="line-height:200%;">
+`hotMove()` and uses a relatively fast, pixel-based approach to address this issue. Given a pixel resolution, hotMove() translates coordinate pairs into unique pixels and evaluates their spatial connectivity on a regional scale. Then, for each pixel region, `hotMoveStats()` estimates its area based on the convex hull of its corresponding samples. Finally, the original samples are labeled based on the region of their corresponding pixels. Let's consider the following example using the movement data we read in the previous section to evaluate the distribution of samples over a migratory track. As this extends over a large area and is provided with Geographic coordinates, we will use a pixel resolution of 0.1. This essentially means that samples which are within ~10 km of each other will be within the same pixel or within neighboring ones. Additionally, we will prompt the function to derive a shapefile with polygons for the sample regions by setting `return.shp` to `TRUE`.
+</p>
+
+</br>
+
+```{r message=FALSE}
+# run function
+sample.regions <- hotMove(xy=move1, pixel.res=0.1, return.shp=TRUE)
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+Let's check the output. The function identified 21 unique sample regions. The code below plots the region shapefile showing the relation between the original samples (in black) and the resulting regions (in red).
+</p>
+
+</br>
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
+par(mar=c(4,4,0,4), xpd = NA, font.lab=2)
+plot(move1@data$long, move1@data$lat, pch=16, cex=0.5, xlab="Lon", ylab="Lat", cex.lab=1, cex.axis=1)
+plot(sample.regions$polygons, col=rgb(1,0,0,0.3), add=TRUE)
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+Using the output of `hotMove()`, we can then use `hotMoveStats()` to identify individual temporal segments within each sample region defined by sequences of consecutive days with movement data. This function reports on the total number of segments, minimum and maximum segment lengths and the amount of time spent in each region. Moreover, for each segment, the function reports on its region, the start and end dates and the total amount of days. Aside from the statistical report, `hotMoveStats()` also reports on the sample indices for each temporal segment. To run the function, as seen below, the user must provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. The region summary table csan be seen below.
+</p>
+
+</br>
+
+```{r}
+region.stats <- hotMoveStats(region.id=sample.regions$indices, obs.time=as.Date(move1@data$timestamp))
+```
+
+```{r, echo=FALSE, results='asis'}
+knitr::kable(head(region.stats$region.stats, 5))
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+Aside from the statistical report, `hotMoveStats()` also provides a plot showing the distribution of samples per sample region and the amount of time spent within them. Based on our example data, the plot shown below portraits an uneven distribution of samples with the region 21 acounting for ~3000 samples and ~80 days.
+</p>
+
+</br>
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
+region.stats$plot
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+To make sense of these results, we can plot the polygons created by `hotMove()` and color it based on the output of `hotMoveStats()`. For this example, we chose to use the information on the total time spent per region. The plot shown below depicts the distribution of time per sample region. As a we can see, the region with most samples and time spent is located in central Europe showing the location of the summering site of this  White Stork.
+</p>
+
+</br>
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE, message=FALSE}
+df <- data.frame(id=1:21, time=region.stats$region.stats$`Total Time`)
+pol <- fortify(SpatialPolygonsDataFrame(sample.regions$polygons, df))
+pol <- merge(pol, df, by="id")
+ggplot(pol, aes(x=long, y=lat, group=id, fill=time)) + theme_bw() + geom_polygon() + xlab("Long") + ylab("Lat")
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+The combination of `hotMove()`and `hotMoveStats()` provides us with a good understanding of the spatial and temporal distribution of the movement data allowing us to pinpoint relevant periods in space and time. Moreover, if the `individual.id` is specified within `hotMoveStats()`, the user will also receive information on how may species shared a given temporal segment. If the user is interested in multi-species studies, this information can be useful to narrow down study sites and study periods over which remote sensing methods can be tested.
+</p>
+
+</br>
+</br>
+
+### Which satellite to use? Choosing a Spatial and Temporal resolution
+<p align="justify" style="line-height:200%;">
+Due to the differences in spatial and temporal scales at which animal movement and remote sensing data are collected, matching these two data sources is not always easy. Issues such as the pseudo-replication of values in space and time are common leading to a reduction of samples that hinders modeling applications. As a result, it becomes crucial to understand how the choice in spatial and temporal scale affects movement data. Do you preserve enough unique samples to efficiently train and validate predictive models on animal-environmnet interactions? In answer to this question, we developted `sMoveRes()`, `tMoveRes()` and `specVar()`.
+</p>
+<p align="justify" style="line-height:200%;">
+`sMoveRes()` helps select an adequate spatial resolution. Given a a spatial resolutions and a shapefile containing movement data points, the function determines which pixels in a raster grid are sampled and evaluates their spatial connectivity as done by `hotMove()`. Let's consider the following example. Taking the second movement dataset (i.e. `move2`), we will evaluate the suitability of the Normalized Difference Vegetation Index (NDVI) derived by a few commonly user satellite sensors: Sentinel-2 (10 m), Landsat (30 m) and MODIS (250 m). As shown below, the function requires point shapefile (`xy`) and a vector os spatial resolutions (`pixel.res`). Additionally, we can see the output of the function consisting of a `data.frame` and a `plot` depicting how the number og unique pixels and pixel regions decreases with the decrease in spatial resolution. Moreover, the function reports on the pixel position of each sample at each sample resolution which allows us to know which samples are grouped.
+</p>
+
+</br>
+
+```{r}
+s.res <- sMoveRes(xy=move2, pixel.res=c(10, 30, 250))
+```
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE, message=FALSE}
+knitr::kable(head(s.res$stats, 3))
+s.res$plot
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+A similar analysis is done within `tMoveRes()`. However, this function uses a static spatial resolution to evaluate how many unique samples are preserved in time depending on the choice of temporal resolution. Let's consider how long distance movement data (`move1`) as it spreads across several days. As the data is distributed along western Europe, let's set the spatial resolution to 0.01 which corresponds to ~10 km. regarding the temporal resolution, let's consider the use of MODIS data prodived every 1, 8 and 16 days. As we can see, the output is very similar to the one produced by `sMoveRes()`.
+</p>
+
+</br>
+
+```{r}
+t.res <- tMoveRes(xy=move1, obs.date=as.Date(move1@data$timestamp), time.res=c(1,8,16), pixel.res=0.01)
+```
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE, message=FALSE}
+knitr::kable(head(t.res$stats, 3))
+t.res$plot
+```
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+In addition to these two tools, we developed `specVar()`. This function extends on `sMoveRes()` informing on how a given spatial resolution reflects the complexity of the landscape in comparison with a higher resolution. Let's consider that the analysis of our movement data done with `sMoveRes()` suggested that a spatial resolution of 250 m is sufficient. Based on these results, the next question we should consider is: does this spatial resolution reflect all the spatial complexity we are trying to capture? Within highly fragmented landscapes where subtle transitions in land cover may be relevant for the species this question becomes particular important. To test if a resolution of 250 m is adequate we now refer to the first layer of our test remote sensing data (`r.stk`). First, `specVar()` will resample `r.stk`, which has a spatial resolution of 30 m, to 250 m. Then, the function will estimate the Mean Absolute Percent Error (MAPE) for each aggregated pixel estimated as 
+</p>
+
+</br>
+
+<p aling="center" style="line-height:200%;">
+$100/n \sum_{i=1}^n |\frac{O_{i} - F_{i}}{O_{i}}|$
+</p>
+
+</br>
+
+<p align="justify" style="line-height:200%;">
+where <i>0</i><sub><i>i</i></sub> are the original values, <i>A</i><sub><i>i</i></sub> the aggregated value and <i>n</i><sub><i>i</i></sub> the number of non-NA pixels in the original `raster`. As shown below, the function provides a `raster` of the MAPE and a histogram of it.
+</p>
+
+```{r message=FALSE}
+s.var <- specVar(img=r.stk[[1]], pixel.res=250)
+```
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", fig.show='hold', echo=FALSE}
+plot(s.var$mape)
+s.var$plot
+```
+
+</br>
+</br>
+
+### What Environmental Variables to Select? See What Your Animal is Doing
+<p align="justify" style="line-height:200%;">
+Once we select adequate satellite data we can consider which variables to derive from it. However, the amount of potentially relevant variables is endless. So which variables to chose? `rsMove` cannot tell its user which variables to use. But it can help on the decision process. To aid on this decision the package provides a series of functions that help quatify and visualize species-environment interactions. Among them, `moveSeg()` provides a fast assessment. The function 
+</p>
+
+</br>
+</br>
+
+### Homogeneizing Animal Movement and Remote Sensing Data
+<p align="justify" style="line-height:200%;">
+Animal movement and satellite data often have different spatial and temporal resolutions. As a consequence, the pseudo-replication of samples is a frequent phenomena. This has implications in the analysis of species-environment interactions. On one side, it increases the amount of processing time due to the inclusion of redundant information. But more importantly, it creates serious issues when creating and validating predictive models. Due to the replication of samples splitting them between training and validation can be difficult and model performances can be artifically inflated - or deflated - due to an inadequate separation of samples. In response to this issue we created `moveReduce()`. This function helps users translate animal movement data into pixels and summarize key behavioral patterns. The function converts samples in a `SpatialPoints` object into pixel coordinates and identifies temporal segments corresponding to consecutive samples in time that fall within the same pixel. Then, for each segment, the function estimates the elapsed time and reports on the start, mean and end timestamps. Unlike a common rasterization function, `moveReduce` preserves periodic movement patterns. If a pixel is visited more than once within distinct temporal segments these are kept as unique observation allowing the user to exclude redundant observations while preserving the dynamic nature of movement data. Let's test this function using the second example movement data (i.e. `move2`) and the example remote sensing data (i.e. `.stk`). The original movement dataset has a total of 121 samples and, as we can see below, some of these are concentrated. This is related to the relative large amount of time the animal spent at its nest. As a consequence, some of the pixels are sampled frequently.
+</p>
+
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
+plot(crop(r.stk[[1]], move2))
+points(move2, type="l")
+```
+
+<p align="justify" style="line-height:200%;">
+Now, let's apply `moveReduce()`. The output, shown below, is a `SpatialPointsDataFrame` object with the reduced sample set. As we can see in the output, the large concentrations of samples disappear and are replaced by a single sample. Moreover, the data frame that is added to the `SpatialPointsDataFrame`
+</p>
+
+
+```{r}
+obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="%Y/%m/%d %H:%M:%S")
+reduced.samples <- moveReduce(xy=move2, obs.time=obs.time, img=r.stk[[1]])
+```
+
+</br>
+</br>
+
+### From Movement to Modeling Species-Environment Interactions
+<p align="justify" style="line-height:200%;">
+</p>
+
+</br>
+</br>
+

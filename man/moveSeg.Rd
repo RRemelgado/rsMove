@@ -4,7 +4,7 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = xy, env.data = env.data, type = "cont",
+moveSeg(xy = xy, env.data = env.data, data.type = "cont",
   threshold = threshold, obs.time = NULL, summary.fun = NULL,
   buffer.size = NULL, smooth.fun = NULL)
 }
@@ -13,9 +13,9 @@ moveSeg(xy = xy, env.data = env.data, type = "cont",
 
 \item{env.data}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
-\item{type}{Raster data type. One of \emph{cont} (continous) or \emph{cat} (for categorical).}
+\item{data.type}{Raster data data.type. One of \emph{cont} (continous) or \emph{cat} (for categorical).}
 
-\item{threshold}{Change threshold. Required if \emph{type} is set to \emph{cat}.}
+\item{threshold}{Change threshold. Required if \emph{data.type} is set to \emph{cat}.}
 
 \item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
@@ -39,7 +39,7 @@ of points found within it. Moreover, if \emph{obs.time} is set, the function rep
 If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
 define \emph{theshold} which indicates when the difference between consecutive points should be considered a change.
 In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
-each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{type} is set to \emph{cat} \emph{smooth.fun} is ignored.
+each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
 In this case, the function will report on the majority value within the buffer. The output of this function consists of:
 \itemize{
  \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{xy}.}
@@ -63,7 +63,7 @@ In this case, the function will report on the majority value within the buffer. 
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, type="cont", threshold=0.1)
+ seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, data.type="cont", threshold=0.1)
 
 }
 }

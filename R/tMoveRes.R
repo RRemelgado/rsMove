@@ -29,7 +29,7 @@
 #'  moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
 #'  moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
 #'
-#'  # test function for 5, 10 20 and 30 m
+#'  # test function for intervals of 1, 8 and 16 days (e.g. of MODIS data)
 #'  obs.date <- as.Date(moveData@data$timestamp)
 #'  a.res <- tMoveRes(xy=moveData, obs.date=obs.date, time.res=c(1,8,16), pixel.res=0.01)
 #'
