@@ -68,5 +68,5 @@ In this case, the function will report on the majority value within the buffer. 
 }
 }
 \seealso{
-\code{\link{dataQuery}} \code{\link{imgInt}}
+\code{\link{dataQuery}} \code{\link{imgInt}} \code{\link{timeDir}} \code{\link{spaceDir}}
 }

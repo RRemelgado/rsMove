@@ -4,7 +4,7 @@
 \alias{specVar}
 \title{specVar}
 \usage{
-specVar(img = img, xy = NULL, pixel.res = pixel.res)
+specVar(img = img, pixel.res = pixel.res)
 }
 \arguments{
 \item{img}{Object of class \emph{RasterLayer}.}

@@ -12,7 +12,7 @@
 #' @importFrom raster extract crs
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar scale_fill_discrete
 #' @import raster rgdal ggplot2
-#' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
+#' @seealso \code{\link{dataQuery}} \code{\link{imgInt}} \code{\link{timeDir}} \code{\link{spaceDir}}
 #' @return A \emph{list}.
 #' @details {This function identifies segments of comparable environmental conditions along the movement track given by \emph{xy}.
 #' Looking at consective data points, the function queries \emph{env.data} and proceeds to identify a new segment if \emph{threshold}
@@ -50,7 +50,8 @@
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=threshold, obs.time=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
+moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=threshold,
+                    obs.time=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 1. check input variables
@@ -64,7 +65,9 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
   # sample dates
   if (!is.null(obs.time)) {
     if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
-    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}}
+    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}
+    processTime <- TRUE
+  } else {processTime <- FALSE}
 
   # environmental data
   if (class(env.data)[1]=='RasterLayer') {
@@ -88,10 +91,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
     if (is.null(smooth.fun)) {smooth.fun <- function(x) {return(mean(x, na.rm=T))}}
     if (!is.null(summary.fun)) {if (!is.function(smooth.fun)){stop('"summary.fun" is not a valid keyword or function')}}
     if (is.null(summary.fun)) {summary.fun <- function(x) {return(mean(x, na.rm=T))}}}
-
-  if (data.type=='cat') {
-    if (!is.null(summary.fun)) {if (!is.function(smooth.fun)){stop('"summary.fun" is not a valid keyword or function')}}
-    summary.fun <- function(x) {return(mean(x, na.rm=T))}}
+  if (data.type=='cat') {summary.fun <- function(x) {return(mean(x, na.rm=T))}}
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 2. query data
@@ -131,7 +131,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
             return(uc[which(count==max(count))[1]])
           } else {return(NA)}})
 
-        rm(tmp, si)
+        rm(tmp, si, edata0)
 
       }
 
@@ -153,7 +153,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
     if (!is.na(diff)) {
       if (diff >= threshold) {
         ep <- r-1
-        rv[[li]] <- smooth.fun(env.data[c(r0:ep)])
+        rv[[li]] <- summary.fun(env.data[c(r0:ep)])
         id[[li]] <- replicate(length(c(r0:ep)), li)
         r0 <- r
         li <- li + 1
@@ -162,27 +162,29 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
           rv[[li]] <- env.data[r]}
       } else {if (r==length(xy)) {
         ep <- r
-        rv[[li]] <- smooth.fun(env.data[c(r0:ep)])
+        rv[[li]] <- summary.fun(env.data[c(r0:ep)])
         id[[li]] <- replicate(length(c(r0:ep)), li)}}}}
   rv <- unlist(rv)
   id <- unlist(id)
 
   #---------------------------------------------------------------------------------------------------------------------#
-  # 4. derive statistics
+  # 4. derive segment statistics
   #---------------------------------------------------------------------------------------------------------------------#
 
   # build region report
   uid <- sort(unique(id))
-  if (!is.null(obs.time)) {
-    f <- function(x) {
-      ind <- which(id==x)
-      et <- difftime(obs.time[ind[length(ind)]], obs.time[ind[1]], units="mins")
-      np <- length(ind)
-      return(list(time=as.numeric(et), count=np))}
-    sstat <- lapply(uid, f)
-    df <- data.frame(sid=uid, count=sapply(sstat, function(x) {x$count}),
-                     time=sapply(sstat, function(x) {x$time}), value=rv)
-  } else {df <- data.frame(sid=uid, count=sapply(uid, function(x){sum(id==x)}))}
+  df <- do.call(rbind, lapply(uid, function(x) {
+    ind <- which(id==x)
+    if (processTime) {
+      tt <- difftime(obs.time[ind[length(ind)]], obs.time[ind[1]], units="mins")
+      st <- min(obs.time[ind])
+      et <- max(obs.time[ind])
+    } else {
+      tt <- NA
+      st <- NA
+      et <- NA}
+    return(data.frame(sid=x, count=length(ind), start=st, end=et,
+                      elapsed=et, value=rv[ind[1]], stringsAsFactors=FALSE))}))
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 5. build plot
@@ -190,7 +192,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
 
   if (data.type=='cont') {
 
-    df$sid <- factor(df$sid, levels=unique(df$sid))
+    df$sid <- factor(df$sid, levels=sort(unique(df$sid)))
 
     # plot with time
     if (!is.null(obs.time)) {
@@ -214,22 +216,22 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
 
       # buid plot object
       p <- ggplot(df, aes_string(x="sid", y="time", fill="count")) + geom_bar(stat="identity") +
-        xlab('') + ylab('Segment length') +
-        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12),
+        xlab('\nSegment ID') + ylab('Sample count\n') +
+        theme(axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
 
   if (data.type=='cat') {
 
-    df$sid <- factor(df$sid, levels=unique(df$sid))
-    df$value <- factor(df$value, levels=unique(df$value))
+    df$sid <- factor(df$sid, levels=sort(unique(df$sid)))
+    df$value <- factor(df$value, levels=sort(unique(df$value)))
 
     # plot with time
     if (!is.null(obs.time)) {
 
       # buid plot object
       p <- ggplot(df, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +
-        xlab('') + ylab('Time Spent (minutes)') + scale_fill_discrete(name="Class") +
-        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12),
+        xlab('\nSegment ID') + ylab('Time Spent (minutes)\n') + scale_fill_discrete(name="Class") +
+        theme(axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))
 
       # plot without time
@@ -237,14 +239,15 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
 
       # buid plot object
       p <- ggplot(df, aes_string(x="sid", y="time", fill="count")) + geom_bar(stat="identity") +
-        xlab('') + ylab('Segment length') + scale_fill_discrete(name="Class") +
-        theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12),
+        xlab('\nSegment ID') + ylab('Sample count\n') + scale_fill_discrete(name="Class") +
+        theme(axis.ticks.x=element_blank(), axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 6. return output
   #---------------------------------------------------------------------------------------------------------------------#
 
+  colnames(df) <- c("Segment ID", "Nr. Samples", "Timestamp (start)", "Timestamp (end)", "Total time (minutes)", "Value")
   return(list(indices=id, stats=df, plot=p))
 
 }
