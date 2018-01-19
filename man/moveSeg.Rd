@@ -13,7 +13,7 @@ moveSeg(xy = xy, env.data = env.data, data.type = "cont",
 
 \item{env.data}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
-\item{data.type}{Raster data data.type. One of \emph{cont} (continous) or \emph{cat} (for categorical).}
+\item{data.type}{Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).}
 
 \item{threshold}{Change threshold. Required if \emph{data.type} is set to \emph{cat}.}
 
@@ -23,7 +23,7 @@ moveSeg(xy = xy, env.data = env.data, data.type = "cont",
 
 \item{buffer.size}{Spatial buffer size applied around each segment (unit depends on spatial projection).}
 
-\item{smooth.fun}{Smoothing function applyed with \emph{buffer.size} when \emph{method} is \emph{cont}. Default is mean.}
+\item{smooth.fun}{Smoothing function applied with \emph{buffer.size} when \emph{method} is \emph{cont}. Default is mean.}
 }
 \value{
 A \emph{list}.
@@ -33,17 +33,17 @@ Pixel based segmentation of movement data using environmental data.
 }
 \details{
 {This function identifies segments of comparable environmental conditions along the movement track given by \emph{xy}.
-Looking at consective data points, the function queries \emph{env.data} and proceeds to identify a new segment if \emph{threshold}
+Looking at consecutive data points, the function queries \emph{env.data} and proceeds to identify a new segment if \emph{threshold}
 is exceeded. Then, for each segment, the function summarizes \emph{env.data} using \emph{summary.fun} and reports on the amount
 of points found within it. Moreover, if \emph{obs.time} is set, the function reports on the start and end timestamps and the elapsed time.
 If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
-define \emph{theshold} which indicates when the difference between consecutive points should be considered a change.
+define \emph{threshold} which indicates when the difference between consecutive points should be considered a change.
 In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
 each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
 In this case, the function will report on the majority value within the buffer. The output of this function consists of:
 \itemize{
  \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{xy}.}
- \item{\emph{stats} - Statistical information for each segment reporting on the conrresponding environmental and temporal information.}
+ \item{\emph{stats} - Statistical information for each segment reporting on the corresponding environmental and temporal information.}
  \item{\emph{plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
 }
 \examples{

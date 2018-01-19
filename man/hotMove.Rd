@@ -23,7 +23,7 @@ Detection of geographic regions of samples using a pixel based approach.
 {First, the function builds a raster with a resolution equal to \emph{pixel.res} and the
 spatial extent of \emph{xy}. Then, each point in \emph{xy} is converted into pixel coordinates. Based
 on the unique pixel coordinates, the function then evaluates the spatial connectivity of these pixels
-using a 8-neighboor connected component labelling algorithm to detect regions. Finally, the ID's are related
+using a 8-neighbor connected component labeling algorithm to detect regions. Finally, the ID's are related
 back to each individual data point in \emph{xy} based on their pixel coordinates and - if \emph{return.shp} is TRUE -
  a polygon is derived from the convex hull of the points within each region.}
 }

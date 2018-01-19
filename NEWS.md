@@ -1,5 +1,22 @@
 =================================================================================
 
+#### rsMove 0.2.3
+
+=================================================================================
+
+##### New:
+  * No new functions added.
+  
+##### Changes:
+  * Inclusion of plotting routines within functions.
+  * Functions that plot results now provide an editable ggplot object.
+  
+##### Fixes:
+  * Signficant improvements to the description of functions.
+  * Updated function keywords to clarify their usage.
+
+=================================================================================
+
 #### rsMove 0.2.2
 
 =================================================================================

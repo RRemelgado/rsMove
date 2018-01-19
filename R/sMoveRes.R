@@ -1,6 +1,6 @@
 #' @title sMoveRes
 #'
-#' @description {Tool to support the selection of an adequate satellite spatial resoltuon. Evaluates how the change
+#' @description {Tool to support the selection of an adequate satellite spatial resolution. Evaluates how the change
 #' in spatial resolution changes the amount of samples and sample regions based on a set of coordinate pairs.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param pixel.res vector of spatial resolutions (unit depends on spatial projection).
@@ -9,11 +9,11 @@
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
 #' @return A \emph{list}.
 #' @details {Given a vector of pixel resolutions (\emph{pixel.res}), the function determines the number of unique pixels
-#' and unique pixel regions after their temporal agggregation. For each spatial resolution, the function starts by converting
+#' and unique pixel regions after their temporal aggregation. For each spatial resolution, the function starts by converting
 #' \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number
 #' of samples and sample regions. The output of the function consists of:
 #' \itemize{
-#'  \item{\emph{stats} - Summarity statistics reporting on the number of unique samples and sample regions per spatial resolution.}
+#'  \item{\emph{stats} - Summary statistics reporting on the number of unique samples and sample regions per spatial resolution.}
 #'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}
 #'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each spatial resolution.}}}
 #' @seealso \code{\link{tMoveRes}} \code{\link{specVar}}

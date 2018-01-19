@@ -10,7 +10,7 @@
 #' @importFrom grDevices colorRampPalette
 #' @details {For each unique region defined by \emph{region.id}, the function identifies unique temporal segments
 #' defined as periods of consecutive days with observations. Then, for each region, the function uses the identified segments
-#' to repoprt on the minimum, maximum and mean time spent as well as the total amount of time spent within the region.
+#' to report on the minimum, maximum and mean time spent as well as the total amount of time spent within the region.
 #' Moreover, the function provides a detailed report of each segment and informs on the corresponding sample indices. If
 #' \emph{individual.id} is specified, the function will in addition count the number of individuals found within each region
 #' and within each temporal segment.}

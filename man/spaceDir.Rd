@@ -37,7 +37,7 @@ Analysis of environmental change in space along a set of coordinate pairs.
 \details{
 {This function evaluates how do environmental conditions change in space along a movement track. For
 each set of consecutive points, the function applies a spatial moving window which boundaries depend on the
-definition of \emph{sample.direction}. Then, whithin each segment, the function extracts all pixels within it.
+definition of \emph{sample.direction}. Then, within each segment, the function extracts all pixels within it.
 If \emph{buffer.size} is defined, the function will consider a buffer when performing this extraction. Finally,
 the the extracted \emph{NA} values are summarized into a given metric. If \emph{data.type} is \emph{cont}, a
 statistical function can be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the
@@ -48,7 +48,7 @@ function is a list consisting of:
 \itemize{
  \item{\emph{endpoints} - Point shapefile with endpoints of each spatial segment. Reports on a given statistical metric, traveled distance, travel time and the mean timestamp.}
  \item{\emph{segments} - Line shapefile with spatial segments. Reports on the same information as \emph{endpoints}.
- \item{\emph{plot} - Ploting of \emph{segments} where each segment is colored according to its corresponding statistical value.}}}}
+ \item{\emph{plot} - Plotting of \emph{segments} where each segment is colored according to its corresponding statistical value.}}}}
 }
 \examples{
 {

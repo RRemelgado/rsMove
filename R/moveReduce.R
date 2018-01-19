@@ -11,7 +11,7 @@
 #' @details {Reduces a set of input samples (\emph{xy}) based on their corresponding pixel coordinates
 #' within a reference raster (\emph{img}). Using this data, the function identifies temporal segments
 #' corresponding to groups of consecutive samples found within the same pixel. In this process, revisits
-#' to recorded pixels are preserved. Once the segments are idenfied, the function derives mean x and y
+#' to recorded pixels are preserved. Once the segments are identified, the function derives mean x and y
 #' coordinates for each of them and evaluates the time spent within each pixel. The function reports on
 #' the start and end timestamps, the mean timestamp and the elapsed time. The output of the function
 #' consists of:

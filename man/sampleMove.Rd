@@ -14,7 +14,7 @@ sampleMove(xy = xy, obs.time = obs.time, search.radius = search.radius,
 
 \item{search.radius}{Sample search radius (in meters).}
 
-\item{method}{How should the disntance be estimated? One of 'm' or 'deg'. Default is 'm'.}
+\item{method}{How should the distance be estimated? One of 'm' or 'deg'. Default is 'm'.}
 
 \item{tUnit}{Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.}
 }

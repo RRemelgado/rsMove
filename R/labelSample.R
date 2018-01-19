@@ -1,6 +1,6 @@
 #' @title labelSample
 #'
-#' @description {Pixel-based labeling of spatialy connected groups of samples for splitting them between training and validation.}
+#' @description {Pixel-based labeling of spatially connected groups of samples for splitting them between training and validation.}
 #' @param xy Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
 #' @param agg.radius Minimum radius for pixel aggregation. Unit depends on the projection of the data.
 #' @param nr.points Minimum number of samples per pixel.
@@ -9,7 +9,7 @@
 #' @return A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 #' @details {First, the samples are converted to pixel coordinates and removes pixels with a corresponding number of points greater
 #' than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internaly, the
-#' function will label groups of pixels based on their connectivety and regions with a pixel count smaller than the one specified by
+#' function will label groups of pixels based on their connectivity and regions with a pixel count smaller than the one specified by
 #' \emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
 #' by \emph{agg.radius} and proceeds to relable the pixels covered by samples. Finally, this information is used to label the original
 #' samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}

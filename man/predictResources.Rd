@@ -30,11 +30,11 @@ number of validation and predicted cases for both presences and absences. Once a
 reported values are summed and used to derive the F1-measure. The F1-measure is estimated as \emph{2 * (P * R) / (P + R)} where
 \emph{P} is the Precision (ratio of true positives within the number of predicted values) and \emph{R} is the Recall (ratio of
 true positives within the number of validation samples). As a consequence, rather than reporting on an average performance, the
-final performance assessment reported by \emph{stratModel} depicts an objective picture on how the model performed among the
-differents sets sample regions. This metric is provided for presences (\emph{presence.data}) and absences ({\emph{absence.data}})
+final performance assessment reported by \emph{predictResources} depicts an objective picture on how the model performed among the
+different sets sample regions. This metric is provided for presences (\emph{presence.data}) and absences ({\emph{absence.data}})
 separately offering an overview on the stability of the model. This analysis is performed using a Random Forest model as provided
 within the \code{\link[caret]{train}} function of the caret package. The final predictive model is then derived with all samples.
-The output of \emph{stratModel} is a list object consisting of:
+The output of \emph{predictResources} is a list object consisting of:
 \itemize{
  \item{\emph{f1} - \emph{data.frame} with final F1-measure for presences and absences.}
  \item{validation - \emph{data.frame} with region identifiers and validation sample count at each iteration.}

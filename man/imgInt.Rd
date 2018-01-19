@@ -61,5 +61,5 @@ Otherwise, all pixels are considered providing a \emph{RasterBrick}. However, if
 }
 }
 \seealso{
-@seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
+\code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 }

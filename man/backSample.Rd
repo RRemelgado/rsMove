@@ -11,7 +11,7 @@ backSample(xy = xy, region.id = region.id,
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
-\item{region.id}{Vector of region identifyers for each sample.}
+\item{region.id}{Vector of region identifyirs for each sample.}
 
 \item{sampling.method}{One of \emph{random} or \emph{pca}. Default is \emph{random}.}
 
@@ -31,7 +31,7 @@ of \emph{env.data} and retrieves n background samples where n is determined by \
 selection of samples is dependent on the method chosen by the user. If \emph{sampling.method} is set to \emph{random},
 the function will select samples randomly. However, if \emph{pca} is used, the function will use a Principal
 Components Analysis (PCA) over \emph{env.data} to evaluate the similarity between the samples associated to \emph{xy}
-and the intial set of random samples First, based on this PCA, the function selects the most important Principal Components
+and the initial set of random samples First, based on this PCA, the function selects the most important Principal Components
 (PC's) using the kaiser rule (i.e. PC's with eigenvalues greater than 1). Then, for each PC, the function estimates
 the median and the Median Absolute Deviation (MAD) for each unique identifier in \emph{region.id}) and selects background
 samples where the difference between their variance and the variance of the region samples exceeds the MAD. Then, the

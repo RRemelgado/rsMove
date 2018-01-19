@@ -37,7 +37,7 @@ First, for each point in \emph{xy}, the function compares its observation date (
 the acquisition dates (\emph{env.dates}) of \emph{env.data} to select non \emph{NA} timesteps within a
 pre-defined temporal window (\emph{temporal.buffer}). The user can adjust this window to determine which
 images are the most important. For example, if one wishes to know how the landscape evolved up to the
-observation date of the target sample and daily satellite data is avaliable, \emph{temporal.buffer} can be
+observation date of the target sample and daily satellite data is available, \emph{temporal.buffer} can be
 define as, e.g., c(30,0) forcing the function to use all images to only use pixels recorded within the previous
 30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated.
 The statistical metric is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression

@@ -3,7 +3,7 @@
 \docType{data}
 \name{longMove}
 \alias{longMove}
-\title{Example data of animal movements during a migtation.}
+\title{Example data of animal movements during a migration.}
 \format{A SpatialPointsDataFrame}
 \usage{
 data(longMove)
@@ -14,7 +14,7 @@ Movement data for one White Stork collected during it migration between Germany 
 \details{
 \itemize{
   \item{timestamp}{observation timestamp.}
-  \item{long}{longiture.}
+  \item{long}{longitude.}
   \item{lat}{latitude.}
 }
 }

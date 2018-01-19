@@ -26,7 +26,7 @@ A \emph{SpatialPointsDataFrame} with sampled pixels reporting on polygon percent
 {\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making it more efficient
 over large areas and converting its output into point samples rather than a raster object. For each polygon in (\emph{"pol.shp"}),
 \emph{poly2sample} extracts the overlapping pixels derived from \emph{ref.ext}. Then, for each pixel, the function estimates the
-percentage of it that is covered by the reference polygon. Finnally, the function extracts coordinate pairs for pixels that has a
+percentage of it that is covered by the reference polygon. Finally, the function extracts coordinate pairs for pixels that has a
 percent coverage equal to or greater than \emph{min.cover}.}
 }
 \examples{

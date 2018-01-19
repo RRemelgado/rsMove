@@ -9,7 +9,7 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @importFrom raster crs nlayers brick
 #' @importFrom stats lm
-#' @seealso @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
+#' @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date. If a \emph{data.frame}, columns represent dates and rows represent samples.
 #' @details {Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{target.dates}).
 #' A temporal buffer (\emph{time.buffer}) is required to limit the search for reference data points (\emph{time.buffer}).

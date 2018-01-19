@@ -25,7 +25,7 @@ resolution changes the amount of samples and sample regions based on a set of co
 }
 \details{
 {Given a base spatial resolution (\emph{pixel.res} and a vector of temporal resolutions (\emph{time.res}), the function determines
-the number of unique pixels and unique pixel regions after their temporal agggregation. For each temporal resolution, the function starts by
+the number of unique pixels and unique pixel regions after their temporal aggregation. For each temporal resolution, the function starts by
 converting \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number of
 samples and sample regions. The output of the function consists of:
 \itemize{

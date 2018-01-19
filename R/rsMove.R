@@ -5,13 +5,13 @@
 #' @import raster sp
 NULL
 
-#' Example data of animal movements during a migtation.
+#' Example data of animal movements during a migration.
 #'
 #'Movement data for one White Stork collected during it migration between Germany and Spain.
 #'
 #' \itemize{
 #'   \item{timestamp}{observation timestamp.}
-#'   \item{long}{longiture.}
+#'   \item{long}{longitude.}
 #'   \item{lat}{latitude.}
 #' }
 #'

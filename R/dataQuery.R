@@ -16,11 +16,11 @@
 #' temporal distance between the sample observation date (\emph{obs.dates}) and the date on which the environmental data was
 #' collected (\emph{env.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
 #' non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
-#' are considred in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
+#' are considered in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
 #' environmental information acquired after the sample observation date and limit the search to -30 days. If \emph{time.buffer}
 #' is set to null all acquisitions are considered. The user may also provide \emph{spatial.buffer} to spatially smooth the selected
 #' environmental information. In this case, for each sample, the function will consider the neighboring pixels within the selected
-#' acquisition and aplly a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
+#' acquisition and apply a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
 #' will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
 #' \emph{env.dates} should refer to each column.}
 #' @examples {

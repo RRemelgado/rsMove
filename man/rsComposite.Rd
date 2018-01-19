@@ -8,7 +8,7 @@ rsComposite(img, img.dates, obs.dates, comp.method = "closest",
   temporal.buffer = NULL)
 }
 \arguments{
-\item{img}{Object of class \emph{RasterSpack} or \emph{RasterBrick}.}
+\item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
 
 \item{img.dates}{Object of class \emph{Date} with \emph{img} observation dates.}
 
@@ -34,7 +34,7 @@ As an alternative, \emph{temporal.buffer} can be specified manually and will
 be required if \emph{obs.dates} consists of a single value. The user can also
 specify how the compositing should be done. \emph{comp.method} can be set to:
 #' \itemize{
- \item{\emph{closest} - Uses layer with the closest possible date in relaton to the reference date.}
+ \item{\emph{closest} - Uses layer with the closest possible date in relation to the reference date.}
  \item{\emph{phenological} - Uses the layer with the Day of the Year (DoY) in relation to the reference date.}}
 The final output of \emph{rsComposite} is a list consisting of:
 #' \itemize{
@@ -43,7 +43,7 @@ The final output of \emph{rsComposite} is a list consisting of:
  \item{\emph{pixel.count} - pixel count of unique values in \emph{dates}. Additionally, it reports on NA values.}
  \item{\emph{target.date} - Reference date used during compositing.}
  \item{\emph{temporal.buffer} - Temporal buffer used during compositing.}}
- If \emph{pheno2} is used, for each pixel, the function wilhin estimate a weighted
+ If \emph{pheno2} is used, for each pixel, the function will estimate a weighted
  mean of the clear pixels within the temporal buffer. The weights represent the
  inverse time difference between the target and the available dates giver higher
  weights to small differences.}
