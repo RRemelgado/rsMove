@@ -5,11 +5,11 @@
 #' @param agg.radius Minimum radius for pixel aggregation. Unit depends on the projection of the data.
 #' @param nr.points Minimum number of samples per pixel.
 #' @param nr.pixels Minimum number of pixels per region.
-#' @param pixel.res Pixel resolution os a valid raster layer.
+#' @param pixel.res Pixel resolution or a valid raster layer.
 #' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @return A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 #' @details {First, the samples are converted to pixel coordinates and removes pixels with a corresponding number of points greater
-#' than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internaly, the
+#' than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internally, the
 #' function will label groups of pixels based on their connectivity and regions with a pixel count smaller than the one specified by
 #' \emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
 #' by \emph{agg.radius} and proceeds to reliable the pixels covered by samples. Finally, this information is used to label the original

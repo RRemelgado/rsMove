@@ -16,7 +16,7 @@ labelSample(xy = xy, agg.radius = agg.radius, nr.points = NULL,
 
 \item{nr.pixels}{Minimum number of pixels per region.}
 
-\item{pixel.res}{Pixel resolution os a valid raster layer.}
+\item{pixel.res}{Pixel resolution or a valid raster layer.}
 }
 \value{
 A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
@@ -26,7 +26,7 @@ A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their
 }
 \details{
 {First, the samples are converted to pixel coordinates and removes pixels with a corresponding number of points greater
-than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internaly, the
+than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internally, the
 function will label groups of pixels based on their connectivity and regions with a pixel count smaller than the one specified by
 \emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
 by \emph{agg.radius} and proceeds to reliable the pixels covered by samples. Finally, this information is used to label the original

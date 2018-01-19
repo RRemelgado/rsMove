@@ -9,7 +9,7 @@
 #' @return A list object.
 #' @details {The function segments an input raster layer (\emph{img}) using a
 #' connected component region labeling approach. For each pixel, the function
-#' estimates the difference between it and its imidiate neighbors. If the
+#' estimates the difference between it and its immediate neighbors. If the
 #' difference is below the threshold defined by \emph{break.point} these are
 #' aggregated into a single region. Moreover, the user can define a minimum pixel
 #' value using \emph{min.value} which will ignore all pixels below that value. The
