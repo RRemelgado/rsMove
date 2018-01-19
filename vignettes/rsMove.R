@@ -7,6 +7,9 @@ library(ggplot2)
 library(knitr)
 library(kableExtra)
 
+## ------------------------------------------------------------------------
+plotRGB(brick(system.file('vignettes', 'untitled.png', package="rsMove")))
+
 ## ----message=FALSE-------------------------------------------------------
 data("longMove")
 data("shortMove")
