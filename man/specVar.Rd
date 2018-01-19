@@ -15,7 +15,7 @@ specVar(img = img, pixel.res = pixel.res)
 A \emph{list}.
 }
 \description{
-{Tool to support the selection of adequate satellite spatial resoltuon. Evaluates
+{Tool to support the selection of adequate satellite spatial resolution. Evaluates
 how the spectral variability within a pixel change with the change in spatial resolution.}
 }
 \details{

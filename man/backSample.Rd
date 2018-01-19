@@ -11,7 +11,7 @@ backSample(xy = xy, region.id = region.id,
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
-\item{region.id}{Vector of region identifyirs for each sample.}
+\item{region.id}{Vector of region identifiers for each sample.}
 
 \item{sampling.method}{One of \emph{random} or \emph{pca}. Default is \emph{random}.}
 

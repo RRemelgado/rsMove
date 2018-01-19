@@ -29,7 +29,7 @@ A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their
 than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internaly, the
 function will label groups of pixels based on their connectivity and regions with a pixel count smaller than the one specified by
 \emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
-by \emph{agg.radius} and proceeds to relable the pixels covered by samples. Finally, this information is used to label the original
+by \emph{agg.radius} and proceeds to reliable the pixels covered by samples. Finally, this information is used to label the original
 samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}
 and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may assign a raster object to \emph{pixel.res}.}
 }
