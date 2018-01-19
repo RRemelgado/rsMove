@@ -1,7 +1,7 @@
 Package: rsMove
 Type: Package
 Title: Remote Sensing for Movement Ecology
-Version: 0.2.3.9000
+Version: 0.2.3
 Date: 2018-01-09
 Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de")
 URL: https://github.com/RRemelgado/rsMove/tree/master/
