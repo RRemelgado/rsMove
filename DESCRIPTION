@@ -12,5 +12,5 @@ LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, RCurl
 RoxygenNote: 6.0.1
 License: GPL (>= 3)
-Suggests: knitr, rmarkdown, kableExtra
+Suggests: knitr, rmarkdown, kableExtra, imager
 VignetteBuilder: knitr
