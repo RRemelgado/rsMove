@@ -20,7 +20,7 @@ tMoveRes(xy = xy, obs.date = obs.date, time.res = time.res,
 A \emph{list} object reporting on the amount and distribution of unique pixels and connected pixel regions per temporal resolution.
 }
 \description{
-{Tool to support the selection of an adequate satellite temporal resoltuon. It evaluates how the change in temporal
+{Tool to support the selection of an adequate satellite temporal resolution. It evaluates how the change in temporal
 resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
 }
 \details{
