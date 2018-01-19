@@ -1,6 +1,6 @@
 #' @title tMoveRes
 #'
-#' @description {Tool to support the selection of an adequate satellite temporal resoltuon. It evaluates how the change in temporal
+#' @description {Tool to support the selection of an adequate satellite temporal resolution. It evaluates how the change in temporal
 #' resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
