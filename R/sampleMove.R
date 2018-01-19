@@ -55,7 +55,7 @@ sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, me
   obs.time <- obs.time[io]
   rm(io)
   if (method!='m' & method!='deg') {stop(paste0('method ', method, ' not recognized'))}
-  if (!is.null(tUnit)) {tUnit<-'days'}
+  if (is.null(tUnit)) {tUnit<-'mins'}
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # 2. extract samples
