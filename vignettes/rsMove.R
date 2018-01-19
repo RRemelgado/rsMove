@@ -6,10 +6,6 @@ library(sp)
 library(ggplot2)
 library(knitr)
 library(kableExtra)
-library(imager)
-
-## ---- echo=FALSE, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"----
-plot(load.image(system.file('vignettes', 'untitled.png', package="rsMove")), axes=FALSE)
 
 ## ----message=FALSE-------------------------------------------------------
 data("longMove")
@@ -78,53 +74,4 @@ points(shortMove, type="l")
 ## ------------------------------------------------------------------------
 obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="%Y/%m/%d %H:%M:%S")
 reduced.samples <- moveReduce(xy=shortMove, obs.time=obs.time, img=landCover)
-
-## ---- out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE----
-plot(reduced.samples$total.time, ext=shortMove)
-points(reduced.samples$points, type="l")
-points(shortMove)
-points(reduced.samples$points, pch=20, col="red")
-
-## ---- echo=FALSE---------------------------------------------------------
-reduced.samples$points$`Elapsed time (minutes)` <- format(reduced.samples$points$`Elapsed time (minutes)`, digits=3)
-kable_styling(kable(head(reduced.samples$points, 5), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
-
-## ------------------------------------------------------------------------
-env.query <- dataQuery(xy=reduced.samples$points, obs.dates=as.Date(reduced.samples$points$`Timeststamp (start)`), env.data=ndvi, env.dates=ndvi.dates, time.buffer=c(30,30))
-
-## ---- echo=FALSE---------------------------------------------------------
-reduced.samples$points$`Elapsed time (minutes)` <- as.numeric(reduced.samples$points$`Elapsed time (minutes)`)
-
-## ---- out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"----
-plotMove(x=reduced.samples$points$x, y=reduced.samples$points$y, size.var=reduced.samples$points$`Elapsed time (minutes)`, fill.var=env.query$value, var.type="cont")
-
-## ------------------------------------------------------------------------
-seg <- moveSeg(xy=shortMove, obs.time=obs.time, env.data=landCover, data.type="cat")
-
-## ---- echo=FALSE---------------------------------------------------------
-seg$stats$`Total time (minutes)` <- format(seg$stats$`Total time (minutes)`, digits=3)
-kable_styling(kable(head(seg$stats, 5), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
-
-## ---- out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", fig.show='hold', echo=FALSE----
-plot(seg$plot)
-
-## ------------------------------------------------------------------------
-# derive reduced sample set
-reduced.samples <- moveReduce(xy=shortMove, obs.time=obs.time, img=ndvi)
-obs.dates <- as.Date(reduced.samples$points$`Timeststamp (start)`)
-
-# estimate temporal changes (estimate slope)
-time.change <- timeDir(xy=reduced.samples$points, obs.dates=obs.dates, env.data=ndvi, env.dates=ndvi.dates, temporal.buffer=c(4,13))
-
-## ---- out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", fig.show='hold', echo=FALSE----
-time.change$plot
-
-## ------------------------------------------------------------------------
-# derived sample subset for arable land
-ind <- which(extract(landCover, reduced.samples$points)==2)
-al.samples <- reduced.samples$points[ind,]
-
-## ---- out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", fig.show='hold', echo=FALSE----
-# plot elapsed time VS temporal change
-plotMove(x=al.samples$x, y=al.samples$y, size.var=al.samples$`Elapsed time (minutes)`, fill.var=time.change$stats$value[ind], var.type="cont")
 
