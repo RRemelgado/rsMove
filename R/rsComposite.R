@@ -9,7 +9,7 @@
 #' @param temporal.buffer Search buffer (expressed in days). The default is 30.
 #' @importFrom raster nlayers calc cellStats
 #' @importFrom stats lm
-#' @seealso \code{\link{imgInt}} \code{\link{dataQuery}} \code{\link{proSat}}
+#' @seealso \code{\link{imgInt}} \code{\link{dataQuery}}
 #' @return A \emph{list}.
 #' @details {The function uses a multi-layer raster object to build a composite for
 #' a reference date which corresponds to the median of \emph{obs.dates}. Moreover,

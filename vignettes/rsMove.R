@@ -3,9 +3,9 @@
 library(rsMove)
 library(raster)
 library(sp)
-require(ggplot2)
-require(knitr)
-require(kableExtra)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
 
 ## ----message=FALSE-------------------------------------------------------
 data("longMove")

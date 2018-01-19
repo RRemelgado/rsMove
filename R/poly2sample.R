@@ -5,7 +5,8 @@
 #' @param ref.ext Object of class \emph{Extent} or a \emph{RasterLayer} from which an extent can be derived.
 #' @param min.cover Minimum percent a pixel should be covered by a polygon for sampling (0-100). Default is 100.
 #' @param pixel.res Pixel resolution. Required if \emph{ref.ext} is an \emph{Extent} object. Unit depends on spatial projection.
-#' @import sp raster rgdal
+#' @importFrom raster raster extent crop rasterToPoints rasterize xyFromCell cellFromXY crs
+#' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame} with sampled pixels reporting on polygon percent coverage.
 #' @details {\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making it more efficient

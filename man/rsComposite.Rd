@@ -72,5 +72,5 @@ The final output of \emph{rsComposite} is a list consisting of:
 }
 }
 \seealso{
-\code{\link{imgInt}} \code{\link{dataQuery}} \code{\link{proSat}}
+\code{\link{imgInt}} \code{\link{dataQuery}}
 }

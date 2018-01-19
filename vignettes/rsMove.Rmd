@@ -23,9 +23,9 @@ Remote sensing became a fundamental tool in the scope of movement ecology. It of
 library(rsMove)
 library(raster)
 library(sp)
-require(ggplot2)
-require(knitr)
-require(kableExtra)
+library(ggplot2)
+library(knitr)
+library(kableExtra)
 ```
 
 </br>
