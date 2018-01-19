@@ -6,6 +6,7 @@
 #' @param nr.points Minimum number of samples per pixel.
 #' @param nr.pixels Minimum number of pixels per region.
 #' @param pixel.res Pixel resolution os a valid raster layer.
+#' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @return A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 #' @details {First, the samples are converted to pixel coordinates and removes pixels with a corresponding number of points greater
 #' than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity between neighboring samples is evaluated. Internaly, the

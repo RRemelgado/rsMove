@@ -9,6 +9,7 @@
 #' @importFrom raster cellFromXY xyFromCell crs ncell
 #' @importFrom sp SpatialPoints SpatialPointsDataFrame
 #' @importFrom stats complete.cases prcomp median
+#' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @return A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame} of background samples for unique pixels in \emph{env.data}.
 #' @details {First, the function determines the unique pixel coordinates for \emph{xy} based on the dimensions
 #' of \emph{env.data} and retrieves n background samples where n is determined by \emph{nr.samples}. Then, the
