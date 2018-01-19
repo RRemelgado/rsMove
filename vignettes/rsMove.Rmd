@@ -10,7 +10,7 @@ vignette: >
 ---
 
 </br>
-<p align="center"><img src="C:\Users\rus14jh.UNI-WUERZBURG\Desktop\Untitled.png" height="100%" width="100%"/></p>
+<p align="center"><img src=system.file('vignettes', 'untitled.png', package="rsMove") height="100%" width="100%"/></p>
 </br>
 
 ### Why develop rsMove?
