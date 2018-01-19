@@ -6,9 +6,10 @@ library(sp)
 library(ggplot2)
 library(knitr)
 library(kableExtra)
+library(imager)
 
-## ------------------------------------------------------------------------
-plotRGB(brick(system.file('vignettes', 'untitled.png', package="rsMove")))
+## ---- echo=FALSE, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"----
+plot(load.image(system.file('vignettes', 'untitled.png', package="rsMove")), axes=FALSE)
 
 ## ----message=FALSE-------------------------------------------------------
 data("longMove")
