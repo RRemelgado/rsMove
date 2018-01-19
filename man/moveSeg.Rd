@@ -52,18 +52,17 @@ In this case, the function will report on the majority value within the buffer. 
  require(raster)
 
  # read raster data
- r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+ r <- raster(system.file('extdata', 'landCover.tif', package="rsMove"))
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+ data(shortMove)
 
  # observation time
- obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+ obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, data.type="cont", threshold=0.1)
+ seg <- moveSeg(xy=shortMove, obs.time=obs.time, env.data=r, data.type="cat")
 
 }
 }

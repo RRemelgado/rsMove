@@ -20,12 +20,10 @@
 #' require(raster)
 #'
 #' # reference data
-#' sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
-#' moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
-#' moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
+#' data(longMove)
 #'
 #' # extract regions
-#' hm <- hotMove(xy=moveData, pixel.res=0.1, return.shp=TRUE)
+#' hm <- hotMove(xy=longMove, pixel.res=0.1, return.shp=TRUE)
 #'
 #' # plot shapefile (color by region)
 #' plot(hm$polygons, col=hm$indices)

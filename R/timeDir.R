@@ -6,8 +6,7 @@
 #' @param img Object of class
 #' @param env.data Object of class \emph{RasterStack} or \emph{RasterBrick} or \emph{data.frame}.
 #' @param env.dates Object of class \emph{Date} with \emph{env.data} observation dates.
-#' @param window.size Temporal moving window size (expressed in days).
-#' @param sample.direction One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.
+#' @param temporal.buffer two element vector with temporal window size (expressed in days).
 #' @param stat.fun Output statistical metric.
 #' @param min.count Minimum number of samples required by \emph{stat.fun}. Default is 2.
 #' @importFrom raster crs extract
@@ -19,43 +18,43 @@
 #' @details {This function evaluates how environmental conditions change in time along a movement track.
 #' First, for each point in \emph{xy}, the function compares its observation date (\emph{obs.dates}) against
 #' the acquisition dates (\emph{env.dates}) of \emph{env.data} to select non \emph{NA} timesteps within a
-#' pre-defined temporal window (\emph{window.size}). The user can chose to only consider time steps before
-#' (\emph{backward}) or after (\emph{forward} the target observation time or look at both directios (\emph{both}).
-#' If the latest is chosen, the function applies \emph{window.size} equally to both directions. After selecting
-#' adequate temporal information for each data point, a statistical metric is estimated. The statistical metric
-#' is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression between the
-#' acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
+#' pre-defined temporal window (\emph{temporal.buffer}). The user can adjust this window to determine which
+#' images are the most important. For example, if one wishes to know how the landscape evolved up to the
+#' observation date of the target sample and daily satellite data is avaliable, \emph{temporal.buffer} can be
+#' define as, e.g., c(30,0) forcing the function to use all images to only use pixels recorded within the previous
+#' 30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated.
+#' The statistical metric is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression
+#' between the acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
 #' for \emph{env.dates} and y for \emph{env.data}.}
 #' @examples {
 #'
 #'  require(raster)
 #'
 #'  # read raster data
-#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
-#'  rsStk <- stack(file)
-#'  rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+#'  r.stk <- stack(file)
+#'  r.stk <- stack(r.stk, r.stk, r.stk) # dummy files for the example
 #'
 #'  # read movement data
-#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
+#'  data(shortMove)
 #'
 #'  # raster dates
 #'  r.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 #'
 #'  # sample dates
-#'  obs.dates <- as.Date(moveData@data$date)
+#'  obs.dates <- as.Date(shortMove@data$date)
 #'
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  time.env <- timeDir(xy=moveData, obs.dates=obs.dates, env.data=rsStk,
-#'  env.dates=r.dates, window.size=10, sample.direction="backward", stat.fun=of)
+#'  time.env <- timeDir(xy=shortMove, obs.dates=obs.dates, env.data=r.stk,
+#'  env.dates=r.dates, temporal.buffer=c(30,30), stat.fun=of)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-timeDir <- function(xy=NULL, obs.dates=obs.dates, img=NULL, env.data=NULL, env.dates=env.dates, window.size=NULL, sample.direction=NULL, stat.fun=NULL, min.count=2) {
+timeDir <- function(xy=NULL, obs.dates=obs.dates, img=NULL, env.data=NULL, env.dates=env.dates, temporal.buffer=temporal.buffer, stat.fun=NULL, min.count=2) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
@@ -81,13 +80,8 @@ timeDir <- function(xy=NULL, obs.dates=obs.dates, img=NULL, env.data=NULL, env.d
   if (class(env.data)[1]=='data.frame') {if (length(env.dates)!=ncol(env.data)) {stop('"env.data" and "env.dates" have different lengths')}}
 
   # time information
-  if (is.null(window.size)) {stop('"window.size" is missing')} else {if (!is.numeric(window.size)) {stop('"window.size" us not numeric')}}
-
-  # query type
-  if (!is.null(sample.direction)) {
-    if (length(sample.direction)>1) {stop('"sample.direction" has too many entries')}
-    if (!sample.direction%in%c('forward', 'backward', 'both')) {stop('"sample.direction" is not a valid entry')}
-  } else {sample.direction <- 'both'}
+  if (!is.numeric(temporal.buffer)) {stop('"temporal.buffer" us not numeric')}
+  if (length(temporal.buffer)!=2) {stop('"temporal.buffer" does not have two elements')}
 
   # check/define input metrics
   if (is.null(stat.fun)) {stat.fun <- function(x,y) {lm(y~x)$coefficients[2]}} else {
@@ -100,7 +94,7 @@ timeDir <- function(xy=NULL, obs.dates=obs.dates, img=NULL, env.data=NULL, env.d
   if (!is.data.frame(env.data)) {
 
     # retrieve environmental variables
-    ind <- which(env.dates%in%seq.Date(min(obs.dates-window.size), max(obs.dates+window.size), by=1))
+    ind <- which(env.dates%in%seq.Date(min(obs.dates-temporal.buffer[1]), max(obs.dates+temporal.buffer[2]), by=1))
     env.data <- extract(env.data[[ind]], xy@coords)
     env.dates <- env.dates[ind]
 
@@ -110,32 +104,12 @@ timeDir <- function(xy=NULL, obs.dates=obs.dates, img=NULL, env.data=NULL, env.d
 # 3. apply sampling approach
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-  # backwards sampling
-  if (sample.direction=='backward') {
-    f <- function(i) {
-      ind <- which(env.dates >= (obs.dates[i]-window.size) & env.dates <= obs.dates[i])
-      x <- as.numeric(env.dates[ind])
-      y <- env.data[i,]
-      u <- !is.na(y)
-      if (sum(u) >= min.count) {return(stat.fun(x[u],y[u]))} else {return(NA)}}}
-
-  # forward sampling
-  if (sample.direction=='forward') {
-    f <- function(i) {
-      ind <- which(env.dates >= obs.dates & env.dates <= (obs.dates[i]+window.size))
-      x <- as.numeric(env.dates[ind])
-      y <- env.data[i,]
-      u <- !is.na(y)
-      if (sum(u) >= min.count) {return(stat.fun(x[u],y[u]))} else {return(NA)}}}
-
-  # Backward-Forward sampling
-  if (sample.direction=='both') {
   f <- function(i) {
-    ind <- which(env.dates >= (obs.dates[i]-window.size) & env.dates <= (obs.dates[i]+window.size))
+    ind <- which(env.dates >= (obs.dates[i]-temporal.buffer[1]) & env.dates <= (obs.dates[i]+temporal.buffer[2]))
     x <- as.numeric(env.dates[ind])
     y <- env.data[i,]
     u <- !is.na(y)
-    if (sum(u) >= min.count) {return(stat.fun(x[u],y[u]))} else {return(NA)}}}
+    if (sum(u) >= min.count) {return(stat.fun(x[u],y[u]))} else {return(NA)}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 4. query samples

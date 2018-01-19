@@ -39,23 +39,24 @@ Otherwise, all pixels are considered providing a \emph{RasterBrick}. However, if
  require(raster)
 
  #'  # read raster data
- file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
- rsStk <- stack(file)
- rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+ r.stk <- stack(file)
+ r.stk <- stack(r.stk, r.stk, r.stk) # dummy files for the example
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
+ data(shortMove)
 
  # raster dates
- env.dates = seq.Date(as.Date("2012-01-01"), as.Date("2012-12-31"), 45)
+ file.name <- names(r.stk)
+ env.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
+ substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # target dates
  target.dates = as.Date("2012-04-01")
 
  # interpolate raster data to target dates
- i.env.data <- imgInt(env.data=rsStk, env.dates=env.dates,
- target.dates=target.dates, time.buffer=c(60,60), xy=moveData)
+ i.env.data <- imgInt(env.data=r.stk, env.dates=env.dates,
+ target.dates=target.dates, time.buffer=c(60,60), xy=shortMove)
 
 }
 }

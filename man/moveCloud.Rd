@@ -50,16 +50,12 @@ final output provides a \emph{data.frame} ($report) with information on:
 
  require(raster)
 
- # read raster data
- r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
-
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+ data(shortMove)
 
  # test function for 30 day buffer
- od <- as.Date(moveData@data$date)
- c.cover <- moveCloud(xy=moveData, obs.dates=od, data.path=".", buffer.size=c(30,30))
+ od <- as.Date(shortMove@data$date)
+ c.cover <- moveCloud(xy=shortMove, obs.dates=od, data.path=".", buffer.size=c(30,30))
 
 }
 }

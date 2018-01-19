@@ -31,20 +31,19 @@
 #'  require(raster)
 #'
 #'  # read raster data
-#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
-#'  rsStk <- stack(file)
+#'  file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+#'  r.stk <- stack(file)
 #'
 #'  # read movement data
-#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
+#'  data(shortMove)
 #'
 #'  # find sample regions
-#'  label <- labelSample(xy=moveData, agg.radius=500, nr.pixels=2, pixel.res=30)
+#'  label <- labelSample(xy=shortMove, agg.radius=500, nr.pixels=2, pixel.res=30)
 #'
 #'  # select background samples
 #'  ind <- which(label>0) # selected samples
-#'  bSamples <- backSample(xy=moveData[ind,], region.id=label[ind],
-#'  env.data=rsStk, sampling.method='random')
+#'  bSamples <- backSample(xy=shortMove[ind,], region.id=label[ind],
+#'  env.data=r.stk, sampling.method='random')
 #'
 #' }
 #' @export

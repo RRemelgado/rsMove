@@ -21,14 +21,13 @@
 #'  require(raster)
 #'
 #'  # read raster data
-#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 #'
 #'  # read movement data
-#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+#'  data(shortMove)
 #'
 #'  # derive region labels
-#'  labels <- labelSample(xy=moveData, agg.radius=90, nr.pixels=2, pixel.res=30)
+#'  labels <- labelSample(xy=shortMove, agg.radius=90, nr.pixels=2, pixel.res=30)
 #'
 #' }
 #' @export

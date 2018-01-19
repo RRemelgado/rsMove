@@ -9,9 +9,8 @@ BugReports: https://github.com/RRemelgado/rsMove/issues/
 Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>
 Description: Tools that support the combined use of animal movement and remote sensing data.
 LazyData: TRUE
-Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, ncdf4, RCurl, XML, httr
+Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices
 RoxygenNote: 6.0.1
 License: GPL (>= 3)
-Suggests: knitr,
-    rmarkdown
+Suggests: knitr, rmarkdown
 VignetteBuilder: knitr

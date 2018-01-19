@@ -34,11 +34,10 @@ of samples and sample regions. The output of the function consists of:
  require(raster)
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData)
+ data(shortMove)
 
  # test function for 5, 10 20 and 30 m
- a.res <- sMoveRes(xy=moveData, pixel.res=c(5, 10, 20, 30))
+ a.res <- sMoveRes(xy=shortMove, pixel.res=c(5, 10, 20, 30))
 
 }
 }

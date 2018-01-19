@@ -35,17 +35,16 @@ as an example, \emph{plotMove} can represent the relation between the elapsed ti
  require(raster)
 
  # read raster data
- r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+ r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+ data(shortMove)
 
  # observation time
- time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
+ time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # reduce amount of samples
- move.reduce <- moveReduce(xy=moveData, obs.time=time, img=r)
+ move.reduce <- moveReduce(xy=shortMove, obs.time=time, img=r)
 
  # query data
  ov <- extract(r, move.reduce$points)

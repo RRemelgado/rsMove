@@ -23,16 +23,14 @@
 #'  require(raster)
 #'
 #' # reference data
-#' sprj <- crs("+proj=longlat +ellps=WGS84 +no_defs")
-#' moveData <- read.csv(system.file('extdata', 'latlon_example.csv', package="rsMove"))
-#' moveData <- SpatialPointsDataFrame(moveData[,2:3], moveData, proj4string=sprj)
+#' data(longMove)
 #'
 #'  # sampling without reference grid
-#'  obs.time = strptime(moveData$timestamp, "%Y-%m-%d %H:%M:%S")
-#'  output <- sampleMove(xy=moveData, obs.time=obs.time, search.radius=7, method='deg')
+#'  obs.time = strptime(longMove$timestamp, "%Y-%m-%d %H:%M:%S")
+#'  output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, method='deg')
 #'
 #'  # compare original vs new samples
-#'  plot(moveData, col="black", pch=16)
+#'  plot(longMove, col="black", pch=16)
 #'  points(output$x, output$y, col="red", pch=15)
 #'
 #' }

@@ -50,29 +50,28 @@ The output of \emph{stratModel} is a list object consisting of:
  require(sp)
 
  # read remote sensing data
- file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
- rsStk <- stack(file)
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+ r.stk <- stack(file)
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
+ data(shortMove)
 
  # observation time
- obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+ obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # remove redundant samples
- moveData <- moveReduce(xy=moveData, obs.time=obs.time, img=rsStk)$points
+ shortMove <- moveReduce(xy=shortMove, obs.time=obs.time, img=rsStk)$points
 
  # retrieve remote sensing data for samples
- rsQuery <- extract(rsStk, moveData)
+ rsQuery <- extract(rsStk, shortMove)
 
  # identify unique sample regions
- label <- labelSample(xy=moveData, agg.radius=90, pixel.res=rsStk)
+ label <- labelSample(xy=shortMove, agg.radius=90, pixel.res=rsStk)
 
  # select background samples
  ind <- which(!is.na(label)) # selected samples
- bSamples <- backSample(xy=moveData[ind,], region.id=label[ind],
+ bSamples <- backSample(xy=shortMove[ind,], region.id=label[ind],
  img=rsStk, sampling.method='pca')
 
  # derive model predictions

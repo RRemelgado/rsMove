@@ -48,23 +48,24 @@ will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spa
  require(raster)
 
  # read raster data
- file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
- rsStk <- stack(file)
- rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+ r.stk <- stack(file)
+ r.stk <- stack(r.stk, r.stk, r.stk) # dummy files for the example
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130805-20130811.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[1:10,1:2], moveData[1:10,], proj4string=crs(rsStk))
+ data(shortMove)
 
  # raster dates
- env.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
+ file.name <- names(r.stk)
+ r.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
+ substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # sample dates
- obs.dates <- as.Date(moveData@data$date)
+ obs.dates <- as.Date(shortMove@data$date)
 
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=moveData, obs.dates=obs.dates,
- env.data=rsStk, env.dates=env.dates, time.buffer=c(30,30))
+ rsQuery <- dataQuery(xy=shortMove, obs.dates=obs.dates,
+ env.data=r.stk, env.dates=r.dates, time.buffer=c(30,30))
 
 }
 

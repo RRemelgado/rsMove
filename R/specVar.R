@@ -22,7 +22,7 @@
 #'  require(raster)
 #'
 #'  # read raster data
-#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 #'
 #'  # apply function
 #'  s.var <- specVar(img=r, pixel.res=60)

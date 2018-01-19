@@ -54,18 +54,20 @@ The final output of \emph{rsComposite} is a list consisting of:
  require(raster)
 
  # read raster data
- file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
- rsStk <- stack(file)
- rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+ r.stk <- stack(file)
+ r.stk <- stack(r.stk, r.stk, r.stk) # dummy files for the example
 
  # raster dates
- img.dates = seq.Date(as.Date("2013-01-01"), as.Date("2013-12-31"), 45)
+ file.name <- names(r.stk)
+ img.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
+ substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # target date
  obs.dates = as.Date("2013-06-01")
 
  # build composite
- r.comp <- rsComposite(rsStk, img.dates, obs.dates, comp.method="closest", temporal.buffer=90)
+ r.comp <- rsComposite(r.stk, img.dates, obs.dates, comp.method="closest", temporal.buffer=90)
 
 }
 }

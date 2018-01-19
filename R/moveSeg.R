@@ -32,18 +32,17 @@
 #'  require(raster)
 #'
 #'  # read raster data
-#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  r <- raster(system.file('extdata', 'landCover.tif', package="rsMove"))
 #'
 #'  # read movement data
-#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+#'  data(shortMove)
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(moveData@data$date, ' ', moveData@data$time),
+#'  obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(xy=moveData, obs.time=obs.time, env.data=r, data.type="cont", threshold=0.1)
+#'  seg <- moveSeg(xy=shortMove, obs.time=obs.time, env.data=r, data.type="cat")
 #'
 #' }
 #' @export
@@ -184,7 +183,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
       st <- NA
       et <- NA}
     return(data.frame(sid=x, count=length(ind), start=st, end=et,
-                      elapsed=et, value=rv[ind[1]], stringsAsFactors=FALSE))}))
+                      elapsed=as.numeric(tt), value=rv[x], stringsAsFactors=FALSE))}))
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 5. build plot
@@ -215,7 +214,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
       if (mv > yr) {yr <- (yr+0.2)*m} else {yr <- yr*m}
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="time", fill="count")) + geom_bar(stat="identity") +
+      p <- ggplot(df, aes_string(x="sid", y="count", fill="value")) + geom_bar(stat="identity") +
         xlab('\nSegment ID') + ylab('Sample count\n') +
         theme(axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
@@ -229,7 +228,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
     if (!is.null(obs.time)) {
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +
+      p <- ggplot(df, aes_string(x="sid", y="elapsed", fill="value")) + geom_bar(stat="identity") +
         xlab('\nSegment ID') + ylab('Time Spent (minutes)\n') + scale_fill_discrete(name="Class") +
         theme(axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))
@@ -238,7 +237,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
     } else {
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="time", fill="count")) + geom_bar(stat="identity") +
+      p <- ggplot(df, aes_string(x="sid", y="count", fill="value")) + geom_bar(stat="identity") +
         xlab('\nSegment ID') + ylab('Sample count\n') + scale_fill_discrete(name="Class") +
         theme(axis.ticks.x=element_blank(), axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}

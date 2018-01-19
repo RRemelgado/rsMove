@@ -5,7 +5,7 @@
 \title{timeDir}
 \usage{
 timeDir(xy = NULL, obs.dates = obs.dates, img = NULL, env.data = NULL,
-  env.dates = env.dates, window.size = NULL, sample.direction = NULL,
+  env.dates = env.dates, temporal.buffer = temporal.buffer,
   stat.fun = NULL, min.count = 2)
 }
 \arguments{
@@ -19,9 +19,7 @@ timeDir(xy = NULL, obs.dates = obs.dates, img = NULL, env.data = NULL,
 
 \item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
 
-\item{window.size}{Temporal moving window size (expressed in days).}
-
-\item{sample.direction}{One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.}
+\item{temporal.buffer}{two element vector with temporal window size (expressed in days).}
 
 \item{stat.fun}{Output statistical metric.}
 
@@ -37,12 +35,13 @@ Analysis of environmental change in time for a set of coordinate pairs.
 {This function evaluates how environmental conditions change in time along a movement track.
 First, for each point in \emph{xy}, the function compares its observation date (\emph{obs.dates}) against
 the acquisition dates (\emph{env.dates}) of \emph{env.data} to select non \emph{NA} timesteps within a
-pre-defined temporal window (\emph{window.size}). The user can chose to only consider time steps before
-(\emph{backward}) or after (\emph{forward} the target observation time or look at both directios (\emph{both}).
-If the latest is chosen, the function applies \emph{window.size} equally to both directions. After selecting
-adequate temporal information for each data point, a statistical metric is estimated. The statistical metric
-is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression between the
-acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
+pre-defined temporal window (\emph{temporal.buffer}). The user can adjust this window to determine which
+images are the most important. For example, if one wishes to know how the landscape evolved up to the
+observation date of the target sample and daily satellite data is avaliable, \emph{temporal.buffer} can be
+define as, e.g., c(30,0) forcing the function to use all images to only use pixels recorded within the previous
+30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated.
+The statistical metric is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression
+between the acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
 for \emph{env.dates} and y for \emph{env.data}.}
 }
 \examples{
@@ -51,24 +50,23 @@ for \emph{env.dates} and y for \emph{env.data}.}
  require(raster)
 
  # read raster data
- file <- list.files(system.file('extdata', '', package="rsMove"), 'tc.*tif', full.names=TRUE)
- rsStk <- stack(file)
- rsStk <- stack(rsStk, rsStk, rsStk) # dummy files for the example
+ file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
+ r.stk <- stack(file)
+ r.stk <- stack(r.stk, r.stk, r.stk) # dummy files for the example
 
  # read movement data
- moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
- moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(rsStk))
+ data(shortMove)
 
  # raster dates
  r.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 
  # sample dates
- obs.dates <- as.Date(moveData@data$date)
+ obs.dates <- as.Date(shortMove@data$date)
 
  # perform directional sampling
  of <- function(x,y) {lm(y~x)$coefficients[2]}
- time.env <- timeDir(xy=moveData, obs.dates=obs.dates, env.data=rsStk,
- env.dates=r.dates, window.size=10, sample.direction="backward", stat.fun=of)
+ time.env <- timeDir(xy=shortMove, obs.dates=obs.dates, env.data=r.stk,
+ env.dates=r.dates, temporal.buffer=c(30,30), stat.fun=of)
 
 }
 }

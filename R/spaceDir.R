@@ -36,19 +36,18 @@
 #'  require(raster)
 #'
 #'  # read raster data
-#'  r <- raster(system.file('extdata', 'tcb_1.tif', package="rsMove"))
+#'  r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 #'
 #'  # read movement data
-#'  moveData <- read.csv(system.file('extdata', 'konstanz_20130804.csv', package="rsMove"))
-#'  moveData <- SpatialPointsDataFrame(moveData[,1:2], moveData, proj4string=crs(r))
+#'  data(shortMove)
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(moveData@data$date, ' ',moveData@data$time),
+#'  obs.time <- strptime(paste0(shortMove@data$date, ' ',shortMove@data$time),
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
 #'  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
-#'  s.sample <- spaceDir(xy=moveData, obs.time=obs.time, img=r,
+#'  s.sample <- spaceDir(xy=shortMove, obs.time=obs.time, img=r,
 #'  sample.direction="backward", data.type='cont', stat.fun=of)
 #'
 #' }
