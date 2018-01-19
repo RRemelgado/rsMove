@@ -2,7 +2,7 @@
 #'
 #' @description Background sample selection.
 #' @param xy Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
-#' @param region.id Vector of region identifyirs for each sample.
+#' @param region.id Vector of region identifiers for each sample.
 #' @param sampling.method One of \emph{random} or \emph{pca}. Default is \emph{random}.
 #' @param env.data Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param nr.samples Number of random background samples.

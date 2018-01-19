@@ -64,6 +64,9 @@ object.
 
 }
 }
+\references{
+\href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
+}
 \seealso{
 \code{\link{labelSample}} \code{\link{hotMove}} \code{\link{dataQuery}}
 }

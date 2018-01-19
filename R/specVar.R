@@ -1,6 +1,6 @@
 #' @title specVar
 #'
-#' @description {Tool to support the selection of adequate satellite spatial resoltuon. Evaluates
+#' @description {Tool to support the selection of adequate satellite spatial resolution. Evaluates
 #' how the spectral variability within a pixel change with the change in spatial resolution.}
 #' @param img Object of class \emph{RasterLayer}.
 #' @param pixel.res Spatial resolution (unit depends on the spatial projection).

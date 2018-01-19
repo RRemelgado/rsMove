@@ -27,7 +27,7 @@
 #'  \item{\emph{cloud cover \% (day)}: cloud cover for the observation dates.}
 #'  \item{\emph{best date (after)}: dates before the observation dates with the lowest cloud cover.}
 #'  \item{\emph{best date cloud cover \% (before)}: cloud cover for best before dates.}
-#'  \item{\emph{best date (after)}: dates after the obsertation dates with the lowest cloud cover.}
+#'  \item{\emph{best date (after)}: dates after the observation dates with the lowest cloud cover.}
 #'  \item{\emph{best date cloud cover \% (after)}: cloud cover best after dates.}}
 #'  Finally, the function generates a plot ($plot) reporting on the variability of cloud cover
 #'  within the dates provided by \emph{obs.dates} and the number of samples registered within them.}
