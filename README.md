@@ -20,7 +20,7 @@ install.packages('rsMove')
 
 ### Examples
 <p align="justify">
-  For examples please click <a href="https://cran.rstudio.com/web/packages/rsMove/vignettes/rsMove.html">here</a> for the package vignette.
+ Please click <a href="https://cran.rstudio.com/web/packages/rsMove/vignettes/rsMove.html">here</a> for the package vignette.
 </p>
 
 <br>
