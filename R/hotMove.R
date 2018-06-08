@@ -49,13 +49,8 @@ hotMove <- function(xy=xy, pixel.res=pixel.res, return.shp=FALSE) {
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
 
-  # derive pixel coordinates
-  ext <- extent(xy)
-  nc <- round((ext[2]-ext[1]) / pixel.res) + 1 # number of columns
-  if (nc < 0) {stop('number of columns negative (is x min/max correct in ext?)')}
-  nr <- round((ext[4]-ext[3]) / pixel.res) + 1 # number of rows
-  if (nr < 0) {stop('number of rows negative (is y min/max correct in ext?)')}
-  sp <- (round((ext[4]-xy@coords[,2])/pixel.res)+1) + nr * round((xy@coords[,1]-ext[1])/pixel.res) # convert coordinates to pixel positions
+  regions <- raster(extent(xy), res=pixel.res, crs=crs(xy), vals=0) # build raster from extent
+  sp <- cellFromXY(regions, xy) # convert coordinates to pixel positions
   up <- unique(sp) # unique pixel positions
   if (length(up)==1) {stop('only one pixel with data. Processing aborted (is "pixel.res" correct?)')}
 
@@ -63,35 +58,8 @@ hotMove <- function(xy=xy, pixel.res=pixel.res, return.shp=FALSE) {
 # 3. find unique sample regions
 #---------------------------------------------------------------------------------------------------------------------#
 
-  # evaluate pixel connectivity
-  regions <- matrix(0, nr, nc)
-  for (r in 1:length(up)) {
-    rp <- ((up[r]-1) %% nr)+1
-    cp <- ((up[r]-1) %/% nr)+1
-    if (cp > 1) {sc<-cp-1} else {sc<-cp}
-    if (cp < nc) {ec<-cp+1} else {ec<-cp}
-    if (rp > 1) {sr<-rp-1} else {sr<-rp}
-    if (rp < nr) {er<-rp+1} else {er<-rp}
-    if (max(regions[sr:er,sc:ec])>0) {
-      uv <- unique(regions[sr:er,sc:ec])
-      uv <- uv[which(uv > 0)]
-      mv <- min(uv)
-      regions[rp,cp] <- mv
-      for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
-    } else {regions[rp,cp] <- max(regions)+1}
-  }
-
-  # update region id
-  uv = unique(regions[which(regions>0)])
-  uregions = regions
-  for (u in 1:length(uv)) {uregions[which(regions==uv[u])] <- u}
-
-#   # convert region layer to raster
-#   ar <- (pixel.res/2)
-#   or = raster(uregions)
-#   extent(or) <- c(ext[1]-ar, ext[2]+ar, ext[3]-ar, ext[4]+ar) # map extent
-#   res(or) <- pixel.res
-#   crs(or) <- crs(xy)
+  regions[up] <- 1 # assign value to overlapping pixels
+  regions <- clump(regions) # determine region connectivity
 
 #---------------------------------------------------------------------------------------------------------------------#
   # 4. produce classified samples
@@ -105,7 +73,7 @@ hotMove <- function(xy=xy, pixel.res=pixel.res, return.shp=FALSE) {
   d.buff <- pixel.res*0.001
 
   # convert samples to polygons
-  if (return.shp==T) {
+  if (return.shp==TRUE) {
 
     # uniqu values
     uv <- sort(unique(rid))

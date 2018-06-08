@@ -91,9 +91,9 @@ labelSample <- function(xy=xy, agg.radius=agg.radius, nr.points=NULL, nr.pixels=
     px.freq <- freq(regions,useNA="no")
     ind <- which(px.freq[,2] >= nr.pixels)
     ind <- as.vector(px.freq[ind,1])
-    for (i in 1:length(ind)) {pixel.res[regions==ind[i]] <- NA}
+    for (i in 1:length(ind)) {pixel.res[regions==ind[i]] <- 0}
     rm(regions, px.freq, ind)
-    up <- up[!is.na(pixel.res[up])]}
+    up <- up[pixel.res[up] > 0]}
 
   # control sample amountth
   if (length(up)==0) {stop(paste0('there are no regions with >= ', as.character(nr.pixels), ' pixels. Consider reducing "nr.pixels"'))}
@@ -106,23 +106,15 @@ labelSample <- function(xy=xy, agg.radius=agg.radius, nr.points=NULL, nr.pixels=
   agg.radius <- round((agg.radius/res(pixel.res)[1])+0.1)
 
   # dilate samples
-  if (agg.radius > 0) {
-    up <- unique(do.call("c", lapply(up, function(p) {
-      rp <- rowFromCell(pixel.res, p)
-      cp <- colFromCell(pixel.res, p)
-      dc <- do.call(rbind, lapply((rp-agg.radius):(rp+agg.radius), function(r) {data.frame(x=r, y=(cp-agg.radius):(cp+agg.radius))}))
-      dc <- cellFromRowCol(pixel.res, dc$x, dc$y)
-      dc <- dc[!is.na(dc)]
-      return(dc)})))
-    pixel.res[up] <- 1}
+  if (agg.radius > 0) {pixel.res <- focal(pixel.res, matrix(1, agg.radius, agg.radius, function(x) {sum(x==1)/length(x)})) > 0}
 
   # evaluate sample connectivity
-  regions <- clump(pixel.res)
+  pixel.res <- clump(pixel.res)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 # 5. return ID's
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 
-  return(regions[sp])
+  return(pixel.res[sp])
 
 }
