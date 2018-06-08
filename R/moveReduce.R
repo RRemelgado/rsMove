@@ -2,8 +2,9 @@
 #'
 #' @description Pixel based summary of movement data that preserves periodic movements.
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
+#' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
+#' @param derive.raster Should a raster with the total time per pixel be provided?
 #' @importFrom raster crs cellFromXY rasterize
 #' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{sampleMove}} \code{\link{moveSeg}}
@@ -17,7 +18,7 @@
 #' consists of:
 #' \itemize{
 #' \item{\emph{r.shp} - Shapefile with reduced sample set and its corresponding temporal information.}
-#' \item{\emph{total.time} - Raster showing the total time spent at each pixel.}
+#' \item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
 #' \item{\emph{indices} - Indices for each sample in \emph{xy} showing which samples were aggregated.}}
 #'
 #' }
@@ -43,7 +44,7 @@
 
 #----------------------------------------------------------------------------------------------------------#
 
-moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
+moveReduce <- function(xy=xy, obs.time=obs.time, img=img, derive.raster=FALSE) {
 
 #----------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -102,12 +103,16 @@ moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
 # 3. derive single raster
 #----------------------------------------------------------------------------------------------------------#
 
-  # estimate time sum per cell
-  up <- unique(sp)
-  t.sum <- sapply(up, function(p) {sum(df$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
+  if (derive.raster) {
 
-  # build raster
-  t.sum.r <- rasterize(xyFromCell(img, up), crop(img, extent(xy)), t.sum)
+    # estimate time sum per cell
+    up <- unique(sp)
+    t.sum <- sapply(up, function(p) {sum(df$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
+
+    # build raster
+    t.sum.r <- rasterize(xyFromCell(img, up), crop(img, extent(xy)), t.sum)
+
+  } else {t.sum.r <- NULL}
 
 #----------------------------------------------------------------------------------------------------------#
 # 4. build output
@@ -116,3 +121,4 @@ moveReduce <- function(xy=xy, obs.time=obs.time, img=img) {
   return(list(points=r.shp, total.time=t.sum.r, indices=sg))
 
 }
+

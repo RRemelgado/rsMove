@@ -47,10 +47,10 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # remove redundant samples
-#'  shortMove <- moveReduce(xy=shortMove, obs.time=obs.time, img=rsStk)$points
+#'  shortMove <- moveReduce(xy=shortMove, obs.time=obs.time, img=r.stk)$points
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- extract(rsStk, shortMove)
+#'  rsQuery <- extract(r.stk, shortMove)
 #'
 #'  # identify unique sample regions
 #'  label <- labelSample(xy=shortMove, agg.radius=90, pixel.res=rsStk)
@@ -58,11 +58,11 @@
 #'  # select background samples
 #'  ind <- which(!is.na(label)) # selected samples
 #'  bSamples <- backSample(xy=shortMove[ind,], region.id=label[ind],
-#'  img=rsStk, sampling.method='pca')
+#'  img=r.stk, sampling.method='pca')
 #'
 #'  # derive model predictions
 #'  out <- predictResources(presence.data=rsQuery,
-#'  absence.data=bSamples@data, sample.label=label, env.data=rsStk)
+#'  absence.data=bSamples@data, sample.label=label, env.data=r.stk)
 #'
 #' }
 #' @export

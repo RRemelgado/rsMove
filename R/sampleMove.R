@@ -4,8 +4,8 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the same length as \emph{xy}.
 #' @param search.radius Sample search radius (in meters).
-#' @param method How should the distance be estimated? One of 'm' or 'deg'. Default is 'm'.
-#' @param tUnit Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.
+#' @param distance.method How should the distance be estimated? One of 'm' or 'deg'. Default is 'm'.
+#' @param time.unit Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.
 #' @importFrom sp SpatialPointsDataFrame
 #' @importFrom stats median
 #' @return A \emph{SpatialPointsDataFrame} with a reduced sample set.
@@ -15,7 +15,7 @@
 #' threshold (\emph{search.radius}). When a pointer is found, the function looks at the distance between the pointer and
 #' the following samples. While this is below the distance threshold, the samples are assigned to the same segment.
 #' Then, for each segment, the function summarizes the corresponding samples deriving mean coordinates, the start,
-#' end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{method}
+#' end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{distance.method}
 #' in accordance with the projection system associated to the data. If 'm' it bases this analysis on the the ecludian distance.
 #' However, if 'deg' it set, the function uses the haversine formula.}
 #' @examples {
@@ -27,7 +27,7 @@
 #'
 #'  # sampling without reference grid
 #'  obs.time = strptime(longMove$timestamp, "%Y-%m-%d %H:%M:%S")
-#'  output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, method='deg')
+#'  output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, distance.method='deg')
 #'
 #'  # compare original vs new samples
 #'  plot(longMove, col="black", pch=16)
@@ -38,7 +38,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, method='m', tUnit=NULL) {
+sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, distance.method='m', time.unit=NULL) {
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -54,8 +54,8 @@ sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, me
   xy <- xy[io,]
   obs.time <- obs.time[io]
   rm(io)
-  if (method!='m' & method!='deg') {stop(paste0('method ', method, ' not recognized'))}
-  if (is.null(tUnit)) {tUnit<-'mins'}
+  if (distance.method!='m' & distance.method!='deg') {stop(paste0('distance.method ', distance.method, ' not recognized'))}
+  if (is.null(time.unit)) {time.unit<-'mins'}
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # 2. extract samples
@@ -67,7 +67,7 @@ sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, me
   for (r in 2:length(xy)) {
 
     # Estimate distance (harvesine method)
-    if (method=='deg') {
+    if (distance.method=='deg') {
       if (sp0==0) {rc<-xy@coords[(r-1):r,]*pi/180} else {rc<-rbind(xy@coords[sp0,],xy@coords[r,])*pi/180}
       xDiff <- abs(rc[2,1]-rc[1,1])
       yDiff <- abs(rc[2,2]-rc[1,2])
@@ -76,7 +76,7 @@ sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, me
       lDist <- 6371000 * cCoef}
 
     # estimate distance (ecludian method)
-    if (method=='m') {
+    if (distance.method=='m') {
       if (sp0==0) {rc <- xy@coords[(r-1):r,]} else {rc<-rbind(xy@coords[sp0,], xy@coords[r,])}
       lDist <- sqrt((rc[2,1]-rc[1,1])^2 + (rc[2,2]-rc[1,2])^2)}
 
@@ -109,7 +109,7 @@ sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, me
       ys[r] <- median(xy@coords[loc[1]:loc[2],2])
       st[[r]] <- obs.time[loc[1]]
       et[[r]] <- obs.time[loc[2]]
-      td[r] <- as.numeric(difftime(obs.time[loc[2]], obs.time[loc[1]], units=tUnit))
+      td[r] <- as.numeric(difftime(obs.time[loc[2]], obs.time[loc[1]], units=time.unit))
       ss[r] <- length(loc[1]:loc[2])}
 
     st <- do.call('c', st)
@@ -125,5 +125,5 @@ sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, me
 
     return(os)
 
-  } else {stop('no samples found')}
+  } else {return(NULL)}
 }

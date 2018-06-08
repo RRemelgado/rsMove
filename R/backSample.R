@@ -20,12 +20,8 @@
 #' (PC's) using the kaiser rule (i.e. PC's with eigenvalues greater than 1). Then, for each PC, the function estimates
 #' the median and the Median Absolute Deviation (MAD) for each unique identifier in \emph{region.id}) and selects background
 #' samples where the difference between their variance and the variance of the region samples exceeds the MAD. Then, the
-#' algorithm removes the background samples that were not selected by all sample regions.}
-#'
-#' If
-#' \emph{nr.samples} is not provided all background pixels are returned
-#'
-#' object.
+#' algorithm removes the background samples that were not selected by all sample regions. If \emph{nr.samples} is not provided
+#' all background pixels are returned.}
 #' @seealso \code{\link{labelSample}} \code{\link{hotMove}} \code{\link{dataQuery}}
 #' @examples {
 #'
@@ -110,22 +106,22 @@ backSample <- function(xy=xy, region.id=region.id, sampling.method=sampling.meth
     pca <- data.frame(pca$x[,npc])
 
     # select absences
-    uv <- unique(region.id[which(region.id>0)])
+    uv <- unique(region.id[which(region.id > 0)])
     i0 = which(region.id==0)
     ai = vector('list', ncol(pca))
     for (p in 1:length(npc)) {
       usr = vector('list', length(uv))
       for (z in 1:length(uv)) {
-        ri = which(region.id==uv[z])
-        s1 = median(pca[ri,p])
-        s2 = median(abs(pca[ri,p]-s1))
-        usr[[z]] = i0[which(abs(pca[i0,p]-s1) > s2)]
+        ri <- which(region.id==uv[z])
+        s1 <- median(pca[ri,p])
+        s2 <- median(abs(pca[ri,p]-s1))
+        usr[[z]] <- i0[which(abs(pca[i0,p]-s1) > s2)]
       }
-      usr = unlist(usr)
-      ui = unique(usr)
-      count = vector('numeric', length(ui))
-      for (z in 1:length(ui)) {count[z] = length(which(usr==ui[z]))}
-      ai[[p]] = ui[which(count==length(uv))]
+      usr <- unlist(usr)
+      ui <- unique(usr)
+      count <- vector('numeric', length(ui))
+      for (z in 1:length(ui)) {count[z] <- length(which(usr==ui[z]))}
+      ai[[p]] <- ui[which(count==length(uv))]
     }
 
     # return samples

@@ -1,19 +1,20 @@
 #' @title poly2sample
 #'
 #' @description {Converts a raster grid to points depending on how much each pixel is covered by a polygon.}
-#' @param pol.shp Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
-#' @param ref.ext Object of class \emph{Extent} or a \emph{RasterLayer} from which an extent can be derived.
-#' @param min.cover Minimum percent a pixel should be covered by a polygon for sampling (0-100). Default is 100.
-#' @param pixel.res Pixel resolution. Required if \emph{ref.ext} is an \emph{Extent} object. Unit depends on spatial projection.
+#' @param x Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
+#' @param y A raster object of a numeric element.
+#' @param min.cover Minimum percent a pixel should be covered by a polygon for sampling (1-100). Default is 1.
 #' @importFrom raster raster extent crop rasterToPoints rasterize xyFromCell cellFromXY crs
 #' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{SpatialPointsDataFrame} with sampled pixels reporting on polygon percent coverage.
-#' @details {\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making it more efficient
-#' over large areas and converting its output into point samples rather than a raster object. For each polygon in (\emph{"pol.shp"}),
-#' \emph{poly2sample} extracts the overlapping pixels derived from \emph{ref.ext}. Then, for each pixel, the function estimates the
-#' percentage of it that is covered by the reference polygon. Finally, the function extracts coordinate pairs for pixels that has a
-#' percent coverage equal to or greater than \emph{min.cover}.}
+#' @details {\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making
+#' it more efficient over large areas and converting its output into point samples rather than a raster object. For each
+#' polygon in (\emph{"x"}), \emph{poly2sample} extracts the overlapping pixels of a reference grid. Then, for each pixel,
+#' the function estimates the percentage of it that is covered by the reference polygon. Finally, the function extracts
+#' coordinate pairs for pixels that has a percent coverage equal to or greater than \emph{min.cover}. If \emph{y} is a
+#' raster object, the function will use it as a reference  grid. If \emph{y} is a numeric element, the function will build
+#' a raster from the extent of \emph{x} and a resolution equal to \emph{y}.}
 #' @examples {
 #'
 #'  require(raster)
@@ -26,66 +27,81 @@
 #'  file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
 #'  roi <- shapefile(file)
 #'
-#'  # segment probabilities
-#'  samples <- poly2sample(pol.shp=roi, ref.ext=img)
+#'  # extract samples
+#'  samples <- poly2sample(roi, img, min.cover=50)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-poly2sample <- function(pol.shp=pol.shp, ref.ext=ref.ext, min.cover=NULL, pixel.res=NULL) {
+poly2sample <- function(x, y, min.cover=1) {
 
 #-------------------------------------------------------------------------------------------------------------------------#
 # 1. Check input variables
 #-------------------------------------------------------------------------------------------------------------------------#
 
   # check shapefile
-  if(is.null('pol.shp')) {stop('"pol.shp" is missing')}
-  if(!class(pol.shp)[1]%in%c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
-    stop('"pol.shp" is not a valid input.')}
+  if(is.null('x')) {stop('"x" is missing')}
+  if(!class(x)[1]%in%c('SpatialPolygons', 'SpatialPolygonsDataFrame')) {
+    stop('"x" is not a valid input')}
 
   # check/derive reference raster
-  if (!class(ref.ext)[1]%in%c("Extent", "RasterLayer")) {stop('"ref.ext" is not of a valid class')}
-  if (class(ref.ext)[1]=="Extent") {
-    if (is.null(pixel.res)) {stop('"ref.ext" is an "Extent". Please provide "pixel.res"')}
-    ref.ext <- raster(extent(pol.shp), res=pixel.res, crs=crs(pol.shp))}
+  if (!class(y)[1]%in%c("RasterLayer", "RasterStack", "RasterBrick", "numeric")) {
+    stop('"y" is not of a valid class')}
+  if (is.numeric(y)) {y <- extend(raster(extent(x), res=y, crs=crs(x)), y)}
 
   # check cover value
   if (is.null(min.cover)) {min.cover <- 100}
-  if (min.cover < 0 | min.cover > 100) {stop('"min.cover" should be between 0 and 100')}
+  if (min.cover < 1 | min.cover > 100) {stop('"min.cover" should be between 0 and 100')}
 
 #-------------------------------------------------------------------------------------------------------------------------#
 # 2. evaluate polygons
 #-------------------------------------------------------------------------------------------------------------------------#
 
   lf <- function(i) {
-    r <- crop(ref.ext, extent(pol.shp[i,]))
-    r <- rasterToPoints(rasterize(pol.shp[i,], r, getCover=T))
-    ind <- which(r[,3] > 0) # usable pixels
-    return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3]))}
-  df0 <- do.call(rbind, lapply(1:length(pol.shp), lf))
+    r <- crop(y, extent(x[i,]))
+    r <- rasterToPoints(rasterize(x[i,], r, getCover=TRUE))
+    ind <- which(r[,3] > min.cover) # usable pixels
+    if (length(ind) > 0) {return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3]))} else {return(NULL)}}
+
+  df0 <- lapply(1:length(x), lf)
 
 #-------------------------------------------------------------------------------------------------------------------------#
 # 3. remove duplicated pixels and update pecent count
 #-------------------------------------------------------------------------------------------------------------------------#
 
-  pp <- cellFromXY(ref.ext, df0[,1:2]) # pixel positions
-  up <- unique(pp) # unique positions
-  pc <- sapply(up, function(x) {sum(df0[which(pp==x),3])}) # update percentages
-  pc[which(pc>100)] <- 100 # account for miss-calculations (related to e.g. overlapping polygons)
-  xy <- xyFromCell(ref.ext, up) # convert unique positions to coordinates
-  df0 <- data.frame(x=xy[,1], y=xy[,2], cover=pc) # build final data frame
+  i <- sapply(df0, function(r) {!is.null(r)})
 
-  # apply percent cover filter
-  ind <- which(pc >= min.cover)
-  df0 <- df0[ind,]
+  if (sum(i) > 0) {
 
-  rm(pp, up, pc, xy, ind)
+    df0 <- do.call(rbind, df0[i])
+    pp <- cellFromXY(y, df0[,c("x", "y")]) # pixel positions
+    up <- unique(pp) # unique positions
+    pc <- sapply(up, function(x) {sum(df0$c[which(pp==x)])}) # update percentages
+    pc[which(pc>100)] <- 100 # account for miss-calculations (related to e.g. overlapping polygons)
+    xy <- xyFromCell(y, up) # convert unique positions to coordinates
+    df0 <- data.frame(x=xy[,1], y=xy[,2], cover=pc) # build final data frame
 
-  # return output
-  return(SpatialPointsDataFrame(df0[,1:2], df0, proj4string=crs(pol.shp)))
+    rm(pp, up, pc, xy)
+
+    # return output
+    if (is.null(nrow(df0))) {
+      warning('no pixels with a percent cover greater than 0')
+      return(NULL)} else {
+
+        return(SpatialPointsDataFrame(df0[,1:2], df0, proj4string=crs(x)))
+
+      }
+
+  } else {
+
+    warning('no pixels with a percent cover greater than 0')
+    return(NULL)
+
+  }
 
 #------------------------------------------------------------------------------------------------------------------------#
 
 }
+

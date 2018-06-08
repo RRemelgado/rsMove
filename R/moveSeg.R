@@ -11,7 +11,6 @@
 #' @param smooth.fun Smoothing function applied with \emph{buffer.size} when \emph{method} is \emph{cont}. Default is mean.
 #' @importFrom raster extract crs
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar scale_fill_discrete
-#' @import raster rgdal ggplot2
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}} \code{\link{timeDir}} \code{\link{spaceDir}}
 #' @return A \emph{list}.
 #' @details {This function identifies segments of comparable environmental conditions along the movement track given by \emph{xy}.
@@ -137,67 +136,57 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
       # simple query
     } else {env.data <- extract(env.data, xy@coords)}}
 
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 3. identify segments
-  #---------------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------------#
+# 3. identify segments
+#---------------------------------------------------------------------------------------------------------------------#
 
-  # search for segments
-  r0 <- 1
-  li <- 1
-  id <- list() # segment id
-  rv <- list() # segment value
+  run.diff <- abs(diff(envi.data)) >= threshold # compare consecutive data points and apply threshold
+  seg.ls <- rle(run.diff) # find sequences of similar values
+  seg.id <- vector('numeric', length(run.diff)) # label segments (1)
+  for (s in 1:length(a$lengths)) {seg.id[(sum(seg.ls$lengths[0:(s-1)])+1):sum(seg.ls$length[1:s])] <- s} # label segments (1)
 
-  for (r in 2:length(xy)) {
-    diff <- abs(env.data[r]-env.data[(r-1)])
-    if (!is.na(diff)) {
-      if (diff >= threshold) {
-        ep <- r-1
-        rv[[li]] <- summary.fun(env.data[c(r0:ep)])
-        id[[li]] <- replicate(length(c(r0:ep)), li)
-        r0 <- r
-        li <- li + 1
-        if (r==length(xy)) {
-          id[[li]] <- li
-          rv[[li]] <- env.data[r]}
-      } else {if (r==length(xy)) {
-        ep <- r
-        rv[[li]] <- summary.fun(env.data[c(r0:ep)])
-        id[[li]] <- replicate(length(c(r0:ep)), li)}}}}
-  rv <- unlist(rv)
-  id <- unlist(id)
+#---------------------------------------------------------------------------------------------------------------------#
+# 4. derive segment statistics
+#---------------------------------------------------------------------------------------------------------------------#
 
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 4. derive segment statistics
-  #---------------------------------------------------------------------------------------------------------------------#
+  id <- unique(seg.id) # unique ID's
 
-  # build region report
-  uid <- sort(unique(id))
-  df <- do.call(rbind, lapply(uid, function(x) {
-    ind <- which(id==x)
+  odf <- do.call(rbind, lapply(id, function(u) {
+
+    ii <- which(seg.id == u) # target samples
+    rv <- summary.fun(env.data[ii]) # segment raster value
+
     if (processTime) {
-      tt <- difftime(obs.time[ind[length(ind)]], obs.time[ind[1]], units="mins")
-      st <- min(obs.time[ind])
-      et <- max(obs.time[ind])
+
+      st <- min(obs.time[ii]) # start time
+      et <- max(obs.time[ii]) # end time
+      tt <- as.numeric(difftime(et, st, units="mins")) # elapsed time
+
     } else {
+
       tt <- NA
       st <- NA
-      et <- NA}
-    return(data.frame(sid=x, count=length(ind), start=st, end=et,
-                      elapsed=as.numeric(tt), value=rv[x], stringsAsFactors=FALSE))}))
+      et <- NA
 
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 5. build plot
-  #---------------------------------------------------------------------------------------------------------------------#
+    }
+
+    return(data.frame(sid=u, count=length(ind), start=st, end=et, elapsed=tt, value=rv, stringsAsFactors=FALSE))}
+
+  ))
+
+#---------------------------------------------------------------------------------------------------------------------#
+# 5. build plot
+#---------------------------------------------------------------------------------------------------------------------#
 
   if (data.type=='cont') {
 
-    df$sid <- factor(df$sid, levels=sort(unique(df$sid)))
+    odf$sid <- factor(odf$sid, levels=sort(unique(odf$sid)))
 
     # plot with time
     if (!is.null(obs.time)) {
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +
+      p <- ggplot(odf, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +
         xlab('') + ylab('Time Spent (minutes)') +
         theme(axis.ticks.x=element_blank(), axis.text.x=element_blank(), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))
@@ -206,7 +195,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
     } else {
 
       # determine y range scale range
-      mv <- max(df$count)
+      mv <- max(odf$count)
       nc <- nchar(as.character(mv))
       m <- as.numeric(paste0(1, paste0(replicate((nc-1), '0'), collapse='')))
       mv <- mv / m
@@ -214,21 +203,21 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
       if (mv > yr) {yr <- (yr+0.2)*m} else {yr <- yr*m}
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="count", fill="value")) + geom_bar(stat="identity") +
+      p <- ggplot(odf, aes_string(x="sid", y="count", fill="value")) + geom_bar(stat="identity") +
         xlab('\nSegment ID') + ylab('Sample count\n') +
         theme(axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
 
   if (data.type=='cat') {
 
-    df$sid <- factor(df$sid, levels=sort(unique(df$sid)))
-    df$value <- factor(df$value, levels=sort(unique(df$value)))
+    odf$sid <- factor(odf$sid, levels=sort(unique(odf$sid)))
+    odf$value <- factor(odf$value, levels=sort(unique(odf$value)))
 
     # plot with time
     if (!is.null(obs.time)) {
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="elapsed", fill="value")) + geom_bar(stat="identity") +
+      p <- ggplot(odf, aes_string(x="sid", y="elapsed", fill="value")) + geom_bar(stat="identity") +
         xlab('\nSegment ID') + ylab('Time Spent (minutes)\n') + scale_fill_discrete(name="Class") +
         theme(axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))
@@ -237,7 +226,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
     } else {
 
       # buid plot object
-      p <- ggplot(df, aes_string(x="sid", y="count", fill="value")) + geom_bar(stat="identity") +
+      p <- ggplot(odf, aes_string(x="sid", y="count", fill="value")) + geom_bar(stat="identity") +
         xlab('\nSegment ID') + ylab('Sample count\n') + scale_fill_discrete(name="Class") +
         theme(axis.ticks.x=element_blank(), axis.text.x=element_text(size=10, hjust=1), axis.text=element_text(size=12),
               axis.title=element_text(size=14), legend.title=element_text(size=14), legend.text=element_text(size=12))}}
@@ -246,7 +235,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
   # 6. return output
   #---------------------------------------------------------------------------------------------------------------------#
 
-  colnames(df) <- c("Segment ID", "Nr. Samples", "Timestamp (start)", "Timestamp (end)", "Total time (minutes)", "Value")
-  return(list(indices=id, stats=df, plot=p))
+  colnames(odf) <- c("Segment ID", "Nr. Samples", "Timestamp (start)", "Timestamp (end)", "Total time (minutes)", "Value")
+  return(list(indices=id, stats=odf, plot=p))
 
 }

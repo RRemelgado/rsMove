@@ -5,7 +5,7 @@
 \title{sampleMove}
 \usage{
 sampleMove(xy = xy, obs.time = obs.time, search.radius = search.radius,
-  method = "m", tUnit = NULL)
+  distance.method = "m", time.unit = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -14,9 +14,9 @@ sampleMove(xy = xy, obs.time = obs.time, search.radius = search.radius,
 
 \item{search.radius}{Sample search radius (in meters).}
 
-\item{method}{How should the distance be estimated? One of 'm' or 'deg'. Default is 'm'.}
+\item{distance.method}{How should the distance be estimated? One of 'm' or 'deg'. Default is 'm'.}
 
-\item{tUnit}{Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.}
+\item{time.unit}{Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.}
 }
 \value{
 A \emph{SpatialPointsDataFrame} with a reduced sample set.
@@ -30,7 +30,7 @@ It looks at the distance among consecutive samples and places pointer when the d
 threshold (\emph{search.radius}). When a pointer is found, the function looks at the distance between the pointer and
 the following samples. While this is below the distance threshold, the samples are assigned to the same segment.
 Then, for each segment, the function summarizes the corresponding samples deriving mean coordinates, the start,
-end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{method}
+end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{distance.method}
 in accordance with the projection system associated to the data. If 'm' it bases this analysis on the the ecludian distance.
 However, if 'deg' it set, the function uses the haversine formula.}
 }
@@ -44,7 +44,7 @@ data(longMove)
 
  # sampling without reference grid
  obs.time = strptime(longMove$timestamp, "\%Y-\%m-\%d \%H:\%M:\%S")
- output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, method='deg')
+ output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, distance.method='deg')
 
  # compare original vs new samples
  plot(longMove, col="black", pch=16)
