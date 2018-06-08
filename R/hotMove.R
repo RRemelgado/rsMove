@@ -23,7 +23,7 @@
 #' data(longMove)
 #'
 #' # extract regions
-#' hm <- hotMove(xy=longMove, pixel.res=0.1, return.shp=TRUE)
+#' hm <- hotMove(longMove, 0.1, return.shp=TRUE)
 #'
 #' # plot shapefile (color by region)
 #' plot(hm$polygons, col=hm$indices)
@@ -33,7 +33,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-hotMove <- function(xy=xy, pixel.res=pixel.res, return.shp=FALSE) {
+hotMove <- function(xy, pixel.res, return.shp=FALSE) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables

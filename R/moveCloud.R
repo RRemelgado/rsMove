@@ -42,14 +42,14 @@
 #'
 #'  # test function for 30 day buffer
 #'  od <- as.Date(shortMove@data$date)
-#'  c.cover <- moveCloud(xy=shortMove, obs.dates=od, data.path=".", buffer.size=c(30,30))
+#'  c.cover <- moveCloud(shortMove, od, data.path=".", buffer.size=c(30,30))
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-moveCloud <- function(xy=xy, obs.dates=obs.dates, data.path=NULL, buffer.size=NULL, remove.file=FALSE) {
+moveCloud <- function(xy, obs.dates, data.path=NULL, buffer.size=NULL, remove.file=FALSE) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables

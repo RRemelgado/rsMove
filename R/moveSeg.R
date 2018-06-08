@@ -48,7 +48,7 @@
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=threshold,
+moveSeg <- function(xy=NULL, env.data=env.data, data.type='cont', threshold=threshold,
                     obs.time=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
 
   #---------------------------------------------------------------------------------------------------------------------#
@@ -56,7 +56,7 @@ moveSeg <- function(xy=xy, env.data=env.data, data.type='cont', threshold=thresh
   #---------------------------------------------------------------------------------------------------------------------#
 
   # samples
-  if (!exists('xy')) {stop('"xy" is missing')}
+  if (!is.null(xy)) {stop('"xy" is missing')}
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   rProj <- crs(xy) # output projection
 

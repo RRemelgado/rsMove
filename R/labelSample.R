@@ -28,14 +28,14 @@
 #'  data(shortMove)
 #'
 #'  # derive region labels
-#'  labels <- labelSample(xy=shortMove, agg.radius=90, nr.pixels=2, pixel.res=30)
+#'  labels <- labelSample(shortMove, 30, agg.radius=90, nr.pixels=2)
 #'
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------------------------------#
 
-labelSample <- function(xy=xy, agg.radius=agg.radius, nr.points=NULL, nr.pixels=NULL, pixel.res=pixel.res) {
+labelSample <- function(xy=xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pixels=NULL) {
 
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -48,8 +48,7 @@ labelSample <- function(xy=xy, agg.radius=agg.radius, nr.points=NULL, nr.pixels=
   if (!is.null(nr.pixels) & !is.null(nr.points)) {stop('"nr.pixels" and "nr.points" are both assigned. Choose one')}
   if (!is.null(nr.pixels)) {if (!is.numeric(nr.pixels) | length(nr.pixels)!=1) {stop('"nr.pixels" is not a valid input')}}
   if (!is.null(nr.points)) {if (!is.numeric(nr.points) | length(nr.points)!=1) {stop('"nr.points" is not a valid input')}}
-  if (!exists('agg.radius')) {stop('"agg.radius" is missing')}
-  if (is.null(pixel.res)) {stop('provide a resolution or a raster')}
+  if (!is.null(agg.radius)) {if (!is.numeric(agg.radius) | length(agg.radius)!=1) {stop('"agg.radius" is not a valid input')}}
 
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 # 2. convert samples ot pixel coordinates

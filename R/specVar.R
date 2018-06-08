@@ -25,14 +25,14 @@
 #'  r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 #'
 #'  # apply function
-#'  s.var <- specVar(img=r, pixel.res=60)
+#'  s.var <- specVar(r, 60)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-specVar <- function(img=img, pixel.res=pixel.res) {
+specVar <- function(img, pixel.res) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables

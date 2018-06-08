@@ -44,8 +44,7 @@
 #'  obs.dates <- as.Date(shortMove@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(xy=shortMove, obs.dates=obs.dates,
-#'  env.data=r.stk, env.dates=r.dates, time.buffer=c(30,30))
+#'  rsQuery <- dataQuery(shortMove, obs.dates, r.dates, env.data=r.stk, time.buffer=c(30,30))
 #'
 #' }
 #'
@@ -53,28 +52,32 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=env.dates, time.buffer=NULL, spatial.buffer=NULL, smooth.fun=NULL) {
+dataQuery <- function(env.data, obs.dates, env.dates, xy=NULL, time.buffer=NULL, spatial.buffer=NULL, smooth.fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   # samples
-  if (!exists('xy')) {stop('"xy" is missing')}
   if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
 
   # raster
-  if (!exists('env.data')) {stop('"env.data" is missing')}
-  if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"env.data" is not of a valid class')}
-  if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
+  if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick', 'data.frame', 'matrix')) {stop('"env.data" is not of a valid class')}
 
   # check temporal information
-  if (!exists('env.dates')) {stop('"env.dates" is missing')}
   if (class(env.dates)[1]!='Date') {stop('"env.dates" is not of a valid class')}
-  if (length(env.dates)!=nlayers(env.data)) {stop('lengths of "env.dates" and "env.data" differ')}
-  if (is.null(obs.dates)) {stop('"obs.dates" is missing')}
   if (class(obs.dates)[1]!='Date') {stop('"obs.dates" is not of a valid class')}
-  if (length(obs.dates)!=length(xy)) {stop('lengths of "obs.dates" and "xy" differ')}
+
+  # check environmental data
+  if (class(env.data) %in% c('RasterStack', 'RasterBrick')) {
+    if (is.null(xy)) {stop('"env.data" is a raster object, please provide "xy"')}
+    if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
+    if (nrow(obs.dates) != length(xy)) {stop('"xy" and "obs.dates" have different lenghts')}
+    if (nlayers(env.data) != length(env.dates)) {stop('the number of layers in "env.data" and the length of "env.dates" differ')}
+  } else {
+    if (nrow(env.data) != length(obs.dates)) {stop('the number of rows in "env.data" and the length of "obs.dates" differ')}
+    if (ncol(env.data) != length(env.dates)) {stop('the number of columns in "env.data" and the length of "env.dates" differ')}
+  }
 
   # auxiliary
   if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {smooth.fun=NULL}
@@ -89,7 +92,7 @@ dataQuery <- function(xy=xy, obs.dates=obs.dates, env.data=env.data, env.dates=e
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   # read data
-  if (!is.data.frame(env.data)) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, smooth.fun=smooth.fun, na.rm=TRUE))}
+  if (!is.data.frame(env.data) & !is.matrix(env.data)) {env.data <- as.data.frame(extract(env.data, xy@coords, buffer=spatial.buffer, smooth.fun=smooth.fun, na.rm=TRUE))}
 
   # function to select pixels
   if (is.null(time.buffer)) {

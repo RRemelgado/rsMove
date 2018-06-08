@@ -47,29 +47,27 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # remove redundant samples
-#'  shortMove <- moveReduce(xy=shortMove, obs.time=obs.time, img=r.stk)$points
+#'  shortMove <- moveReduce(shortMove, obs.time, r.stk)$points
 #'
 #'  # retrieve remote sensing data for samples
 #'  rsQuery <- extract(r.stk, shortMove)
 #'
 #'  # identify unique sample regions
-#'  label <- labelSample(xy=shortMove, agg.radius=90, pixel.res=rsStk)
+#'  label <- labelSample(shortMove, rsStk, agg.radius=90)
 #'
 #'  # select background samples
 #'  ind <- which(!is.na(label)) # selected samples
-#'  bSamples <- backSample(xy=shortMove[ind,], region.id=label[ind],
-#'  img=r.stk, sampling.method='pca')
+#'  bSamples <- backSample(shortMove[ind,], label[ind], r.stk, sampling.method='pca')
 #'
 #'  # derive model predictions
-#'  out <- predictResources(presence.data=rsQuery,
-#'  absence.data=bSamples@data, sample.label=label, env.data=r.stk)
+#'  out <- predictResources(rsQuery, bSamples@data, sample.label=label, env.data=r.stk)
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 
-predictResources <-function(presence.data=presence.data, absence.data=absence.data, sample.label=NULL, env.data=NULL) {
+predictResources <-function(presence.data, absence.data, sample.label=NULL, env.data=NULL) {
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables and define auxiliary functions

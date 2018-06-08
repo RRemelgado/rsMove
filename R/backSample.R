@@ -35,23 +35,22 @@
 #'  data(shortMove)
 #'
 #'  # find sample regions
-#'  label <- labelSample(xy=shortMove, agg.radius=500, nr.pixels=2, pixel.res=30)
+#'  label <- labelSample(shortMove, agg.radius=500, nr.pixels=2, pixel.res=30)
 #'
 #'  # select background samples
 #'  ind <- which(label>0) # selected samples
-#'  bSamples <- backSample(xy=shortMove[ind,], region.id=label[ind],
-#'  env.data=r.stk, sampling.method='random')
+#'  bSamples <- backSample(shortMove[ind,], label[ind], r.stk, sampling.method='random')
 #'
 #' }
 #' @export
 #'
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-backSample <- function(xy=xy, region.id=region.id, sampling.method=sampling.method, env.data=env.data, nr.samples=NULL) {
+backSample <- function(xy, env.data, region.id, sampling.method=sampling.method, nr.samples=NULL) {
 
-#-------------------------------------------------------------------------------------------------------------------------------#
-# 1. check input variables
-#-------------------------------------------------------------------------------------------------------------------------------#
+  #-------------------------------------------------------------------------------------------------------------------------------#
+  # 1. check input variables
+  #-------------------------------------------------------------------------------------------------------------------------------#
 
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (is.null(crs(xy)@projargs)) {stop('"xy" is missing a valid projection')}

@@ -37,14 +37,14 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(xy=shortMove, obs.time=obs.time, img=r)
+#'  move.reduce <- moveReduce(shortMove, obs.time, r)
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------#
 
-moveReduce <- function(xy=xy, obs.time=obs.time, img=img, derive.raster=FALSE) {
+moveReduce <- function(xy, obs.time, img, derive.raster=FALSE) {
 
 #----------------------------------------------------------------------------------------------------------#
 # 1. check input variables

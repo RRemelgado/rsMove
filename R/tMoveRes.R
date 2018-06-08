@@ -29,14 +29,14 @@
 #'
 #'  # test function for intervals of 1, 8 and 16 days (e.g. of MODIS data)
 #'  obs.date <- as.Date(longMove@data$timestamp)
-#'  a.res <- tMoveRes(xy=longMove, obs.date=obs.date, time.res=c(1,8,16), pixel.res=0.01)
+#'  a.res <- tMoveRes(longMove, obs.date, c(1,8,16), 0.01)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-tMoveRes <- function(xy=xy, obs.date=obs.date, time.res=time.res, pixel.res=pixel.res) {
+tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables

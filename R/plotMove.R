@@ -27,7 +27,7 @@
 #'  time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(xy=shortMove, obs.time=time, img=r)
+#'  move.reduce <- moveReduce(shortMove, time, r)
 #'
 #'  # query data
 #'  ov <- extract(r, move.reduce$points)
@@ -36,14 +36,14 @@
 #'  x <- move.reduce$points@data$x
 #'  y <- move.reduce$points@data$y
 #'  et <- move.reduce$points@data$`Elapsed time (minutes)`
-#'  op <- plotMove(x=x, y=y, size.var=et, fill.var=ov, var.type="cont")
+#'  op <- plotMove(x, y, size.var=et, fill.var=ov, var.type="cont")
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------#
 
-plotMove <- function(x=x, y=y, size.var=NULL, fill.var=NULL, var.type=NULL) {
+plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL) {
 
 #----------------------------------------------------------------------------------------------------------#
 # 1. Check input data

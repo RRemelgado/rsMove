@@ -27,7 +27,7 @@
 #'
 #'  # sampling without reference grid
 #'  obs.time = strptime(longMove$timestamp, "%Y-%m-%d %H:%M:%S")
-#'  output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, distance.method='deg')
+#'  output <- sampleMove(longMove, obs.time, 7, distance.method='deg')
 #'
 #'  # compare original vs new samples
 #'  plot(longMove, col="black", pch=16)
@@ -38,7 +38,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-sampleMove <- function(xy=xy, obs.time=obs.time, search.radius=search.radius, distance.method='m', time.unit=NULL) {
+sampleMove <- function(xy, obs.time, search.radius, distance.method='m', time.unit=NULL) {
 
 #-----------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
