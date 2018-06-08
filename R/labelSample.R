@@ -105,7 +105,7 @@ labelSample <- function(xy=xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pi
   agg.radius <- round((agg.radius/res(pixel.res)[1])+0.1)
 
   # dilate samples
-  if (agg.radius > 0) {pixel.res <- focal(pixel.res, matrix(1, agg.radius, agg.radius, function(x) {sum(x==1)/length(x)})) > 0}
+  if (agg.radius > 0) {pixel.res <- focal(pixel.res, matrix(1, agg.radius, agg.radius), max, na.rm=TRUE) > 0}
 
   # evaluate sample connectivity
   pixel.res <- clump(pixel.res)
