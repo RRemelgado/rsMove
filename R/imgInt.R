@@ -35,7 +35,7 @@
 #'  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 #'
 #'  # target dates
-#'  target.dates = as.Date("2012-04-01")
+#'  target.dates = as.Date("2013-08-10")
 #'
 #'  # interpolate raster data to target dates
 #'  i.env.data <- imgInt(r.stk, env.dates, target.dates, c(60,60), shortMove)
@@ -60,8 +60,8 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy) {
   # check environmnetal information
   if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick', 'data.frame')) {stop('"env.data" is not of a valid class')}
   if (class(env.data)[1]%in%c('RasterStack', 'RasterBrick')) {
+    processRaster <- TRUE
     if (exists("xy")) {
-      processRaster=TRUE
       if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"shp is nor a valid point shapefile object')}
       if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
       if (nlayers(env.data)!=length(env.dates)) {stop('length of "env.data" and "env.dates" do not match')}}}
