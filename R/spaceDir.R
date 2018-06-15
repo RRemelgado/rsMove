@@ -13,7 +13,7 @@
 #' @importFrom raster extract
 #' @importFrom stats lm
 #' @importFrom grDevices colorRampPalette
-#' @importFrom ggplot2 aes_string geom_line theme scale_color_gradientn xlab ylab
+#' @importFrom ggplot2 aes_string geom_line theme scale_color_gradientn xlab ylab fortify geom_path element_text element_blank geom_histogram xlim
 #' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list} containing shapefiles with information on environmental change and travel distance/time and a plot of the results.
 #' @details {This function evaluates how do environmental conditions change in space along a movement track. For

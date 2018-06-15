@@ -4,17 +4,17 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(env.data, obs.dates, env.dates, xy = NULL, time.buffer = NULL,
-  spatial.buffer = NULL, smooth.fun = NULL)
+dataQuery(x, y, y.dates, x.dates, time.buffer, spatial.buffer = NULL,
+  smooth.fun = NULL)
 }
 \arguments{
-\item{env.data}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
+\item{x}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
 
-\item{obs.dates}{Object of class \emph{Date} with \emph{xy} observation dates.}
+\item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
+\item{y.dates}{Object of class \emph{Date} with \emph{y} observation dates.}
 
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x.dates}{Object of class \emph{Date} with \emph{x} observation dates.}
 
 \item{time.buffer}{Two element vector with temporal search buffer (expressed in days).}
 
@@ -30,16 +30,16 @@ Query environmental data for coordinate pairs using the nearest non NA value in 
 }
 \details{
 {Returns environmental variables from a raster object for a given set of x and y coordinates depending on the
-temporal distance between the sample observation date (\emph{obs.dates}) and the date on which the environmental data was
-collected (\emph{env.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
+temporal distance between the sample observation date (\emph{y.dates}) and the date on which the environmental data was
+collected (\emph{x.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
 non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
 are considered in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
 environmental information acquired after the sample observation date and limit the search to -30 days. If \emph{time.buffer}
 is set to null all acquisitions are considered. The user may also provide \emph{spatial.buffer} to spatially smooth the selected
 environmental information. In this case, for each sample, the function will consider the neighboring pixels within the selected
 acquisition and apply a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
-will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
-\emph{env.dates} should refer to each column.}
+will be returned by default. If \emph{x} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
+\emph{x.dates} should refer to each column.}
 }
 \examples{
 {
@@ -56,14 +56,14 @@ will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spa
 
  # raster dates
  file.name <- names(r.stk)
- r.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
+ x.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # sample dates
- obs.dates <- as.Date(shortMove@data$date)
+ y.dates <- as.Date(shortMove@data$date)
 
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(shortMove, obs.dates, r.dates, env.data=r.stk, time.buffer=c(30,30))
+ rsQuery <- dataQuery(r.stk, shortMove, y.dates, x.dates, c(10,10))
 
 }
 

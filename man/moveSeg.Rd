@@ -4,14 +4,14 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = NULL, env.data = env.data, data.type = "cont",
-  threshold = threshold, obs.time = NULL, summary.fun = NULL,
-  buffer.size = NULL, smooth.fun = NULL)
+moveSeg(env.data, xy = NULL, data.type = "cont", threshold = threshold,
+  obs.time = NULL, summary.fun = NULL, buffer.size = NULL,
+  smooth.fun = NULL)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
-
 \item{env.data}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
+
+\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{data.type}{Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).}
 
@@ -62,7 +62,7 @@ In this case, the function will report on the majority value within the buffer. 
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(xy=shortMove, obs.time=obs.time, env.data=r, data.type="cat")
+ seg <- moveSeg(r, xy=shortMove, obs.time=obs.time, data.type="cat")
 
 }
 }

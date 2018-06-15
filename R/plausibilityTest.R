@@ -14,7 +14,8 @@
 #'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
 #'  \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{sample.mask} within each class of \emph{reference.map}.}}}
 #' @importFrom raster crs extract nlayers
-#' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlab ylab scale_fill_manual facet_wrap
+#' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlab ylab scale_fill_manual facet_wrap element_blank unit
+#' @importFrom stats as.formula
 #' @importFrom grDevices rainbow
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#

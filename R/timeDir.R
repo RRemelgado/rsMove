@@ -12,7 +12,7 @@
 #' @importFrom raster crs extract
 #' @importFrom stats lm
 #' @importFrom grDevices colorRampPalette
-#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab
+#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab element_text element_blank
 #' @seealso \code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{vector} with a requested statistical metric for each point in \emph{xy}.
 #' @details {This function evaluates how environmental conditions change in time along a movement track.

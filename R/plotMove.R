@@ -6,7 +6,8 @@
 #' @param size.var Optional. Vector with elapsed time as report by \code{\link{moveReduce}}, \code{\link{sampleMove}} or \code{\link{timeDir}}. Controls the point size.
 #' @param fill.var Optional. Vector with environmental information. Controls the fill color.
 #' @param var.type One of 'cont' or 'cat'. Defines the type of \emph{fill.var}.
-#' @importFrom ggplot2 ggplot aes_string theme geom_bar scale_fill_gradientn xlab ylab theme_bw geom_point guides scale_size_continuous scale_color_discrete scale_fill_gradientn scale_size_continuous
+#' @importFrom ggplot2 ggplot aes_string theme geom_bar scale_fill_gradientn xlab ylab theme_bw geom_point guides
+#' scale_size_continuous scale_color_discrete scale_fill_gradientn scale_size_continuous guide_legend element_text element_blank
 #' @importFrom grDevices colorRampPalette
 #' @seealso \code{\link{dataQuery}} \code{\link{moveReduce}}
 #' @return A \emph{ggplot} object.

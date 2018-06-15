@@ -6,7 +6,7 @@
 #' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
 #' @param time.res Vector of temporal resolutions (expressed in days).
 #' @param pixel.res Spatial resolution (unit depends on spatial projection).
-#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
+#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar element_text
 #' @importFrom raster raster extent extend cellFromXY crs
 #' @importFrom utils download.file
 #' @importFrom grDevices colorRampPalette

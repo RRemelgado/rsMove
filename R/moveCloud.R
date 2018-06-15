@@ -9,7 +9,7 @@
 #' @param remove.file Logical. Should the files be deleted after usage?
 #' @importFrom raster raster extract
 #' @importFrom grDevices colorRampPalette
-#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
+#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar element_text
 #' @importFrom utils download.file
 #' @importFrom RCurl url.exists
 #' @return A \emph{list} object reporting on the variability of cloud cover within and around each observation dates.
@@ -51,9 +51,9 @@
 
 moveCloud <- function(xy, obs.dates, data.path=NULL, buffer.size=NULL, remove.file=FALSE) {
 
-#---------------------------------------------------------------------------------------------------------------------#
-#  1. check inpur variables
-#---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------------------#
+  #  1. check inpur variables
+  #---------------------------------------------------------------------------------------------------------------------#
 
   # input keywords
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
@@ -70,9 +70,9 @@ moveCloud <- function(xy, obs.dates, data.path=NULL, buffer.size=NULL, remove.fi
   myd <- "ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/MYDAL2_D_CLD_FR/" # aqua
   mod <- "ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/MODAL2_D_CLD_FR/" # terra
 
-#---------------------------------------------------------------------------------------------------------------------#
-# 2. download data and derive statistics
-#---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------------------#
+  # 2. download data and derive statistics
+  #---------------------------------------------------------------------------------------------------------------------#
 
   # target dates
   obs.dates <- as.Date(obs.dates)

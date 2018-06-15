@@ -10,7 +10,7 @@
 #' @param buffer.size Spatial buffer size applied around each segment (unit depends on spatial projection).
 #' @param smooth.fun Smoothing function applied with \emph{buffer.size} when \emph{method} is \emph{cont}. Default is mean.
 #' @importFrom raster extract crs
-#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar scale_fill_discrete
+#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar scale_fill_discrete element_blank element_text
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}} \code{\link{timeDir}} \code{\link{spaceDir}}
 #' @return A \emph{list}.
 #' @details {This function identifies segments of comparable environmental conditions along the movement track given by \emph{xy}.
@@ -41,14 +41,14 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(xy=shortMove, obs.time=obs.time, env.data=r, data.type="cat")
+#'  seg <- moveSeg(r, xy=shortMove, obs.time=obs.time, data.type="cat")
 #'
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(xy=NULL, env.data=env.data, data.type='cont', threshold=threshold,
+moveSeg <- function(env.data, xy=NULL, data.type='cont', threshold=threshold,
                     obs.time=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
 
   #---------------------------------------------------------------------------------------------------------------------#
@@ -140,10 +140,10 @@ moveSeg <- function(xy=NULL, env.data=env.data, data.type='cont', threshold=thre
 # 3. identify segments
 #---------------------------------------------------------------------------------------------------------------------#
 
-  run.diff <- abs(diff(envi.data)) >= threshold # compare consecutive data points and apply threshold
+  run.diff <- abs(diff(env.data)) >= threshold # compare consecutive data points and apply threshold
   seg.ls <- rle(run.diff) # find sequences of similar values
   seg.id <- vector('numeric', length(run.diff)) # label segments (1)
-  for (s in 1:length(a$lengths)) {seg.id[(sum(seg.ls$lengths[0:(s-1)])+1):sum(seg.ls$length[1:s])] <- s} # label segments (1)
+  for (s in 1:length(seg.ls$lengths)) {seg.id[(sum(seg.ls$lengths[0:(s-1)])+1):sum(seg.ls$length[1:s])] <- s} # label segments (1)
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 4. derive segment statistics
@@ -170,7 +170,7 @@ moveSeg <- function(xy=NULL, env.data=env.data, data.type='cont', threshold=thre
 
     }
 
-    return(data.frame(sid=u, count=length(ind), start=st, end=et, elapsed=tt, value=rv, stringsAsFactors=FALSE))}
+    return(data.frame(sid=u, count=length(ii), start=st, end=et, elapsed=tt, value=rv, stringsAsFactors=FALSE))}
 
   ))
 
