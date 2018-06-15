@@ -4,20 +4,20 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(env.data, xy = NULL, data.type = "cont", threshold = threshold,
-  obs.time = NULL, summary.fun = NULL, buffer.size = NULL,
+moveSeg(x, y = NULL, obs.time = NULL, data.type = "cont",
+  threshold = threshold, summary.fun = NULL, buffer.size = NULL,
   smooth.fun = NULL)
 }
 \arguments{
-\item{env.data}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
+\item{x}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.}
 
 \item{data.type}{Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).}
 
 \item{threshold}{Change threshold. Required if \emph{data.type} is set to \emph{cat}.}
-
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{summary.fun}{Summary function used to summarize the values within each segment when \emph{method} is \emph{cont}. Default is mean.}
 
@@ -32,17 +32,17 @@ A \emph{list}.
 Pixel based segmentation of movement data using environmental data.
 }
 \details{
-{This function identifies segments of comparable environmental conditions along the movement track given by \emph{xy}.
-Looking at consecutive data points, the function queries \emph{env.data} and proceeds to identify a new segment if \emph{threshold}
-is exceeded. Then, for each segment, the function summarizes \emph{env.data} using \emph{summary.fun} and reports on the amount
+{This function identifies segments of comparable environmental conditions along the movement track given by \emph{y}.
+Looking at consecutive data points, the function queries \emph{x} and proceeds to identify a new segment if \emph{threshold}
+is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount
 of points found within it. Moreover, if \emph{obs.time} is set, the function reports on the start and end timestamps and the elapsed time.
 If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
 define \emph{threshold} which indicates when the difference between consecutive points should be considered a change.
 In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
-each sample in \emph{xy} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
+each sample in \emph{y} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
 In this case, the function will report on the majority value within the buffer. The output of this function consists of:
 \itemize{
- \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{xy}.}
+ \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{y}.}
  \item{\emph{stats} - Statistical information for each segment reporting on the corresponding environmental and temporal information.}
  \item{\emph{plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
 }
@@ -62,7 +62,7 @@ In this case, the function will report on the majority value within the buffer. 
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(r, xy=shortMove, obs.time=obs.time, data.type="cat")
+ seg <- moveSeg(r, shortMove, obs.time=obs.time, data.type="cat")
 
 }
 }

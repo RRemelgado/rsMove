@@ -4,7 +4,7 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(x, y, y.dates, x.dates, time.buffer, spatial.buffer = NULL,
+dataQuery(x, y, x.dates, y.dates, time.buffer, spatial.buffer = NULL,
   smooth.fun = NULL)
 }
 \arguments{
@@ -12,9 +12,9 @@ dataQuery(x, y, y.dates, x.dates, time.buffer, spatial.buffer = NULL,
 
 \item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{y.dates}{Object of class \emph{Date} with \emph{y} observation dates.}
-
 \item{x.dates}{Object of class \emph{Date} with \emph{x} observation dates.}
+
+\item{y.dates}{Object of class \emph{Date} with \emph{y} observation dates.}
 
 \item{time.buffer}{Two element vector with temporal search buffer (expressed in days).}
 
@@ -63,7 +63,7 @@ will be returned by default. If \emph{x} is a \emph{data.frame} \emph{spatial.bu
  y.dates <- as.Date(shortMove@data$date)
 
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(r.stk, shortMove, y.dates, x.dates, c(10,10))
+ rsQuery <- dataQuery(r.stk, shortMove, x.dates, y.dates, c(10,10))
 
 }
 

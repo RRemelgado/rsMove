@@ -44,7 +44,7 @@
 #'  y.dates <- as.Date(shortMove@data$date)
 #'
 #'  # retrieve remote sensing data for samples
-#'  rsQuery <- dataQuery(r.stk, shortMove, y.dates, x.dates, c(10,10))
+#'  rsQuery <- dataQuery(r.stk, shortMove, x.dates, y.dates, c(10,10))
 #'
 #' }
 #'
@@ -52,7 +52,7 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-dataQuery <- function(x, y, y.dates, x.dates, time.buffer, spatial.buffer=NULL, smooth.fun=NULL) {
+dataQuery <- function(x, y, x.dates, y.dates, time.buffer, spatial.buffer=NULL, smooth.fun=NULL) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # check variables
