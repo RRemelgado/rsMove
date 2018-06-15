@@ -1,16 +1,16 @@
 #' @title moveReduce
 #'
 #' @description Pixel based summary of movement data that preserves periodic movements.
-#' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @param img Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
+#' @param x Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
+#' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.
+#' @param y Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
 #' @param derive.raster Should a raster with the total time per pixel be provided?
 #' @importFrom raster crs cellFromXY rasterize
 #' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{sampleMove}} \code{\link{moveSeg}}
 #' @return A \emph{list} object.
-#' @details {Reduces a set of input samples (\emph{xy}) based on their corresponding pixel coordinates
-#' within a reference raster (\emph{img}). Using this data, the function identifies temporal segments
+#' @details {Reduces a set of input samples (\emph{x}) based on their corresponding pixel coordinates
+#' within a reference raster (\emph{y}). Using this data, the function identifies temporal segments
 #' corresponding to groups of consecutive samples found within the same pixel. In this process, revisits
 #' to recorded pixels are preserved. Once the segments are identified, the function derives mean x and y
 #' coordinates for each of them and evaluates the time spent within each pixel. The function reports on
@@ -19,7 +19,7 @@
 #' \itemize{
 #' \item{\emph{r.shp} - Shapefile with reduced sample set and its corresponding temporal information.}
 #' \item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
-#' \item{\emph{indices} - Indices for each sample in \emph{xy} showing which samples were aggregated.}}
+#' \item{\emph{indices} - Indices for each sample in \emph{x} showing which samples were aggregated.}}
 #'
 #' }
 #' @examples {
@@ -33,47 +33,47 @@
 #'  data(shortMove)
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+#'  z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(shortMove, obs.time, r)
+#'  move.reduce <- moveReduce(shortMove, z, r)
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------#
 
-moveReduce <- function(xy, obs.time, img, derive.raster=FALSE) {
+moveReduce <- function(x, y, z, derive.raster=FALSE) {
 
 #----------------------------------------------------------------------------------------------------------#
 # 1. check input variables
 #----------------------------------------------------------------------------------------------------------#
 
   # samples
-  if (!exists('xy')) {stop('"xy" is missing')}
-  if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  rProj <- crs(xy) # output projection
+  if (!exists('x')) {stop('"x" is missing')}
+  if (!class(x)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"x" is not of a valid class')}
+  rProj <- crs(x) # output projection
 
   # sample dates
-  if (!is.null(obs.time)) {
-    if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
-    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}}
+  if (!is.null(z)) {
+    if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
+    if (length(z)!=length(x)) {stop('errorr: "x" and "z" have different lengths')}}
 
   # environmental data
-  if (!class(img)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
-    stop('"img" is not a valid raster object')}
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "edata" have different projections')}
+  if (!class(y)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
+    stop('"y" is not a valid raster object')}
+  if (crs(x)@projargs!=crs(y)@projargs) {stop('"x" and "edata" have different projections')}
 
 #----------------------------------------------------------------------------------------------------------#
 # 2. identify segments
 #----------------------------------------------------------------------------------------------------------#
 
-  # convert xy to single pixels
-  os <- order(obs.time)
-  xy <- xy[os,]
-  obs.time <- obs.time[os]
-  sp <- cellFromXY(img, xy@coords)
+  # convert x to single pixels
+  os <- order(z)
+  x <- x[os,]
+  z <- z[os]
+  sp <- cellFromXY(y, x@coords)
 
   rm(os)
 
@@ -87,17 +87,17 @@ moveReduce <- function(xy, obs.time, img, derive.raster=FALSE) {
   # estimate
   df <- do.call(rbind, lapply(1:max(sg), function(s) {
     ind <- which(sg==s)
-    mx <- median(xy@coords[ind,1])
-    my <- median(xy@coords[ind,2])
-    s.time <- obs.time[ind[1]]
-    e.time <- obs.time[ind[length(ind)]]
+    mx <- median(x@coords[ind,1])
+    my <- median(x@coords[ind,2])
+    s.time <- z[ind[1]]
+    e.time <- z[ind[length(ind)]]
     d.time <- as.numeric(difftime(e.time, s.time, units='mins'))
     return(data.frame(x=mx, y=my, start.time=s.time, end.time=e.time, diff.time=d.time, segment.id=s))}))
   colnames(df) <- c("x", "y", "Timeststamp (start)", "Timeststamp (end)",
                     "Elapsed time (minutes)", "Segment ID")
 
   # build statistic shapefile
-  r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(xy))
+  r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(x))
 
 #----------------------------------------------------------------------------------------------------------#
 # 3. derive single raster
@@ -110,7 +110,7 @@ moveReduce <- function(xy, obs.time, img, derive.raster=FALSE) {
     t.sum <- sapply(up, function(p) {sum(df$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
 
     # build raster
-    t.sum.r <- rasterize(xyFromCell(img, up), crop(img, extent(xy)), t.sum)
+    t.sum.r <- rasterize(xyFromCell(y, up), crop(y, extent(x)), t.sum)
 
   } else {t.sum.r <- NULL}
 

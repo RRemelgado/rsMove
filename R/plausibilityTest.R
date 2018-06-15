@@ -17,7 +17,12 @@
 #' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlab ylab scale_fill_manual facet_wrap element_blank unit
 #' @importFrom stats as.formula
 #' @importFrom grDevices rainbow
-
+#' @example {
+#'
+#'
+#'
+#'
+#' }
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 

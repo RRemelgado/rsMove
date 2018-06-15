@@ -4,7 +4,7 @@
 #' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param x Object of class \emph{RasterLayer} or \emph{data.frame}.
 #' @param data.type Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).
-#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.
+#' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.
 #' @param threshold Change threshold. Required if \emph{data.type} is set to \emph{cat}.
 #' @param summary.fun Summary function used to summarize the values within each segment when \emph{method} is \emph{cont}. Default is mean.
 #' @param buffer.size Spatial buffer size applied around each segment (unit depends on spatial projection).
@@ -16,7 +16,7 @@
 #' @details {This function identifies segments of comparable environmental conditions along the movement track given by \emph{y}.
 #' Looking at consecutive data points, the function queries \emph{x} and proceeds to identify a new segment if \emph{threshold}
 #' is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount
-#' of points found within it. Moreover, if \emph{obs.time} is set, the function reports on the start and end timestamps and the elapsed time.
+#' of points found within it. Moreover, if \emph{z} is set, the function reports on the start and end timestamps and the elapsed time.
 #' If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
 #' define \emph{threshold} which indicates when the difference between consecutive points should be considered a change.
 #' In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
@@ -37,18 +37,18 @@
 #'  data(shortMove)
 #'
 #'  # observation time
-#'  obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+#'  z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(r, shortMove, obs.time=obs.time, data.type="cat")
+#'  seg <- moveSeg(r, shortMove, z=z, data.type="cat")
 #'
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(x, y=NULL, obs.time=NULL, data.type='cont', threshold=threshold, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
+moveSeg <- function(x, y=NULL, z=NULL, data.type='cont', threshold=threshold, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 1. check input variables
@@ -59,9 +59,9 @@ moveSeg <- function(x, y=NULL, obs.time=NULL, data.type='cont', threshold=thresh
   rProj <- crs(y) # output projection
 
   # sample dates
-  if (!is.null(obs.time)) {
-    if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
-    if (length(obs.time)!=length(y)) {stop('errorr: "y" and "obs.time" have different lengths')}
+  if (!is.null(z)) {
+    if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
+    if (length(z)!=length(y)) {stop('errorr: "y" and "z" have different lengths')}
     processTime <- TRUE
   } else {processTime <- FALSE}
 
@@ -156,8 +156,8 @@ moveSeg <- function(x, y=NULL, obs.time=NULL, data.type='cont', threshold=thresh
 
     if (processTime) {
 
-      st <- min(obs.time[ii]) # start time
-      et <- max(obs.time[ii]) # end time
+      st <- min(z[ii]) # start time
+      et <- max(z[ii]) # end time
       tt <- as.numeric(difftime(et, st, units="mins")) # elapsed time
 
     } else {
@@ -181,7 +181,7 @@ moveSeg <- function(x, y=NULL, obs.time=NULL, data.type='cont', threshold=thresh
     odf$sid <- factor(odf$sid, levels=sort(unique(odf$sid)))
 
     # plot with time
-    if (!is.null(obs.time)) {
+    if (!is.null(z)) {
 
       # buid plot object
       p <- ggplot(odf, aes_string(x="sid", y="time", fill="value")) + geom_bar(stat="identity") +
@@ -212,7 +212,7 @@ moveSeg <- function(x, y=NULL, obs.time=NULL, data.type='cont', threshold=thresh
     odf$value <- factor(odf$value, levels=sort(unique(odf$value)))
 
     # plot with time
-    if (!is.null(obs.time)) {
+    if (!is.null(z)) {
 
       # buid plot object
       p <- ggplot(odf, aes_string(x="sid", y="elapsed", fill="value")) + geom_bar(stat="identity") +
