@@ -35,7 +35,7 @@
 
 #---------------------------------------------------------------------------------------------------------------------------------------------#
 
-labelSample <- function(xy=xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pixels=NULL) {
+labelSample <- function(xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pixels=NULL) {
 
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -74,9 +74,9 @@ labelSample <- function(xy=xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pi
 
   if (length(up)==1) {stop('warning: only one pixel in the data. Processing aborted (is pixel.res correct?)')}
 
-#--------------------------------------------------------------------------------------------------------------------------------------------#
-# 3. region label (phase I)
-#--------------------------------------------------------------------------------------------------------------------------------------------#
+  #--------------------------------------------------------------------------------------------------------------------------------------------#
+  # 3. region label (phase I)
+  #--------------------------------------------------------------------------------------------------------------------------------------------#
 
   # filter based on the number of pixels
   if (!is.null(nr.points)) {
@@ -88,31 +88,41 @@ labelSample <- function(xy=xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pi
   if (!is.null(nr.pixels)) {
     regions <- clump(pixel.res)
     px.freq <- freq(regions,useNA="no")
-    ind <- which(px.freq[,2] >= nr.pixels)
+    ind <- which(px.freq[,2] < nr.pixels)
     ind <- as.vector(px.freq[ind,1])
-    for (i in 1:length(ind)) {pixel.res[regions==ind[i]] <- 0}
+    if (!is.na(ind[1])) {for (i in 1:length(ind)) {pixel.res[regions==ind[i]] <- 0}}
     rm(regions, px.freq, ind)
     up <- up[pixel.res[up] > 0]}
 
   # control sample amountth
   if (length(up)==0) {stop(paste0('there are no regions with >= ', as.character(nr.pixels), ' pixels. Consider reducing "nr.pixels"'))}
 
-#--------------------------------------------------------------------------------------------------------------------------------------------#
-# 4. region label (phase II)
-#--------------------------------------------------------------------------------------------------------------------------------------------#
+  #--------------------------------------------------------------------------------------------------------------------------------------------#
+  # 4. region label (phase II)
+  #--------------------------------------------------------------------------------------------------------------------------------------------#
 
   #determine radius (in pixels)
   agg.radius <- round((agg.radius/res(pixel.res)[1])+0.1)
 
   # dilate samples
-  if (agg.radius > 0) {pixel.res <- focal(pixel.res, matrix(1, agg.radius, agg.radius), max, na.rm=TRUE) > 0}
+  if (agg.radius > 0) {
+
+    for (p in 1:length(up)) {
+
+      rp <- rowFromCell(pixel.res, up[p]) # row position
+      cp <- colFromCell(pixel.res, up[p]) # column positon
+      pixel.res[(rp-agg.radius):(rp+agg.radius), (cp-agg.radius):(cp+agg.radius)] <- 1
+
+    }
+
+  }
 
   # evaluate sample connectivity
   pixel.res <- clump(pixel.res)
 
-#--------------------------------------------------------------------------------------------------------------------------------------------#
-# 5. return ID's
-#--------------------------------------------------------------------------------------------------------------------------------------------#
+  #--------------------------------------------------------------------------------------------------------------------------------------------#
+  # 5. return ID's
+  #--------------------------------------------------------------------------------------------------------------------------------------------#
 
   return(pixel.res[sp])
 

@@ -4,8 +4,8 @@
 \alias{sampleMove}
 \title{sampleMove}
 \usage{
-sampleMove(xy = xy, obs.time = obs.time, search.radius = search.radius,
-  distance.method = "m", time.unit = NULL)
+sampleMove(xy, obs.time, search.radius, distance.method = "m",
+  time.unit = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -44,7 +44,7 @@ data(longMove)
 
  # sampling without reference grid
  obs.time = strptime(longMove$timestamp, "\%Y-\%m-\%d \%H:\%M:\%S")
- output <- sampleMove(xy=longMove, obs.time=obs.time, search.radius=7, distance.method='deg')
+ output <- sampleMove(longMove, obs.time, 7, distance.method='deg')
 
  # compare original vs new samples
  plot(longMove, col="black", pch=16)

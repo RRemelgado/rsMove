@@ -4,7 +4,7 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(xy = xy, env.data = env.data, data.type = "cont",
+moveSeg(xy = NULL, env.data = env.data, data.type = "cont",
   threshold = threshold, obs.time = NULL, summary.fun = NULL,
   buffer.size = NULL, smooth.fun = NULL)
 }

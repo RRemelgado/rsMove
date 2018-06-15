@@ -4,17 +4,14 @@
 \alias{poly2sample}
 \title{poly2sample}
 \usage{
-poly2sample(pol.shp = pol.shp, ref.ext = ref.ext, min.cover = NULL,
-  pixel.res = NULL)
+poly2sample(x, y, min.cover = 1)
 }
 \arguments{
-\item{pol.shp}{Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.}
+\item{x}{Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.}
 
-\item{ref.ext}{Object of class \emph{Extent} or a \emph{RasterLayer} from which an extent can be derived.}
+\item{y}{A raster object of a numeric element.}
 
-\item{min.cover}{Minimum percent a pixel should be covered by a polygon for sampling (0-100). Default is 100.}
-
-\item{pixel.res}{Pixel resolution. Required if \emph{ref.ext} is an \emph{Extent} object. Unit depends on spatial projection.}
+\item{min.cover}{Minimum percent a pixel should be covered by a polygon for sampling (1-100). Default is 1.}
 }
 \value{
 A \emph{SpatialPointsDataFrame} with sampled pixels reporting on polygon percent coverage.
@@ -23,11 +20,13 @@ A \emph{SpatialPointsDataFrame} with sampled pixels reporting on polygon percent
 {Converts a raster grid to points depending on how much each pixel is covered by a polygon.}
 }
 \details{
-{\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making it more efficient
-over large areas and converting its output into point samples rather than a raster object. For each polygon in (\emph{"pol.shp"}),
-\emph{poly2sample} extracts the overlapping pixels derived from \emph{ref.ext}. Then, for each pixel, the function estimates the
-percentage of it that is covered by the reference polygon. Finally, the function extracts coordinate pairs for pixels that has a
-percent coverage equal to or greater than \emph{min.cover}.}
+{\emph{poly2Sample} extends on the \code{\link[raster]{rasterize}} function from the raster package making
+it more efficient over large areas and converting its output into point samples rather than a raster object. For each
+polygon in (\emph{"x"}), \emph{poly2sample} extracts the overlapping pixels of a reference grid. Then, for each pixel,
+the function estimates the percentage of it that is covered by the reference polygon. Finally, the function extracts
+coordinate pairs for pixels that has a percent coverage equal to or greater than \emph{min.cover}. If \emph{y} is a
+raster object, the function will use it as a reference  grid. If \emph{y} is a numeric element, the function will build
+a raster from the extent of \emph{x} and a resolution equal to \emph{y}.}
 }
 \examples{
 {
@@ -42,8 +41,8 @@ percent coverage equal to or greater than \emph{min.cover}.}
  file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
  roi <- shapefile(file)
 
- # segment probabilities
- samples <- poly2sample(pol.shp=roi, ref.ext=img)
+ # extract samples
+ samples <- poly2sample(roi, img, min.cover=50)
 
 }
 }

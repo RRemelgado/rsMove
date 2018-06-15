@@ -4,7 +4,7 @@
 \alias{hotMove}
 \title{hotMove}
 \usage{
-hotMove(xy = xy, pixel.res = pixel.res, return.shp = FALSE)
+hotMove(xy, pixel.res, return.shp = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
@@ -36,7 +36,7 @@ require(raster)
 data(longMove)
 
 # extract regions
-hm <- hotMove(xy=longMove, pixel.res=0.1, return.shp=TRUE)
+hm <- hotMove(longMove, 0.1, return.shp=TRUE)
 
 # plot shapefile (color by region)
 plot(hm$polygons, col=hm$indices)

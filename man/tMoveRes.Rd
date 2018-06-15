@@ -4,8 +4,7 @@
 \alias{tMoveRes}
 \title{tMoveRes}
 \usage{
-tMoveRes(xy = xy, obs.date = obs.date, time.res = time.res,
-  pixel.res = pixel.res)
+tMoveRes(xy, obs.date, time.res, pixel.res)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -43,7 +42,7 @@ samples and sample regions. The output of the function consists of:
 
  # test function for intervals of 1, 8 and 16 days (e.g. of MODIS data)
  obs.date <- as.Date(longMove@data$timestamp)
- a.res <- tMoveRes(xy=longMove, obs.date=obs.date, time.res=c(1,8,16), pixel.res=0.01)
+ a.res <- tMoveRes(longMove, obs.date, c(1,8,16), 0.01)
 
 }
 }

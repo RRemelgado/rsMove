@@ -4,8 +4,7 @@
 \alias{imgInt}
 \title{imgInt}
 \usage{
-imgInt(env.data = env.data, env.dates = env.dates,
-  target.dates = target.dates, time.buffer = time.buffer, xy = NULL)
+imgInt(env.data, env.dates, target.dates, time.buffer, xy)
 }
 \arguments{
 \item{env.data}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
@@ -52,11 +51,10 @@ Otherwise, all pixels are considered providing a \emph{RasterBrick}. However, if
  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # target dates
- target.dates = as.Date("2012-04-01")
+ target.dates = as.Date("2013-08-10")
 
  # interpolate raster data to target dates
- i.env.data <- imgInt(env.data=r.stk, env.dates=env.dates,
- target.dates=target.dates, time.buffer=c(60,60), xy=shortMove)
+ i.env.data <- imgInt(r.stk, env.dates, target.dates, c(60,60), shortMove)
 
 }
 }

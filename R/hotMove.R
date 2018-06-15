@@ -49,7 +49,7 @@ hotMove <- function(xy, pixel.res, return.shp=FALSE) {
 # 2. determine grid coordinates for given pixels
 #---------------------------------------------------------------------------------------------------------------------#
 
-  regions <- raster(extent(xy), res=pixel.res, crs=crs(xy), vals=0) # build raster from extent
+  regions <- raster(extend(extent(xy), c(pixel.res,pixel.res)), res=pixel.res, crs=crs(xy), vals=0) # build raster from extent
   sp <- cellFromXY(regions, xy) # convert coordinates to pixel positions
   up <- unique(sp) # unique pixel positions
   if (length(up)==1) {stop('only one pixel with data. Processing aborted (is "pixel.res" correct?)')}
@@ -67,7 +67,7 @@ hotMove <- function(xy, pixel.res, return.shp=FALSE) {
 
   # label smaples based on the value associated to each unique position
   rid <- vector('numeric', length(xy))
-  for (r in 1:length(up)) {rid[which(sp==up[r])]<-uregions[up[r]]}
+  for (r in 1:length(up)) {rid[which(sp==up[r])] <- regions[up[r]]}
 
   # dummy buffer (used if a region has only 1 point)
   d.buff <- pixel.res*0.001

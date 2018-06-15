@@ -4,22 +4,21 @@
 \alias{timeDir}
 \title{timeDir}
 \usage{
-timeDir(xy = NULL, obs.dates = obs.dates, img = NULL, env.data = NULL,
-  env.dates = env.dates, temporal.buffer = temporal.buffer,
-  stat.fun = NULL, min.count = 2)
+timeDir(env.dates, obs.dates, temporal.buffer, xy = NULL, img = NULL,
+  env.data = NULL, stat.fun = NULL, min.count = 2)
 }
 \arguments{
-\item{xy}{Object of class "SpatialPoints" or "SpatialPointsDataFrame".}
+\item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
 
 \item{obs.dates}{Object of class \emph{Date} with \emph{xy} observation dates.}
+
+\item{temporal.buffer}{two element vector with temporal window size (expressed in days).}
+
+\item{xy}{Object of class "SpatialPoints" or "SpatialPointsDataFrame".}
 
 \item{img}{Object of class}
 
 \item{env.data}{Object of class \emph{RasterStack} or \emph{RasterBrick} or \emph{data.frame}.}
-
-\item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
-
-\item{temporal.buffer}{two element vector with temporal window size (expressed in days).}
 
 \item{stat.fun}{Output statistical metric.}
 
@@ -65,8 +64,7 @@ for \emph{env.dates} and y for \emph{env.data}.}
 
  # perform directional sampling
  of <- function(x,y) {lm(y~x)$coefficients[2]}
- time.env <- timeDir(xy=shortMove, obs.dates=obs.dates, env.data=r.stk,
- env.dates=r.dates, temporal.buffer=c(30,30), stat.fun=of)
+ time.env <- timeDir(r.dates, obs.dates, c(30,30), xy=shortMove, env.data=r.stk, stat.fun=of)
 
 }
 }

@@ -4,8 +4,7 @@
 \alias{hotMoveStats}
 \title{hotMoveStats}
 \usage{
-hotMoveStats(region.id = region.id, obs.time = obs.time,
-  individual.id = NULL)
+hotMoveStats(region.id, obs.time, individual.id = NULL)
 }
 \arguments{
 \item{region.id}{Region unique identifiers. Vector of class \emph{numeric}.}
@@ -37,7 +36,7 @@ require(raster)
 data(longMove)
 
 # extract regions
-hm <- hotMove(xy=longMove, pixel.res=0.1, return.shp=TRUE)
+hm <- hotMove(longMove, 0.1, return.shp=TRUE)
 
 # plot shapefile (color by region)
 plot(hm$polygons)
@@ -46,8 +45,7 @@ plot(hm$polygons)
 longMove@data <- cbind(longMove@data, hm$indices)
 
 # derive statistics
-hm.region.stats <- hotMoveStats(region.id=hm$indices,
-obs.time=as.Date(longMove@data$timestamp))
+hm.region.stats <- hotMoveStats(hm$indices, as.Date(longMove@data$timestamp))
 
 }
 }

@@ -4,8 +4,8 @@
 \alias{moveCloud}
 \title{moveCloud}
 \usage{
-moveCloud(xy = xy, obs.dates = obs.dates, data.path = NULL,
-  buffer.size = NULL, remove.file = FALSE)
+moveCloud(xy, obs.dates, data.path = NULL, buffer.size = NULL,
+  remove.file = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -55,7 +55,7 @@ final output provides a \emph{data.frame} ($report) with information on:
 
  # test function for 30 day buffer
  od <- as.Date(shortMove@data$date)
- c.cover <- moveCloud(xy=shortMove, obs.dates=od, data.path=".", buffer.size=c(30,30))
+ c.cover <- moveCloud(shortMove, od, data.path=".", buffer.size=c(30,30))
 
 }
 }

@@ -4,18 +4,17 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(xy = xy, obs.dates = obs.dates, env.data = env.data,
-  env.dates = env.dates, time.buffer = NULL, spatial.buffer = NULL,
-  smooth.fun = NULL)
+dataQuery(env.data, obs.dates, env.dates, xy = NULL, time.buffer = NULL,
+  spatial.buffer = NULL, smooth.fun = NULL)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{env.data}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
 
 \item{obs.dates}{Object of class \emph{Date} with \emph{xy} observation dates.}
 
-\item{env.data}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
-
 \item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
+
+\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{time.buffer}{Two element vector with temporal search buffer (expressed in days).}
 
@@ -64,8 +63,7 @@ will be returned by default. If \emph{env.data} is a \emph{data.frame} \emph{spa
  obs.dates <- as.Date(shortMove@data$date)
 
  # retrieve remote sensing data for samples
- rsQuery <- dataQuery(xy=shortMove, obs.dates=obs.dates,
- env.data=r.stk, env.dates=r.dates, time.buffer=c(30,30))
+ rsQuery <- dataQuery(shortMove, obs.dates, r.dates, env.data=r.stk, time.buffer=c(30,30))
 
 }
 

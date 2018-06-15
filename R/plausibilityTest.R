@@ -10,11 +10,11 @@
 #' @details {The function counts the number of non-NA pixels in \emph{sample.mask} within each class of \emph{reference.map}.
 #' Then, the sample count is normalized by its largest value. The output of the function is a list consisting of:
 #'  \itemize{
-#'  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map.}
-#'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map.}
+#'  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
+#'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
 #'  \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{sample.mask} within each class of \emph{reference.map}.}}}
 #' @importFrom raster crs extract nlayers
-#' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlabl ylab scale_fill_manual facet_wrap
+#' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlab ylab scale_fill_manual facet_wrap
 #' @importFrom grDevices rainbow
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#

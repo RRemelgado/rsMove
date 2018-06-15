@@ -4,19 +4,19 @@
 \alias{labelSample}
 \title{labelSample}
 \usage{
-labelSample(xy = xy, agg.radius = agg.radius, nr.points = NULL,
-  nr.pixels = NULL, pixel.res = pixel.res)
+labelSample(xy, pixel.res, agg.radius = NULL, nr.points = NULL,
+  nr.pixels = NULL)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
+
+\item{pixel.res}{Pixel resolution or a valid raster layer.}
 
 \item{agg.radius}{Minimum radius for pixel aggregation. Unit depends on the projection of the data.}
 
 \item{nr.points}{Minimum number of samples per pixel.}
 
 \item{nr.pixels}{Minimum number of pixels per region.}
-
-\item{pixel.res}{Pixel resolution or a valid raster layer.}
 }
 \value{
 A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
@@ -45,7 +45,7 @@ and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may ass
  data(shortMove)
 
  # derive region labels
- labels <- labelSample(xy=shortMove, agg.radius=90, nr.pixels=2, pixel.res=30)
+ labels <- labelSample(shortMove, 30, agg.radius=90, nr.pixels=2)
 
 }
 }

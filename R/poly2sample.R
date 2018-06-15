@@ -47,7 +47,7 @@ poly2sample <- function(x, y, min.cover=1) {
     stop('"x" is not a valid input')}
 
   # check/derive reference raster
-  if (is.numeric(y) {y <- extend(raster(extent(x), res=y, crs=crs(x)), y)} else {
+  if (is.numeric(y)) {y <- extend(raster(extent(x), res=y, crs=crs(x)), y)} else {
     e <- try(extent(y))
     if (class(e) != "Extent") {stop('"y" is not of a valid class')}}
 

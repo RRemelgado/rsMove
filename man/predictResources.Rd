@@ -4,8 +4,8 @@
 \alias{predictResources}
 \title{predictResources}
 \usage{
-predictResources(presence.data = presence.data, absence.data = absence.data,
-  sample.label = NULL, env.data = NULL)
+predictResources(presence.data, absence.data, sample.label = NULL,
+  env.data = NULL)
 }
 \arguments{
 \item{presence.data}{Object of class \emph{data.frame} with environmental variables for presence samples.}
@@ -61,22 +61,20 @@ The output of \emph{predictResources} is a list object consisting of:
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # remove redundant samples
- shortMove <- moveReduce(xy=shortMove, obs.time=obs.time, img=rsStk)$points
+ shortMove <- moveReduce(shortMove, obs.time, r.stk)$points
 
  # retrieve remote sensing data for samples
- rsQuery <- extract(rsStk, shortMove)
+ rsQuery <- extract(r.stk, shortMove)
 
  # identify unique sample regions
- label <- labelSample(xy=shortMove, agg.radius=90, pixel.res=rsStk)
+ label <- labelSample(shortMove, rsStk, agg.radius=90)
 
  # select background samples
  ind <- which(!is.na(label)) # selected samples
- bSamples <- backSample(xy=shortMove[ind,], region.id=label[ind],
- img=rsStk, sampling.method='pca')
+ bSamples <- backSample(shortMove[ind,], label[ind], r.stk, sampling.method='pca')
 
  # derive model predictions
- out <- predictResources(presence.data=rsQuery,
- absence.data=bSamples@data, sample.label=label, env.data=rsStk)
+ out <- predictResources(rsQuery, bSamples@data, sample.label=label, env.data=r.stk)
 
 }
 }

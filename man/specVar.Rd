@@ -4,7 +4,7 @@
 \alias{specVar}
 \title{specVar}
 \usage{
-specVar(img = img, pixel.res = pixel.res)
+specVar(img, pixel.res)
 }
 \arguments{
 \item{img}{Object of class \emph{RasterLayer}.}
@@ -38,7 +38,7 @@ output of the function consists of:
  r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 
  # apply function
- s.var <- specVar(img=r, pixel.res=60)
+ s.var <- specVar(r, 60)
 
 }
 }

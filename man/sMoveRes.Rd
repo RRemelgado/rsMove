@@ -4,7 +4,7 @@
 \alias{sMoveRes}
 \title{sMoveRes}
 \usage{
-sMoveRes(xy = xy, pixel.res = pixel.res)
+sMoveRes(xy, pixel.res)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -37,7 +37,7 @@ of samples and sample regions. The output of the function consists of:
  data(shortMove)
 
  # test function for 5, 10 20 and 30 m
- a.res <- sMoveRes(xy=shortMove, pixel.res=c(5, 10, 20, 30))
+ a.res <- sMoveRes(shortMove, c(5, 10, 20, 30))
 
 }
 }

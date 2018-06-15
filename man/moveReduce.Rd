@@ -4,7 +4,7 @@
 \alias{moveReduce}
 \title{moveReduce}
 \usage{
-moveReduce(xy = xy, obs.time = obs.time, img = img)
+moveReduce(xy, obs.time, img, derive.raster = FALSE)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -12,6 +12,8 @@ moveReduce(xy = xy, obs.time = obs.time, img = img)
 \item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+
+\item{derive.raster}{Should a raster with the total time per pixel be provided?}
 }
 \value{
 A \emph{list} object.
@@ -29,7 +31,7 @@ the start and end timestamps, the mean timestamp and the elapsed time. The outpu
 consists of:
 \itemize{
 \item{\emph{r.shp} - Shapefile with reduced sample set and its corresponding temporal information.}
-\item{\emph{total.time} - Raster showing the total time spent at each pixel.}
+\item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
 \item{\emph{indices} - Indices for each sample in \emph{xy} showing which samples were aggregated.}}
 
 }
@@ -50,7 +52,7 @@ consists of:
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # reduce amount of samples
- move.reduce <- moveReduce(xy=shortMove, obs.time=obs.time, img=r)
+ move.reduce <- moveReduce(shortMove, obs.time, r)
 
 }
 }

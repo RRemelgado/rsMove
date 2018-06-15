@@ -4,21 +4,20 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(xy = xy, obs.time = NULL, img = img,
-  sample.direction = sample.direction, data.type = data.type,
+spaceDir(xy, img, sample.direction, data.type, obs.time = NULL,
   distance.method = "m", buffer.size = NULL, stat.fun = NULL,
   min.count = 2)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
-
 \item{img}{Object of class \emph{RasterLayer}.}
 
 \item{sample.direction}{One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.}
 
 \item{data.type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
+
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
 
 \item{distance.method}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
 
@@ -67,8 +66,7 @@ function is a list consisting of:
 
  # perform directional sampling
  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
- s.sample <- spaceDir(xy=shortMove, obs.time=obs.time, img=r,
- sample.direction="backward", data.type='cont', stat.fun=of)
+ s.sample <- spaceDir(shortMove, r, "backward", "cont", obs.time=obs.time, stat.fun=of)
 
 }
 }
