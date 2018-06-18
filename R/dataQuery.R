@@ -1,10 +1,10 @@
 #' @title dataQuery
 #'
 #' @description Query environmental data for coordinate pairs using the nearest non NA value in time.
-#' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param y.dates Object of class \emph{Date} with \emph{y} observation dates.
 #' @param x Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.
+#' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param x.dates Object of class \emph{Date} with \emph{x} observation dates.
+#' @param y.dates Object of class \emph{Date} with \emph{y} observation dates.
 #' @param time.buffer Two element vector with temporal search buffer (expressed in days).
 #' @param spatial.buffer Spatial buffer size used to smooth the returned values. The unit depends on the spatial projection.
 #' @param smooth.fun Smoothing function applied with \emph{spatial.buffer}.

@@ -4,17 +4,16 @@
 \alias{plausibilityTest}
 \title{plausibilityTest}
 \usage{
-plausibilityTest(sample.mask, reference.map, class.labels = NULL,
-  sample.colors = NULL)
+plausibilityTest(x, y, class.labels = NULL, sample.colors = NULL)
 }
 \arguments{
-\item{sample.mask}{Object of class \emph{raster} and \emph{RasterStack} with the sample mask(s).}
+\item{x}{Object of class \emph{raster} and \emph{RasterStack} with the x(s).}
 
-\item{reference.map}{Reference \emph{raster} (e.g. Land cover map).}
+\item{y}{Reference \emph{raster} (e.g. Land cover map).}
 
-\item{class.labels}{Labels of classes in \emph{reference.map} provided as a character vector.}
+\item{class.labels}{Labels of classes in \emph{y} provided as a character vector.}
 
-\item{sample.colors}{Hex color codes for each layer in \emph{sample.mask} provided as a character vector.}
+\item{sample.colors}{Hex color codes for each layer in \emph{x} provided as a character vector.}
 }
 \value{
 A \emph{list} with statistical information on the distribution of samples per class and a comparative plot.
@@ -23,10 +22,33 @@ A \emph{list} with statistical information on the distribution of samples per cl
 Quantifies and plots the distribution of pixels within a mask over a reference categorical raster object.
 }
 \details{
-{The function counts the number of non-NA pixels in \emph{sample.mask} within each class of \emph{reference.map}.
+{The function counts the number of non-NA pixels in \emph{x} within each class of \emph{y}.
 Then, the sample count is normalized by its largest value. The output of the function is a list consisting of:
  \itemize{
- \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
- \item{\emph{relative.count} - Relative sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
- \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{sample.mask} within each class of \emph{reference.map}.}}}
+ \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{x} within each class of \emph{y}.}
+ \item{\emph{relative.count} - Relative sample count for each layer of \emph{x} within each class of \emph{y}.}
+ \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{x} within each class of \emph{y}.}}}
+}
+\examples{
+{
+
+ require(raster)
+
+ # load example probability image
+ file <- system.file('extdata', 'probabilities.tif', package="rsMove")
+ p <- raster(file) > 0.5
+
+ # land cover map
+ lc <- raster(system.file('extdata', 'landCover.tif', package="rsMove"))
+
+ # segment probabilities
+ pt <- plausibilityTest(p, lc)
+
+ # show plot
+ pt$relative.plot
+
+ # see relative sample count
+ head(pt$relative.count)
+
+}
 }

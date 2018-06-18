@@ -1,13 +1,13 @@
 #' @title segRaster
 #'
 #' @description {Connected-region based raster segmentation that preserves spatial gradients.}
-#' @param img Object of class \emph{RasterLayer}.
+#' @param x Object of class \emph{RasterLayer}.
 #' @param break.point Difference threshold. Default is 0.05.
 #' @param min.value Minimum value. Default is 0.5.
 #' @importFrom raster raster extent crs res
 #' @importFrom stats sd
 #' @return A list object.
-#' @details {The function segments an input raster layer (\emph{img}) using a
+#' @details {The function segments an input raster layer (\emph{x}) using a
 #' connected component region labeling approach. For each pixel, the function
 #' estimates the difference between it and its immediate neighbors. If the
 #' difference is below the threshold defined by \emph{break.point} these are
@@ -34,13 +34,13 @@
 
 #-----------------------------------------------------------------------------------#
 
-segRaster <- function(img, break.point=0.1, min.value=0.5) {
+segRaster <- function(x, break.point=0.1, min.value=0.5) {
 
   #-----------------------------------------------------------------------------------#
   # 1. check input variables
   #-----------------------------------------------------------------------------------#
 
-  if (class(img)[1]!='RasterLayer') {stop('"img" is not a "RasterLayer"')}
+  if (class(x)[1]!='RasterLayer') {stop('"x" is not a "RasterLayer"')}
   if (is.null(min.value)) {min.value <- 0}
 
   #-----------------------------------------------------------------------------------#
@@ -48,12 +48,39 @@ segRaster <- function(img, break.point=0.1, min.value=0.5) {
   #-----------------------------------------------------------------------------------#
 
   # raster dimensions
-  nr <- dim(img)[1]
-  nc <- dim(img)[2]
+  nr <- dim(x)[1]
+  nc <- dim(x)[2]
 
   # identify usable pixels
-  data <- as.matrix(img)
-  pos <- which(data >= min.value)
+  pos <- which.max(x >= min.value)
+
+  # evaluate pixel connectivity
+  regions <- x
+  regions[] <- 0
+
+  sapply(pos, function(p) {
+
+    rp <- rowFromCell(x, p)
+    cp <- colFromCell(x, p)
+
+    if (cp > 1) {sc<-cp-1} else {sc<-cp}
+    if (cp < nc) {ec<-cp+1} else {ec<-cp}
+    if (rp > 1) {sr<-rp-1} else {sr<-rp}
+    if (rp < nr) {er<-rp+1} else {er<-rp}
+
+    if (max(regions[sr:er,sc:ec]) > 0) {
+
+      diff <- abs(x[sr:er,sc:ec]-x[rp,cp]) <= break.point & is.finite(x[sr:er,sc:ec])
+      uv <- unique(c(regions[sr:er,sc:ec][diff]))
+      uv <- uv[which(uv>0)]
+      if (length(uv>0)) {
+        mv <- min(uv)
+        regions[rp,cp]<-min(uv)
+      } else {regions[rp,cp] <<- cellStats(regions, max)+1}
+
+    } else {regions[rp,cp] <<- cellStats(regions, max)+1}
+
+  })
 
   # evaluate pixel connectivity
   regions <- matrix(0, nr, nc)
@@ -108,9 +135,9 @@ segRaster <- function(img, break.point=0.1, min.value=0.5) {
 
   # convert data back to raster
   uregions <- raster(uregions)
-  extent(uregions) <- extent(img)
-  res(uregions) <- res(img)
-  crs(uregions) <- crs(img)
+  extent(uregions) <- extent(x)
+  res(uregions) <- res(x)
+  crs(uregions) <- crs(x)
 
   # build/return data frame
   df <- data.frame(segment=uv, min=pmn, max=pmx, mean=pav, sd=psd, count=npx)

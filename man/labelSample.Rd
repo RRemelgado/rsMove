@@ -4,11 +4,11 @@
 \alias{labelSample}
 \title{labelSample}
 \usage{
-labelSample(xy, pixel.res, agg.radius = NULL, nr.points = NULL,
+labelSample(x, pixel.res, agg.radius = NULL, nr.points = NULL,
   nr.pixels = NULL)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
+\item{x}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
 \item{pixel.res}{Pixel resolution or a valid raster layer.}
 
@@ -19,7 +19,7 @@ labelSample(xy, pixel.res, agg.radius = NULL, nr.points = NULL,
 \item{nr.pixels}{Minimum number of pixels per region.}
 }
 \value{
-A \emph{vector} of unique identifiers assigning each point in \emph{xy} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
+A \emph{vector} of unique identifiers assigning each point in \emph{x} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 }
 \description{
 {Pixel-based labeling of spatially connected groups of samples for splitting them between training and validation.}
@@ -30,7 +30,7 @@ than \emph{nr.points}. Then, if \emph{nr.pixels} is set, the connectivity betwee
 function will label groups of pixels based on their connectivity and regions with a pixel count smaller than the one specified by
 \emph{nr.pixels} are excluded. Then, the algorithm aggregates nearby regions using a dilation algorithm within the radius specified
 by \emph{agg.radius} and proceeds to reliable the pixels covered by samples. Finally, this information is used to label the original
-samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}
+samples provided by \emph{x} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{x}
 and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may assign a raster object to \emph{pixel.res}.}
 }
 \examples{

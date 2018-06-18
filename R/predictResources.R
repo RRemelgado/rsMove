@@ -1,24 +1,24 @@
 #' @title predictResources
 #'
 #' @description Spatially stratified predictive modeling of resource suitability based on presence/absence samples.
-#' @param presence.data Object of class \emph{data.frame} with environmental variables for presence samples.
-#' @param absence.data Object of class \emph{data.frame} with environmental variables for background samples.
-#' @param sample.label Numeric or character vector with sample region labels. If missing, "presence.data" is assumed as one region.
-#' @param env.data Object of class \emph{RasterStack} or \emph{RasterBrick} with environmental variables in \emph{presence.data} and \emph{absence.data}.
+#' @param x Object of class \emph{data.frame} with environmental variables for presence samples.
+#' @param y Object of class \emph{data.frame} with environmental variables for background samples.
+#' @param z Numeric or character vector with sample region labels. If missing, "x" is assumed as one region.
+#' @param env.data Object of class \emph{RasterStack} or \emph{RasterBrick} with environmental variables in \emph{x} and \emph{y}.
 #' @importFrom stats complete.cases
 #' @importFrom caret train trainControl
 #' @importFrom raster predict
 #' @return A \emph{list}.
 #' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @details {Modeling of resource suitability using animal movement data following a recent paper (Remelgado et al, 2017). For each
-#' unique label in \emph{sample.label}, the function keeps it for validation and uses the remaining samples for training. Then, the
+#' unique label in \emph{z}, the function keeps it for validation and uses the remaining samples for training. Then, the
 #' function evaluates the performance of this model reporting (internally) on the number of true positives, false positives and the
 #' number of validation and predicted cases for both presences and absences. Once all sample regions are used for validation, the
 #' reported values are summed and used to derive the F1-measure. The F1-measure is estimated as \emph{2 * (P * R) / (P + R)} where
 #' \emph{P} is the Precision (ratio of true positives within the number of predicted values) and \emph{R} is the Recall (ratio of
 #' true positives within the number of validation samples). As a consequence, rather than reporting on an average performance, the
 #' final performance assessment reported by \emph{predictResources} depicts an objective picture on how the model performed among the
-#' different sets sample regions. This metric is provided for presences (\emph{presence.data}) and absences ({\emph{absence.data}})
+#' different sets sample regions. This metric is provided for presences (\emph{x}) and absences ({\emph{y}})
 #' separately offering an overview on the stability of the model. This analysis is performed using a Random Forest model as provided
 #' within the \code{\link[caret]{train}} function of the caret package. The final predictive model is then derived with all samples.
 #' The output of \emph{predictResources} is a list object consisting of:
@@ -53,45 +53,45 @@
 #'  rsQuery <- extract(r.stk, shortMove)
 #'
 #'  # identify unique sample regions
-#'  label <- labelSample(shortMove, rsStk, agg.radius=90)
+#'  label <- labelSample(shortMove, r.stk, agg.radius=30)
 #'
 #'  # select background samples
-#'  ind <- which(!is.na(label)) # selected samples
-#'  bSamples <- backSample(shortMove[ind,], label[ind], r.stk, sampling.method='pca')
+#'  bSamples <- backSample(shortMove, r.stk, label, sampling.method='pca')
 #'
 #'  # derive model predictions
-#'  out <- predictResources(rsQuery, bSamples@data, sample.label=label, env.data=r.stk)
+#'  out <- predictResources(rsQuery, bSamples@data, z=label, env.data=r.stk)
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 
-predictResources <-function(presence.data, absence.data, sample.label=NULL, env.data=NULL) {
+predictResources <-function(x, y, z, env.data=NULL) {
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables and define auxiliary functions
 #----------------------------------------------------------------------------------------------------------------------------------#
 
   # check variables in data frame
-  if (ncol(presence.data)!=ncol(absence.data)) {stop('different number of variables in "presence.data" and "absence.data"')}
-  if (min(colnames(presence.data)==colnames(absence.data))==0) {stop('column names of "presence.data" and "absence.data" differ')}
+  if (ncol(x)!=ncol(y)) {stop('different number of variables in "x" and "y"')}
+  if (min(colnames(x)==colnames(y))==0) {stop('column names of "x" and "y" differ')}
 
   # check labels
-  if (is.null(sample.label)) {sample.label <- vector('numeric', length(presence.data))+1}
-  if (length(sample.label)!=nrow(presence.data)) {stop('"presence.data" and "sample.label" have different lengths')}
+  if (length(z)!=nrow(x)) {stop('"x" and "z" have different lengths')}
+  uv <- unique(z) # unique region id's
+  if (length(uv) == 1) {stop('"z" only has one unique element')}
 
   # remove duplicates
-  cc <- complete.cases(presence.data)
-  presence.data <- presence.data[cc,]
-  sample.label <- sample.label[cc]
-  absence.data <- absence.data[complete.cases(absence.data),]
+  cc <- complete.cases(x)
+  x <- x[cc,]
+  z <- z[cc]
+  y <- y[complete.cases(y),]
 
   # check environmental data
   if (!is.null(env.data)) {
     if (!class(env.data)[1]%in%c("RasterStack", "RasterBrick")) {stop('"env.data" is not a valid raster object')}
-    if (nlayers(env.data)!=ncol(presence.data)) {stop('"env.data" has a different amount of variables from the training data')}
-    if (length(colnames(presence.data))!=length(names(env.data))) {stop('the variable names of "env.data" are differ from the predictive data')}}
+    if (nlayers(env.data)!=ncol(x)) {stop('"env.data" has a different amount of variables from the training data')}
+    if (length(colnames(x))!=length(names(env.data))) {stop('the variable names of "env.data" are differ from the predictive data')}}
 
   # training metric
   tc <- trainControl(method='oob')
@@ -100,16 +100,15 @@ predictResources <-function(presence.data, absence.data, sample.label=NULL, env.
 # 2. define class codes
 #----------------------------------------------------------------------------------------------------------------------------------#
 
-  i1 <- vector('numeric', nrow(presence.data))+1 # presence class code
-  i0 <- vector('numeric', nrow(absence.data))+2 # absence class code
-  uv <- unique(sample.label) # unique region id's
+  i1 <- vector('numeric', nrow(x))+1 # presence class code
+  i0 <- vector('numeric', nrow(y))+2 # absence class code
 
 #----------------------------------------------------------------------------------------------------------------------------------#
 # 3. Build model
 #----------------------------------------------------------------------------------------------------------------------------------#
 
   # initiate outputs
-  val.set <- data.frame(region=vector(class(sample.label), length(uv)), count=vector('numeric', length(uv)))
+  val.set <- data.frame(region=vector(class(z), length(uv)), count=vector('numeric', length(uv)))
   m.ls <- vector('list', length(uv)) # model list
 
   pp <- 0
@@ -123,8 +122,8 @@ predictResources <-function(presence.data, absence.data, sample.label=NULL, env.
   for (v in 1:length(uv)) {
 
     # split presences
-    i1.t <- which(sample.label!=uv[v])
-    i1.v <- which(sample.label==uv[v])
+    i1.t <- which(z!=uv[v])
+    i1.v <- which(z==uv[v])
 
     # split absence indices (1/2 split)
     si <- sample(1:length(i0), length(i0))
@@ -132,12 +131,11 @@ predictResources <-function(presence.data, absence.data, sample.label=NULL, env.
     i0.v <- i0[si[seq(from=2, to=length(i0), by=2)]]
 
     # build model for training set
-    m.ls[[v]] <- train(rbind(presence.data[i1.t,], absence.data[i0.t,]),
-                       as.factor(c(i1[i1.t],i0[i0.t])), method="rf", trControl=tc)
+    m.ls[[v]] <- train(rbind(x[i1.t,], y[i0.t,]), as.factor(c(i1[i1.t],i0[i0.t])), method="rf", trControl=tc)
 
     # estimate/store accuracies
     vi <- c(i1[i1.v], i0[i0.v])
-    pred <- as.numeric(predict(m.ls[[v]], rbind(presence.data[i1.v,], absence.data[i0.v,])))
+    pred <- as.numeric(predict(m.ls[[v]], rbind(x[i1.v,], y[i0.v,])))
     pp <- pp + sum(pred == 1) # class predictions (1)
     cp <- cp + sum(pred == 1 & vi == 1) # correct class predictions (1)
     tp <- tp + sum(vi==1) # validation set class samples (1)
@@ -167,7 +165,7 @@ predictResources <-function(presence.data, absence.data, sample.label=NULL, env.
   rm(p, r, cp, pp, tp, ca, pa, ta, ap, aa)
 
   # write output
-  model <- train(rbind(presence.data, absence.data), as.factor(c(i1,i0)), method="rf", trControl=tc)
+  model <- train(rbind(x, y), as.factor(c(i1,i0)), method="rf", trControl=tc)
   if (!is.null(env.data)) {prob <-  calc(env.data, function(x){predict(model, x, type='prob')$'1'})} else {prob <- NULL}
   return(list(f1=acc, validation=val.set, iteration.models=m.ls, final.model=model, probabilities=prob))
 

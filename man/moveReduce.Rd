@@ -4,14 +4,14 @@
 \alias{moveReduce}
 \title{moveReduce}
 \usage{
-moveReduce(xy, obs.time, img, derive.raster = FALSE)
+moveReduce(x, y, z, derive.raster = FALSE)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{y}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{img}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.}
 
 \item{derive.raster}{Should a raster with the total time per pixel be provided?}
 }
@@ -22,8 +22,8 @@ A \emph{list} object.
 Pixel based summary of movement data that preserves periodic movements.
 }
 \details{
-{Reduces a set of input samples (\emph{xy}) based on their corresponding pixel coordinates
-within a reference raster (\emph{img}). Using this data, the function identifies temporal segments
+{Reduces a set of input samples (\emph{x}) based on their corresponding pixel coordinates
+within a reference raster (\emph{y}). Using this data, the function identifies temporal segments
 corresponding to groups of consecutive samples found within the same pixel. In this process, revisits
 to recorded pixels are preserved. Once the segments are identified, the function derives mean x and y
 coordinates for each of them and evaluates the time spent within each pixel. The function reports on
@@ -32,7 +32,7 @@ consists of:
 \itemize{
 \item{\emph{r.shp} - Shapefile with reduced sample set and its corresponding temporal information.}
 \item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
-\item{\emph{indices} - Indices for each sample in \emph{xy} showing which samples were aggregated.}}
+\item{\emph{indices} - Indices for each sample in \emph{x} showing which samples were aggregated.}}
 
 }
 }
@@ -48,11 +48,11 @@ consists of:
  data(shortMove)
 
  # observation time
- obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+ z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # reduce amount of samples
- move.reduce <- moveReduce(shortMove, obs.time, r)
+ move.reduce <- moveReduce(shortMove, r, z)
 
 }
 }

@@ -2,74 +2,89 @@
 #' @title plausibilityTest
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 #' @description Quantifies and plots the distribution of pixels within a mask over a reference categorical raster object.
-#' @param sample.mask Object of class \emph{raster} and \emph{RasterStack} with the sample mask(s).
-#' @param reference.map Reference \emph{raster} (e.g. Land cover map).
-#' @param class.labels Labels of classes in \emph{reference.map} provided as a character vector.
-#' @param sample.colors Hex color codes for each layer in \emph{sample.mask} provided as a character vector.
+#' @param x Object of class \emph{raster} and \emph{RasterStack} with the x(s).
+#' @param y Reference \emph{raster} (e.g. Land cover map).
+#' @param class.labels Labels of classes in \emph{y} provided as a character vector.
+#' @param sample.colors Hex color codes for each layer in \emph{x} provided as a character vector.
 #' @return A \emph{list} with statistical information on the distribution of samples per class and a comparative plot.
-#' @details {The function counts the number of non-NA pixels in \emph{sample.mask} within each class of \emph{reference.map}.
+#' @details {The function counts the number of non-NA pixels in \emph{x} within each class of \emph{y}.
 #' Then, the sample count is normalized by its largest value. The output of the function is a list consisting of:
 #'  \itemize{
-#'  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
-#'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{sample.mask} within each class of \emph{reference.map}.}
-#'  \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{sample.mask} within each class of \emph{reference.map}.}}}
+#'  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{x} within each class of \emph{y}.}
+#'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{x} within each class of \emph{y}.}
+#'  \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{x} within each class of \emph{y}.}}}
 #' @importFrom raster crs extract nlayers
 #' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlab ylab scale_fill_manual facet_wrap element_blank unit
 #' @importFrom stats as.formula
 #' @importFrom grDevices rainbow
-#' @example {
+#' @examples {
 #'
+#'  require(raster)
 #'
+#'  # load example probability image
+#'  file <- system.file('extdata', 'probabilities.tif', package="rsMove")
+#'  p <- raster(file) > 0.5
 #'
+#'  # land cover map
+#'  lc <- raster(system.file('extdata', 'landCover.tif', package="rsMove"))
+#'
+#'  # segment probabilities
+#'  pt <- plausibilityTest(p, lc)
+#'
+#'  # show plot
+#'  pt$relative.plot
+#'
+#'  # see relative sample count
+#'  head(pt$relative.count)
 #'
 #' }
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-plausibilityTest <- function(sample.mask, reference.map, class.labels=NULL, sample.colors=NULL) {
+plausibilityTest <- function(x, y, class.labels=NULL, sample.colors=NULL) {
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. Check input variables
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # check sample layer
-  if (!class(sample.mask)[1] %in% c("RasterLayer", "RasterStack")) {stop('"sample.mask" is not a raster object')}
+  if (!class(x)[1] %in% c("RasterLayer", "RasterStack")) {stop('"x" is not a raster object')}
 
   # check reference layer
-  if (class(reference.map)[1]!="RasterLayer") {stop('"reference.map" is not a valid raster object')}
-  if (crs(sample.mask)@projargs!=crs(reference.map)@projargs) {stop('"sample.mask" and "reference.map" have different projections')}
-  if (sum(dim(sample.mask)[1:2]-dim(reference.map)[1:2])!=0) {stop('"sample.mask" & "reference.map" have different dimensions')}
-  n.runs <- nlayers(sample.mask)
+  if (class(y)[1]!="RasterLayer") {stop('"y" is not a valid raster object')}
+  if (crs(x)@projargs!=crs(y)@projargs) {stop('"x" and "y" have different projections')}
+  if (sum(dim(x)[1:2]-dim(y)[1:2])!=0) {stop('"x" & "y" have different dimensions')}
+  n.runs <- nlayers(x)
 
   # check auxiliary information
   if (!is.null(class.labels)) {if (!is.character(class.labels)) {'"class.labels" is not a "character" vector'}}
   if (!is.null(sample.colors)) {
     if (!is.character(sample.colors)) {'"sample.colors" is not a "character" vector'}
-    if (length(sample.colors)!=n.runs) {'"sample.mask" and "sample.colors" have different lenghts'}
+    if (length(sample.colors)!=n.runs) {'"x" and "sample.colors" have different lenghts'}
   } else {sample.colors <- rainbow(n.runs, start=0.1, end=0.9)}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
-# 2. Extract unique cases in "reference.map" and check "class.labels" and "class.colors"
+# 2. Extract unique cases in "y" and check "class.labels" and "class.colors"
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # unique raster values
-  unique.values <- sort(unique(reference.map))
+  unique.values <- sort(unique(y))
   unique.values <- unique.values[!is.na(unique.values)]
 
   # define class labels and check the number of elements
   if (is.null(class.labels)) {class.labels <- as.character(unique.values)} else {
-    if (length(class.labels)!=length(unique.values)) {stop('the length of "class.labels" is different from the number of cases in "reference.map"')}}
+    if (length(class.labels)!=length(unique.values)) {stop('the length of "class.labels" is different from the number of cases in "y"')}}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 3. Check sample distribution per class
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # extract layer names
-  layer.names <- names(sample.mask)
+  layer.names <- names(x)
 
   # count unique raster values per mask
   sample.count <- lapply(1:n.runs, function(i) {
-    erv <-reference.map[which.max(sample.mask[[i]])]
+    erv <-y[which.max(x[[i]])]
     erv <- sapply(unique.values, function(c) {sum(erv==c, na.rm=TRUE)})
     return(list(absolute=erv, relative=erv/max(erv)))})
 
@@ -82,7 +97,6 @@ plausibilityTest <- function(sample.mask, reference.map, class.labels=NULL, samp
   relative.count <- do.call(cbind, lapply(sample.count, function(i) {data.frame(i$relative)}))
   colnames(relative.count) <- layer.names
   relative.count <- data.frame(code=unique.values, label=class.labels, relative.count, stringsAsFactors=FALSE)
-
 
   # data.frame used to a comparative plot
   plot.data <- do.call(rbind, lapply(1:n.runs, function(i) {data.frame(count=sample.count[[i]]$relative, label=class.labels, layer=layer.names[i])}))

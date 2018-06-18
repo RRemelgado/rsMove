@@ -37,7 +37,7 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(shortMove, z, r)
+#'  move.reduce <- moveReduce(shortMove, r, z)
 #'
 #' }
 #' @export

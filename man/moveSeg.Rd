@@ -4,7 +4,7 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(x, y = NULL, obs.time = NULL, data.type = "cont",
+moveSeg(x, y = NULL, z = NULL, data.type = "cont",
   threshold = threshold, summary.fun = NULL, buffer.size = NULL,
   smooth.fun = NULL)
 }
@@ -13,7 +13,7 @@ moveSeg(x, y = NULL, obs.time = NULL, data.type = "cont",
 
 \item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.}
+\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.}
 
 \item{data.type}{Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).}
 
@@ -35,7 +35,7 @@ Pixel based segmentation of movement data using environmental data.
 {This function identifies segments of comparable environmental conditions along the movement track given by \emph{y}.
 Looking at consecutive data points, the function queries \emph{x} and proceeds to identify a new segment if \emph{threshold}
 is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount
-of points found within it. Moreover, if \emph{obs.time} is set, the function reports on the start and end timestamps and the elapsed time.
+of points found within it. Moreover, if \emph{z} is set, the function reports on the start and end timestamps and the elapsed time.
 If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
 define \emph{threshold} which indicates when the difference between consecutive points should be considered a change.
 In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
@@ -58,11 +58,11 @@ In this case, the function will report on the majority value within the buffer. 
  data(shortMove)
 
  # observation time
- obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+ z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(r, shortMove, obs.time=obs.time, data.type="cat")
+ seg <- moveSeg(r, shortMove, z=z, data.type="cat")
 
 }
 }
