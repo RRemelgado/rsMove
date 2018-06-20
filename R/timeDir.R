@@ -3,7 +3,6 @@
 #' @description Analysis of environmental change in time for a set of coordinate pairs.
 #' @param xy Object of class "SpatialPoints" or "SpatialPointsDataFrame".
 #' @param obs.dates Object of class \emph{Date} with \emph{xy} observation dates.
-#' @param img Object of class
 #' @param env.data Object of class \emph{RasterStack} or \emph{RasterBrick} or \emph{data.frame}.
 #' @param env.dates Object of class \emph{Date} with \emph{env.data} observation dates.
 #' @param temporal.buffer two element vector with temporal window size (expressed in days).
@@ -46,14 +45,14 @@
 #'
 #'  # perform directional sampling
 #'  of <- function(x,y) {lm(y~x)$coefficients[2]}
-#'  time.env <- timeDir(r.dates, obs.dates, c(30,30), xy=shortMove, env.data=r.stk, stat.fun=of)
+#'  time.env <- timeDir(r.stk, r.dates, obs.dates, c(30,30), xy=shortMove, stat.fun=of)
 #'
 #' }
 #' @export
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-timeDir <- function(env.dates, obs.dates, temporal.buffer, xy=NULL, img=NULL, env.data=NULL, stat.fun=NULL, min.count=2) {
+timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, stat.fun=NULL, min.count=2) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables

@@ -4,9 +4,8 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(x, y = NULL, z = NULL, data.type = "cont",
-  threshold = threshold, summary.fun = NULL, buffer.size = NULL,
-  smooth.fun = NULL)
+moveSeg(x, y, z, data.type = "cont", threshold = NULL, summary.fun = NULL,
+  buffer.size = NULL, smooth.fun = NULL)
 }
 \arguments{
 \item{x}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
@@ -58,11 +57,11 @@ In this case, the function will report on the majority value within the buffer. 
  data(shortMove)
 
  # observation time
- z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+ obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(r, shortMove, z=z, data.type="cat")
+ seg <- moveSeg(r, shortMove, obs.time, data.type="cat")
 
 }
 }

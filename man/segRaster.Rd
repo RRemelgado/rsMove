@@ -32,12 +32,12 @@ output of this function consists of:
  \item{\emph{stats} - Basic statistics for each pixel region.}}}
 }
 \examples{
-{
+\dontrun{
 
  require(raster)
 
  # load example probability image
- file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+ file <- system.file('extdata', 'probabilities.tif', package="rsMove")
  r <- raster(file)
 
  # segment probabilities

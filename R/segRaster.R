@@ -18,12 +18,12 @@
 #'  \item{\emph{regions} - Region raster image.}
 #'  \item{\emph{stats} - Basic statistics for each pixel region.}}}
 #' @seealso \code{\link{predictResources}}
-#' @examples {
+#' @examples \dontrun{
 #'
 #'  require(raster)
 #'
 #'  # load example probability image
-#'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+#'  file <- system.file('extdata', 'probabilities.tif', package="rsMove")
 #'  r <- raster(file)
 #'
 #'  # segment probabilities
@@ -58,7 +58,7 @@ segRaster <- function(x, break.point=0.1, min.value=0.5) {
   regions <- x
   regions[] <- 0
 
-  sapply(pos, function(p) {
+  tmp <- sapply(pos, function(p) {
 
     rp <- rowFromCell(x, p)
     cp <- colFromCell(x, p)
@@ -82,35 +82,12 @@ segRaster <- function(x, break.point=0.1, min.value=0.5) {
 
   })
 
-  # evaluate pixel connectivity
-  regions <- matrix(0, nr, nc)
-  for (r in 1:length(pos)) {
-    rp <- ((pos[r]-1) %% nr)+1
-    cp <- ((pos[r]-1) %/% nr)+1
-    if (cp > 1) {sc<-cp-1} else {sc<-cp}
-    if (cp < nc) {ec<-cp+1} else {ec<-cp}
-    if (rp > 1) {sr<-rp-1} else {sr<-rp}
-    if (rp < nr) {er<-rp+1} else {er<-rp}
-    if (max(regions[sr:er,sc:ec])>0) {
-      diff <- abs(data[sr:er,sc:ec]-data[rp,cp]) <= break.point &
-        is.finite(data[sr:er,sc:ec])
-      uv <- unique(c(regions[sr:er,sc:ec][diff]))
-      uv <- uv[which(uv>0)]
-      if (length(uv>0)) {
-        mv <- min(uv)
-        regions[rp,cp]<-min(uv)
-        for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
-      } else {regions[rp,cp]<-max(regions)+1}
-    } else {regions[rp,cp] <- max(regions)+1}
-  }
-
   #-----------------------------------------------------------------------------------#
   # 3. derive segment statistics
   #-----------------------------------------------------------------------------------#
 
   # update region id
-  uv <- sort(unique(regions[which(regions>0)]))
-  uregions = regions
+  uv <- sort(unique(regions[which.max(regions > 0)]))
   nr <- length(uv)
   pmn <- vector('numeric', nr) # min
   pmx <- vector('numeric', nr) # max
@@ -118,31 +95,23 @@ segRaster <- function(x, break.point=0.1, min.value=0.5) {
   psd <- vector('numeric', nr) # sd
   npx <- vector('numeric', nr) # count
   for (u in 1:nr) {
-    pos <- which(regions==uv[u])
-    uregions[pos] <- u
-    pmn[u] <- min(data[pos], na.rm=T)
-    pmx[u] <- max(data[pos], na.rm=T)
-    pav[u] <- mean(data[pos], na.rm=T)
-    psd[u] <- sd(data[pos], na.rm=T)
-    npx[u] <- sum(!is.na(data[pos]))
+    pos <- which.max(regions==uv[u])
+    regions[pos] <- u
+    pmn[u] <- min(x[pos], na.rm=T)
+    pmx[u] <- max(x[pos], na.rm=T)
+    pav[u] <- mean(x[pos], na.rm=T)
+    psd[u] <- sd(x[pos], na.rm=T)
+    npx[u] <- sum(!is.na(x[pos]))
   }
-
-  rm(regions, data)
 
   #-----------------------------------------------------------------------------------#
   # 4. return output
   #-----------------------------------------------------------------------------------#
 
-  # convert data back to raster
-  uregions <- raster(uregions)
-  extent(uregions) <- extent(x)
-  res(uregions) <- res(x)
-  crs(uregions) <- crs(x)
-
   # build/return data frame
   df <- data.frame(segment=uv, min=pmn, max=pmx, mean=pav, sd=psd, count=npx)
 
   # return matrix/df
-  return(list(regions=uregions, stats=df))
+  return(list(regions=regions, stats=df))
 
 }

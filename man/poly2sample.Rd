@@ -34,11 +34,11 @@ a raster from the extent of \emph{x} and a resolution equal to \emph{y}.}
  require(raster)
 
  # load example probability image
- file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+ file <- system.file('extdata', 'probabilities.tif', package="rsMove")
  img <- raster(file)
 
  # load area of interest
- file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
+ file <- system.file('extdata', 'roi.shp', package="rsMove")
  roi <- shapefile(file)
 
  # extract samples

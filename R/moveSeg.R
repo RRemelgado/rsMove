@@ -1,8 +1,8 @@
 #' @title moveSeg
 #'
 #' @description Pixel based segmentation of movement data using environmental data.
-#' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param x Object of class \emph{RasterLayer} or \emph{data.frame}.
+#' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param data.type Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).
 #' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.
 #' @param threshold Change threshold. Required if \emph{data.type} is set to \emph{cat}.
@@ -37,18 +37,18 @@
 #'  data(shortMove)
 #'
 #'  # observation time
-#'  z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+#'  obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(r, shortMove, z=z, data.type="cat")
+#'  seg <- moveSeg(r, shortMove, obs.time, data.type="cat")
 #'
 #' }
 #' @export
 
 #---------------------------------------------------------------------------------------------------------------------#
 
-moveSeg <- function(x, y=NULL, z=NULL, data.type='cont', threshold=threshold, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
+moveSeg <- function(x, y, z, data.type='cont', threshold=NULL, summary.fun=NULL, buffer.size=NULL, smooth.fun=NULL) {
 
   #---------------------------------------------------------------------------------------------------------------------#
   # 1. check input variables
@@ -59,11 +59,8 @@ moveSeg <- function(x, y=NULL, z=NULL, data.type='cont', threshold=threshold, su
   rProj <- crs(y) # output projection
 
   # sample dates
-  if (!is.null(z)) {
-    if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
-    if (length(z)!=length(y)) {stop('errorr: "y" and "z" have different lengths')}
-    processTime <- TRUE
-  } else {processTime <- FALSE}
+  if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
+  if (length(z)!=length(y)) {stop('errorr: "y" and "z" have different lengths')}
 
   # environmental data
   if (class(x)[1]=='RasterLayer') {
@@ -154,19 +151,9 @@ moveSeg <- function(x, y=NULL, z=NULL, data.type='cont', threshold=threshold, su
     ii <- which(seg.id == u) # target samples
     rv <- summary.fun(x[ii]) # segment raster value
 
-    if (processTime) {
-
-      st <- min(z[ii]) # start time
-      et <- max(z[ii]) # end time
-      tt <- as.numeric(difftime(et, st, units="mins")) # elapsed time
-
-    } else {
-
-      tt <- NA
-      st <- NA
-      et <- NA
-
-    }
+    st <- min(z[ii]) # start time
+    et <- max(z[ii]) # end time
+    tt <- as.numeric(difftime(et, st, units="mins")) # elapsed time
 
     return(data.frame(sid=u, count=length(ii), start=st, end=et, elapsed=tt, value=rv, stringsAsFactors=FALSE))}
 

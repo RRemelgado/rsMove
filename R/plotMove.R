@@ -28,7 +28,7 @@
 #'  time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # reduce amount of samples
-#'  move.reduce <- moveReduce(shortMove, time, r)
+#'  move.reduce <- moveReduce(shortMove, r, time)
 #'
 #'  # query data
 #'  ov <- extract(r, move.reduce$points)

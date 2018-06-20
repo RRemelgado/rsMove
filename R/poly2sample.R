@@ -2,7 +2,7 @@
 #'
 #' @description {Converts a raster grid to points depending on how much each pixel is covered by a polygon.}
 #' @param x Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
-#' @param y A raster object of a numeric element.
+#' @param y A raster object or a numeric element.
 #' @param min.cover Minimum percent a pixel should be covered by a polygon for sampling (1-100). Default is 1.
 #' @importFrom raster raster extent crop rasterToPoints rasterize xyFromCell cellFromXY crs
 #' @importFrom sp SpatialPointsDataFrame
@@ -20,11 +20,11 @@
 #'  require(raster)
 #'
 #'  # load example probability image
-#'  file <- system.file('extdata', 'konstanz_probabilities.tif', package="rsMove")
+#'  file <- system.file('extdata', 'probabilities.tif', package="rsMove")
 #'  img <- raster(file)
 #'
 #'  # load area of interest
-#'  file <- system.file('extdata', 'konstanz_roi.shp', package="rsMove")
+#'  file <- system.file('extdata', 'roi.shp', package="rsMove")
 #'  roi <- shapefile(file)
 #'
 #'  # extract samples
@@ -49,7 +49,7 @@ poly2sample <- function(x, y, min.cover=1) {
   # check/derive reference raster
   if (is.numeric(y)) {y <- extend(raster(extent(x), res=y, crs=crs(x)), y)} else {
     e <- try(extent(y))
-    if (class(e) != "Extent") {stop('"y" is not of a valid class')}}
+    if (class(e) == "try-error") {stop('"y" is not of a valid class')}}
 
   # check cover value
   if (is.null(min.cover)) {min.cover <- 100}
@@ -60,7 +60,7 @@ poly2sample <- function(x, y, min.cover=1) {
 #-------------------------------------------------------------------------------------------------------------------------#
 
   lf <- function(i) {
-    r <- crop(y, extent(x[i,]))
+    r <- extend(crop(y, extent(x[i,])), res(y)
     r <- rasterToPoints(rasterize(x[i,], r, getCover=TRUE))
     ind <- which(r[,3] > min.cover) # usable pixels
     if (length(ind) > 0) {return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3]))} else {return(NULL)}}
