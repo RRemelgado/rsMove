@@ -51,6 +51,10 @@ poly2sample <- function(x, y, min.cover=1) {
     e <- try(extent(y))
     if (class(e) == "try-error") {stop('"y" is not of a valid class')}}
 
+  # check overlap between x and y
+  o <- checkOverlap(x, y)
+  if (o != 100) {stop('"x" is not contained by "y"')}
+
   # check cover value
   if (is.null(min.cover)) {min.cover <- 100}
   if (min.cover < 1 | min.cover > 100) {stop('"min.cover" should be between 0 and 100')}

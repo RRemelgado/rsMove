@@ -21,7 +21,7 @@
 #'  roi <- shapefile(file)
 #'
 #'  # extract samples
-#'  checkOverlap(img, roi)
+#'  checkOverlap(roi, img)
 #'
 #' }
 #' @export
