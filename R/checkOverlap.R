@@ -7,8 +7,23 @@
 #' @importFrom raster extent intersect ncell raster
 #' @details {Uses \link[raster]{intersect} to estimate the amount of overlap between two spatial objects (i.e. \emph{x}
 #' and \emph{y}). The function reports on the percentage of the area in each spatial object represented by their overlap.}
-#' @seealso \code{\link{derivePlots}} \code{\link{rankPlots}}
-#' @examples {}
+#' @seealso \code{\link{poly2sample}}
+#' @examples {
+#'
+#'  require(raster)
+#'
+#'  # load example probability image
+#'  file <- system.file('extdata', 'probabilities.tif', package="rsMove")
+#'  img <- raster(file)
+#'
+#'  # load area of interest
+#'  file <- system.file('extdata', 'roi.shp', package="rsMove")
+#'  roi <- shapefile(file)
+#'
+#'  # extract samples
+#'  checkOverlap(img, roi)
+#'
+#' }
 #' @export
 
 #-----------------------------------------------------------------------------------------------------------------------------------------------#

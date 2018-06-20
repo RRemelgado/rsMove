@@ -9,7 +9,7 @@ poly2sample(x, y, min.cover = 1)
 \arguments{
 \item{x}{Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.}
 
-\item{y}{A raster object of a numeric element.}
+\item{y}{A raster object or a numeric element.}
 
 \item{min.cover}{Minimum percent a pixel should be covered by a polygon for sampling (1-100). Default is 1.}
 }

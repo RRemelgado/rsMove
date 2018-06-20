@@ -60,7 +60,7 @@ poly2sample <- function(x, y, min.cover=1) {
 #-------------------------------------------------------------------------------------------------------------------------#
 
   lf <- function(i) {
-    r <- extend(crop(y, extent(x[i,])), res(y)
+    r <- extend(crop(y, extent(x[i,])), res(y)*2)
     r <- rasterToPoints(rasterize(x[i,], r, getCover=TRUE))
     ind <- which(r[,3] > min.cover) # usable pixels
     if (length(ind) > 0) {return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3]))} else {return(NULL)}}
