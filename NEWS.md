@@ -1,3 +1,20 @@
+
+=================================================================================
+
+#### rsMove 0.2.4
+
+=================================================================================
+
+#### New:
+  * Added function checkOverlap() and plausibilityTest()
+  
+#### Changes:
+  * Simplification of variable names in all functions
+
+#### Fixes:
+  * backSample(), labelSample() and imgInt() optimized
+  * poly2sample now accepts RasterStack objects
+
 =================================================================================
 
 #### rsMove 0.2.3

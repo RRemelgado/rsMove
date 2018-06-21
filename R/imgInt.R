@@ -9,6 +9,7 @@
 #' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @importFrom raster crs nlayers brick
 #' @importFrom stats lm
+#' @importFrom pryr mem_used
 #' @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date. If a \emph{data.frame}, columns represent dates and rows represent samples.
 #' @details {Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{target.dates}).
@@ -38,14 +39,14 @@
 #'  target.dates = as.Date("2013-08-10")
 #'
 #'  # interpolate raster data to target dates
-#'  i.env.data <- imgInt(r.stk, env.dates, target.dates, c(60,60), shortMove)
+#'  i.env.data <- imgInt(r.stk, env.dates, target.dates, c(60,60), xy=shortMove)
 #'
 #' }
 #' @export
 
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
-imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy) {
+imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy=NULL) {
 
 #-----------------------------------------------------------------------------------------------------------------------------------#
 # 1. check input variables
@@ -61,7 +62,7 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy) {
   if (!class(env.data)[1]%in%c('RasterStack', 'RasterBrick', 'data.frame')) {stop('"env.data" is not of a valid class')}
   if (class(env.data)[1]%in%c('RasterStack', 'RasterBrick')) {
     processRaster <- TRUE
-    if (exists("xy")) {
+    if (!is.null(xy)) {
       if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"shp is nor a valid point shapefile object')}
       if (crs(xy)@projargs!=crs(env.data)@projargs) {stop('"xy" and "env.data" have different projections')}
       if (nlayers(env.data)!=length(env.dates)) {stop('length of "env.data" and "env.dates" do not match')}}}
@@ -73,16 +74,22 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy) {
 # 2. build interpolation function
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
-  otd <- ''
-  int <- function(x) {
-    di <- which(env.dates==otd & !is.na(x))
-    if (length(di)>0) {return(mean(x[di]))} else {
-      bi <- rev(which(!is.na(x) & env.dates < otd & env.dates >= (otd-time.buffer[1])))
-      ai <- which(!is.na(x) & env.dates > otd & env.dates <= (otd+time.buffer[2]))
-      if (length(bi)>=1 & length(ai)>=1) {
-        lc <- lm(c(x[bi[1]],x[ai[1]])~as.numeric(c(env.dates[bi[1]],env.dates[ai[1]])))
-        return(as.numeric(otd)*lc$coefficients[2]+lc$coefficients[1])
-      } else {return(NA)}}}
+  intTime <- function(x) {
+
+    tmp <- do.call(cbind, lapply(target.dates, function(d) {
+
+      di <- which(env.dates==d & !is.na(x))
+      if (length(di)>0) {return(mean(x[di]))} else {
+        bi <- rev(which(!is.na(x) & env.dates < d & env.dates >= (d-time.buffer[1])))
+        ai <- which(!is.na(x) & env.dates > d & env.dates <= (d+time.buffer[2]))
+        if (length(bi)>=1 & length(ai)>=1) {
+          lc <- lm(c(x[bi[1]],x[ai[1]])~as.numeric(c(env.dates[bi[1]],env.dates[ai[1]])))
+          return(as.numeric(d)*lc$coefficients[2]+lc$coefficients[1])
+        } else {return(NA)}}}))
+
+    return(tmp)
+
+  }
 
 #-----------------------------------------------------------------------------------------------------------------------------------#
 # 3. read environmental data (if required)
@@ -98,10 +105,24 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy) {
 
   # apply function (if raster)
   if (processRaster) {
-    out <- brick(env.data[[1]], nl=length(target.dates))
-    for (r in 1:length(target.dates)) {
-      otd <- target.dates[r]
-      out[[r]] <- calc(env.data, int)}}
+
+    m <- 1000-memory.size() # available memory
+    d <- dim(env.data) # image dimensions
+    n <- d[1] * d[2] # number of cells
+    b <- (nlayers(env.data) * 1416) * 0.000001 # memory usage for 1 pixel time-series
+    p <- n * b # predicted memory usage
+    nr <- ceiling(p / m) # number of runs
+    n <- ceiling(n / nr) # number of cells per run
+
+    out <- brick(env.data[[1]], nl=length(target.dates)) # output array
+
+    for (i in 1:nr) {
+
+      out[(1+(n*(i-1))):(n*i)] <- t(apply(env.data[(1+(n*(i-1))):(n*i)], 1, intTime))
+
+    }
+
+  }
 
   # apply function (if data frame)
   if (!processRaster) {
@@ -109,7 +130,7 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy) {
     colnames(out) <- as.character(target.dates)
     for (r in 1:length(target.dates)) {
       otd <- target.dates[r]
-      out[,r] <- apply(env.data, 1, int)}}
+      out[,r] <- apply(env.data, 1, intTime)}}
 
   # provide output
   return(out)
