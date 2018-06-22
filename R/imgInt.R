@@ -10,6 +10,7 @@
 #' @importFrom raster crs nlayers brick
 #' @importFrom stats lm
 #' @importFrom pryr mem_used
+#' @importFrom utils memory.size
 #' @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date. If a \emph{data.frame}, columns represent dates and rows represent samples.
 #' @details {Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{target.dates}).
