@@ -35,7 +35,7 @@ and \emph{y}). The function reports on the percentage of the area in each spatia
  roi <- shapefile(file)
 
  # extract samples
- checkOverlap(roi, img)
+ checkOverlap(img, roi)
 
 }
 }
