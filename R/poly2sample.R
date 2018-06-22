@@ -53,7 +53,7 @@ poly2sample <- function(x, y, min.cover=1) {
 
   # check overlap between x and y
   o <- checkOverlap(x, y)
-  if (o != 100) {stop('"x" is not contained by "y"')}
+  if (o[1] != 100) {stop('"x" is not contained by "y"')}
 
   # check cover value
   if (is.null(min.cover)) {min.cover <- 100}
