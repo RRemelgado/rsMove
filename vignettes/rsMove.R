@@ -2,7 +2,6 @@
 # load packages
 library(rsMove)
 library(raster)
-library(sp)
 library(ggplot2)
 library(knitr)
 library(kableExtra)

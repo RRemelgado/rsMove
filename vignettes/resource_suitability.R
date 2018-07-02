@@ -2,16 +2,13 @@
 # load packages
 library(rsMove)
 library(raster)
-library(sp)
 library(ggplot2)
 library(knitr)
 library(kableExtra)
 
 ## ----message=FALSE-------------------------------------------------------
-data("shortMove")
-
-## ----message=FALSE-------------------------------------------------------
-ndvi <- stack(list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE))
+data("shortMove") # movement data
+ndvi <- stack(list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)) # environmental predictors
 
 ## ----message=FALSE-------------------------------------------------------
 plot(shortMove)
@@ -28,7 +25,9 @@ presence.samples <- SpatialPoints(xyFromCell(move.mask, usable.pixels), proj4str
 
 ## ----message=FALSE-------------------------------------------------------
 sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
+sample.id # show indices
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples
+absence.samples # show samples
 
 ## ----message=FALSE-------------------------------------------------------
 env.presences <- extract(ndvi, presence.samples) # extract environmental data for presences
