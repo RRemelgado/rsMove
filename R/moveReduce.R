@@ -105,8 +105,11 @@ moveReduce <- function(x, y, z, derive.raster=FALSE) {
 
   if (derive.raster) {
 
-    # estimate time sum per cell
+    # find cell positions of reduced sample set
+    sp <- cellFromXY(y, df[,c("x", "y")])
     up <- unique(sp)
+
+    # estimate time sum per cell
     t.sum <- sapply(up, function(p) {sum(df$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
 
     # build raster

@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Ruben Remelgado" />
+
+<meta name="date" content="2018-07-02" />
+
+<title>Predicting Resource Suitability with rsMove</title>
+
+<script>$(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip();
+    $('[data-toggle="popover"]').popover();
+});
+</script>
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; position: absolute; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; }
+pre.numberSource a.sourceLine:empty
+  { position: absolute; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: absolute; left: -5em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#header {
+text-align: center;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Predicting Resource Suitability with rsMove</h1>
+<h4 class="author"><em>Ruben Remelgado</em></h4>
+<h4 class="date"><em>2018-07-02</em></h4>
+
+
+
+<p></br></p>
+<div id="a-remote-sensing-perspective-on-resource-suitability-modelling" class="section level3">
+<h3>A Remote Sensing Perspective on Resource Suitability Modelling</h3>
+<p align="justify" style="line-height:200%;">
+This tutorial is based on the a recently published paper that you can find [here](<a href="https://doi.org/10.5441/001/1.78152p3q">here</a>. In this paper, we introduced a standardized machine learning approach to predict resource suitability and consistently validate the model output. And, more importantly, our approach offers a transferable approach to narrow the technical and theoretical gaps between Animal Movement and Remote Sensing data. In this vignette, we will show how users can replicate the approach proposed in our paper using <em>rsMove</em> to map resource suitability related to feeding behaviour.
+</p>
+</div>
+<div id="data" class="section level3">
+<h3>Data</h3>
+<p align="justify" style="line-height:200%;">
+For this exercise we will use the local movement data set provided by <em>rsMove</em> (<code>shortMove</code>) that describes the movements of a White Stork around its nest.
+</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" data-line-number="1"><span class="kw">data</span>(<span class="st">&quot;shortMove&quot;</span>)</a></code></pre></div>
+<p align="justify" style="line-height:200%;">
+Additionally, we will use our time-series of Normalized Difference Vegetation Index (NDVI) images as predictors.
+</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" data-line-number="1">ndvi &lt;-<span class="st"> </span><span class="kw">stack</span>(<span class="kw">list.files</span>(<span class="kw">system.file</span>(<span class="st">'extdata'</span>, <span class="st">''</span>, <span class="dt">package=</span><span class="st">&quot;rsMove&quot;</span>), <span class="st">'ndvi.tif'</span>, <span class="dt">full.names=</span><span class="ot">TRUE</span>))</a></code></pre></div>
+<p></br></p>
+</div>
+<div id="movement-data-pre-processing" class="section level3">
+<h3>Movement Data Pre-Processing</h3>
+<p align="justify" style="line-height:200%;">
+As a first step, we need to remove redundant data points . As animals move through the landscape, they sometimes visit the same locations. Looking at our example data, this issue is frequent. Since the animal is nesting it performed several trips between its nest and the feeding sites.
+</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" data-line-number="1"><span class="kw">plot</span>(shortMove)</a></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAAABlBMVEUAAAD///+l2Z/dAAAACXBIWXMAAA7DAAAOwwHHb6hkAAADp0lEQVR4nO3c4ZIZWxSAUfP+L30rbiYY2sdUtX2U9f0hYnK2NafpkuLwpbsdpgdYPUARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgCFAGKAEWAIkARoAhQBCgaBlr/9wMomgc6TM9wP0DR3HCHU+O/pzstsoMAbS8P6M7ih4vj7N/NcxNdt8QOuuAZn+myaaBbm+jPtWWQ5ge5sYN+3jDZ/CA3dxCg0wCX50O3nrRHm55j4zkI0HnfHIfvP6y0i1aY4esEdPmqtsJwK8wAqDpsNj3ZKkBfdtAj/ZllLZ2v9YCOlwv5LA80Pt/4AGcBerCLs+rRSVYY4EZLvXk2PkA0Pt/4ANut8Yq/MNCx8fnGB4jG5xsfIBqfb3yAaHy+8QGi8fnGB1g9QBGgCFAEKAIUAYoARYAiQBGgCFAEKAIUAYoARYAiQBGgCFAEKAIUAYoARYAiQBGgCFAEKAIUAYoARYAiQNEbAM2OCGjp1R8K0P2GP1oHqJYfXb1a4PMsawKdfz3O0WZuTEA5yop9f5B+/ghbG+j/63bQdc8C7fgolgO6+m6KR46zTwI6dtpBp6/12L4vIEA/Owc6v7h9X0D3xtz7VODtgf5+qc6Oo6zY1Wni7TFfcSK5MNDxouf73B30FNBuj+MdgO6fIH4w0OExoH2fiZYDOlxlB1122jP9NV2HH6A7jbNWTwLt/WK/OND2g788CD/uELuA6bc5PgXo6p2gvzdv/8DpB3ebaa9/+NedHWJnt2zf93j5aUCX1x55JxFQ3He33gFo+4YXtDLQM3+1W+sB3QlQBCgCtN0r3l29vfBrl/t9O//vzt113yJAEaAI0HZjT9DHxV+/5O+aGhTQous+HaAIUARo0QBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBigBFgCJAEaAIUAQoAhQBiv4Du9FBdc23tIAAAAAASUVORK5CYII=" /><!-- --></p>
+<p align="justify" style="line-height:200%;">
+As a consequence, when using movement data to sample from satellite imagery with a much lower temporal resolution, most of those samples will be be replicated. Pseudo-replication has two main consequences. First, it offers misleading information on the preferences of a species. Since we can not monitor environmental conditions at the same temporal scale at which we can track animals we often miss environmental changes that influence animal decision making. Second, it becomes hard to consistently train and validate any predictive model due to potential abundance of of duplicated data.
+</p>
+<p align="justify" style="line-height:200%;">
+To address this issue, we will use <em>moveReduce()</em>. This function derives a shapefile based on movement data that aggregates temporally consecutive data points when they fall within the same pixel and reports on the elapsed time at that location. In addition, the user can choose to derive a raster with the total amount of time elapsed at each pixel. We will take advantage of this functionality to remove duplicate samples and identify relevant ones.
+</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" data-line-number="1">obs.time &lt;-<span class="st"> </span><span class="kw">strptime</span>(<span class="kw">paste0</span>(shortMove<span class="op">@</span>data<span class="op">$</span>date, <span class="st">' '</span>, shortMove<span class="op">@</span>data<span class="op">$</span>time), <span class="dt">format=</span><span class="st">&quot;%Y/%m/%d %H:%M:%S&quot;</span>) <span class="co"># format observation time</span></a>
+<a class="sourceLine" id="cb4-2" data-line-number="2">reduced.samples &lt;-<span class="st"> </span><span class="kw">moveReduce</span>(shortMove, ndvi, obs.time, <span class="dt">derive.raster=</span><span class="ot">TRUE</span>) <span class="co"># remove redundant data points</span></a>
+<a class="sourceLine" id="cb4-3" data-line-number="3"><span class="kw">plot</span>(reduced.samples<span class="op">$</span>total.time) <span class="co"># show total time image</span></a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p align="justify" style="line-height:200%;">
+Looking at the output image, we see one pixel standing out with about 400 minutes (i.e. roughly 7 hours). This is the nesting site. Since we are interested in feeding sites alone, we will remove ignore this location. Moreover, we will ignore all the pixels with 0 minutes. These are mainly pixels that were not visited by the animal but also consider those that, while visited, did not record more than one consecutive observation. To do this, we will use the raster package to create a mask, extract relevant pixel positions and build a new shapefile from it. The output will be our present sample.
+</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" data-line-number="1">move.mask &lt;-<span class="st"> </span>reduced.samples<span class="op">$</span>total.time <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span> <span class="op">&amp;</span><span class="st"> </span>reduced.samples<span class="op">$</span>total.time <span class="op">&lt;</span><span class="st"> </span><span class="dv">60</span> <span class="co"># build sample mask</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2">usable.pixels &lt;-<span class="st"> </span><span class="kw">which.max</span>(move.mask) <span class="co"># identify relevant pixels</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3">presence.samples &lt;-<span class="st"> </span><span class="kw">SpatialPoints</span>(<span class="kw">xyFromCell</span>(move.mask, usable.pixels), <span class="dt">proj4string=</span><span class="kw">crs</span>(shortMove)) <span class="co"># build shapefile from samples (presences)</span></a></code></pre></div>
+<p></br></p>
+</div>
+<div id="identify-absence-samples" class="section level3">
+<h3>Identify absence samples</h3>
+<p align="justify" style="line-height:200%;">
+In the previous steps we translated the <em>shortMove</em> movement data into samples that likely relate to feeding sites. However, to understand how these samples can be distinguished from the rest of the landscape, we need to collect background that describe unattractive environmental conditions. While movement data is a strong asset to understand the environmental preferences of an animal it tells us little about its dislikes. Even if a location was not visited by an animal it does not mean it was unsuitable. Factors such as distance and accessibility can condition animal decision leading to the neglect of potentially suitable resources. As a consequence, usual techniques such as random background sampling can be misleading as it does not account for the abundance of suitable resources. To address this issue, we developed <em>backSample()</em>. This function introduces a new technique that uses presence samples as informants. These are used to collect samples from the remote sensing data and identify pixels where the environmental conditions are statistically different. This approach is also sensitive to differences in resource selection. For example, the White Stork is a versatile animal. While they often search for prey in areas freshly harvested crop fields they can sometimes be found in grasslands and even wetlands. As a consequence, our presence samples can reflect a diverse set of environmental conditions. To account for this and to better define the spectral border between suitable and unsuitable environmental conditions, <em>backSample()</em> requires an index that defines the aggregation of samples with similar environmental attributes. This index is returned by <em>labelSample()</em>. In this exercise, we will aggregate samples within 60m of each other (i.e. 2 pixels).
+</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" data-line-number="1">sample.id &lt;-<span class="st"> </span><span class="kw">labelSample</span>(presence.samples, ndvi, <span class="dt">agg.radius=</span><span class="dv">60</span>) <span class="co"># aggregate samples in space</span></a>
+<a class="sourceLine" id="cb6-2" data-line-number="2">absence.samples &lt;-<span class="st"> </span><span class="kw">backSample</span>(presence.samples, ndvi, sample.id, <span class="dt">sampling.method=</span><span class="st">&quot;pca&quot;</span>) <span class="co"># identify absence samples</span></a></code></pre></div>
+<p></br></p>
+</div>
+<div id="derive-and-validate-predict-model" class="section level3">
+<h3>Derive and Validate Predict Model</h3>
+<p align="justify" style="line-height:200%;">
+Our modelling approach follows similar lines than our background sampling. It relies on spatially independent samples to train a predictive model and validate its consistency. The function iterates through each of the presence regions given by <em>sample.id</em> and uses the corresponding samples for validation while the remaining ones are used for training. During this process, a random set of absence samples is selected. Ideally, the function will try to try to equalize the number of presence samples in the training and validation sets. The final validation is an F1 score estimated from the total number of correct and false positives among all iterations. The function <em>predictResources()</em> can be used to perform the training and validation steps.
+</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" data-line-number="1">env.presences &lt;-<span class="st"> </span><span class="kw">extract</span>(ndvi, presence.samples) <span class="co"># extract environmental data for presences</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2">env.absences &lt;-<span class="st"> </span><span class="kw">extract</span>(ndvi, absence.samples)  <span class="co"># extract environmental data for absences</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3">resourceModel1 &lt;-<span class="st"> </span><span class="kw">predictResources</span>(env.presences, env.absences, sample.id, <span class="dt">env.data=</span>ndvi) <span class="co"># build model</span></a></code></pre></div>
+<pre><code>## note: only 2 unique complexity parameters in default grid. Truncating the grid to 2 .
+## 
+## note: only 2 unique complexity parameters in default grid. Truncating the grid to 2 .
+## 
+## note: only 2 unique complexity parameters in default grid. Truncating the grid to 2 .</code></pre>
+<p align="justify" style="line-height:200%;">
+Now let’s have a look at our results. First, let’s make a mask from the output probability map with a threshold of 0.5. Then let’s overlap the presence samples.
+</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" data-line-number="1"><span class="kw">plot</span>(resourceModel1<span class="op">$</span>probabilities <span class="op">&gt;=</span><span class="st"> </span><span class="fl">0.5</span>) <span class="co"># probability map</span></a>
+<a class="sourceLine" id="cb9-2" data-line-number="2"><span class="kw">points</span>(presence.samples) <span class="co"># presences</span></a></code></pre></div>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAMAAAAjXV6yAAABIFBMVEUAAAAAAA0AABcAADoAAGYAIHsAIXwAOpAAOp0AZrYApgAFqAAMqgASrAAZrwAfsQAmswAttQA1uAA6AAA6ADo6AGY6Ojo6OpA6kNs6nf87ugBDvQBMvwBRvP9TwQBcxABjxgBmAABmADpmtv9m2/9syAB0ygB9zQCFzwCP0QCQOgCQZgCQ2/+Z1ACh1gCs2AC02gC2WAC2ZgC2/7a2//+8UQ2/3QDI3wDT4QDbZhfbkDrb2//b///c4wDm1hLm3Avm5ALnyiLnzxvowTPoxSvpuUPpvDzqtFbqtk3rsWfrsW7rsl3ssXjssn/ts4nttZHuuJruu6Tvvqzvw7XwyL3wzsfw08/x29jx4uDy6+ry8vL/tmb/25D//7b//9v///+qB/BIAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAIuklEQVR4nO2dB3vkNBCGBXcQsnSOcnSWUENoPqoJHL33zm2S/f//Assae+2s19/YltdF3/s8HEluGew3sjSyrZFZk1rM0AcwdigIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIEAzQRfHJuXqOz0dzvhoJCg2190Xq+yL+dNE0MVxriU+OO3hYMZIE0Hny6Psy1UwFxlbEKBhHyRNiH3QDs6XbhQLpv0wD4JQEICJIoCJIoDDPICJIoAtCMBEEcBEEcA8CEBBgGaCImMO02TxCH92JjTrpJO+JzKHti9iJ11BOsyvrpysOcxXkyaKLkVkolgFWxAi74MKOfXc4SgGYB4EoCAALzEAE0WA52He9I6Xs26An0SxfPy3+qLh8XrBdwuyfwQrSJEoBi4Ij2KhC9KFoyAQLmBBvMTqwYli2II4zAMUdxTDFsQWhGCiiOAo5iUcBYFwAQuKs6sr5ihWRZyMYOfLw3VjQYlX+WPWgtzYdXGcjGXNBJnFYmHSPxazFpS9oxgdnDYSZNU4QYtubajh8Xqh1TuK0WHc5JZrMILyC+t8uetV8sAF5W9xXhy36IMs8+6DtOG2TszaWVBQHq7y5MytEVxiZ4/kDX9lTDrtVp2REnebLIm8ezHLuAWdL/MDtzclVhpDjQWlNzoKixIqwo1V0Grzm3UDcnSI/6OmgkRNi/tBgyeKK3M9v893ds2exq5sbuuMlFhBLnKrO4q2j+5ZEHqYvxH08EnNWWydkZJuLcgD8HjN3cKOj+VGXPej6YSaCbK/kcP1eJ9qmHuEYQStU0e2+9+52GdoQfcKSFA/l5iCoQXdJ0BBvXTSCoYWdL+ABPUzzCsYWtADAhLUT6KowJegRUpzQQ8KlR9LEsXbX7Ctxzacd5Px5nHtGfljaEEPCVUfKzWaOB1rFC/rzkzQE0LFx0rdjmtF++uDvL/E2VbQk0LFx0oD174FlcMNKOgpoWKqUU59JnyJVarRCnpGqPjYpeS5j/tB2nADCnpWgIKipCWdXVOsF5iZoOeEqj6oeIlNOZPuJOhFAXXSvU1WVeEGFPSSgIZ5Z2uak9VOgl4WYKI44T6oBni85hWh8mMfGnPb01kO9HaSAdylPSN/DC3oVQG2oNXBqbyoojkjfwwt6HUBTzXsN9McxToJekNAo5gb89Vn5I+hBb0poKnG6uqNpVFViZqZoLcElEnH9hGi6601Z+SPoQW9J0BBVwK9af++gKYariuSp6D4jPwxtKAPBDjVcIIUXfXMBH0soGHePSAO8BL7VMD3pJNEUVXDZqS3XNsKuingqYZ9zelORRGkmbWgTwTYguz3qnKQMxP0uYD6oHX6mkGAgj4T0Chmvzp4LUBBXwrwqYb9NgpQ0BcCvGlvL7gQBX0tQEHp6lL/gmBN+6EFfSXApxr2G/+CcE37oQV9K6BOOpYOyu9cTFGRfGhB3wiKYb6HFqSoaT+0oB8ETaLoX9AEWtB3ApxqpL3pHf77IFTTfmhB3wuoBV0cJ1/ExvsdRVjTfmhBPwq6J6sBPtX4SVBMNdZTfTbvqFxDDo/X/CygPMgReW9Be0sUjfzTVNAvQsVcbPuFDtXuIONMFNMFwNuLy+Dxml8FONVIT0LRR3sa5n3fUWwt6DdBcYkpd5cZZ6LYWtDvAu6kY+XuOyNNFKuXJ8LjNX8IcKoRays+D5ko1lQ7WVQuT4THa/4UUKKoendqc0ZqvCaKdYtY27agvwQ01ZDZ/KjzoB39TN3fweM1fwtwsjqB1T69CPpHQH1Qr+vF6t5RH1rQvwIaxfqai0XGXD977LRNYYFqC777oP8E1S1X/8/m7R2myFuhyeqRqu7v4PHWrZsvZdJ9LQs/Qu4Hns3XsRdBaQ2zj9ajvaNYxz4usbxTG2thgTr20knH0kCnWKp0f8M8DDdOQZNLFPcuyM4vrBL3AlXcy4pDVgOuhzXt62FFcgA3PwKwBSFY0x7BUcxLOAoC4QIWxEusHiaK9XCYB3DzIwBbEIKJIoKjmJdwFATCBSyImx/V03rzo0AEtd78KBRBms2PesfDOTei1TuKW5sf4agV/x/Vj/YupNMB4M2PdkYNQxDe/Ghn1EAEtY9KQSBqEIIUmx/tjBqOoPrNj3ZGDUYQ2LpmZ9RgBIHNj3ZGDUaQrgXNiGaCbK5fu/nR/GjYhNHmR/Nj8Gt87FAQgIIAFASgIAAFASgIQEEACgJQEKCrIFcHrLgyxP5kJc9ojgpLgNF+VeVIm3lfvgm6OpJXOgpyFXXtOtas/Pmmxm76DDZfdoTWH12KVCgWLpugqyP5pZsgV1HXze3dHZBCjd043XhAFq6hFWyXIxWrtKR3eNWRPNNNkKuoW1whu6mxm5bHyJc+ojWQlyPFmYBsE3R1JM90EiQVdeW0zFGpxm5a/ypfPAtW0W5Fih41+cYgqyaRfNNFUFZRV36nyWkVauzKI5CsSdSvw96KdL5MeyRnKJWhjOSdLoLyirqua00EFWrsFs8DntZ2pJR8n5lpCipU1I2SjvTG8yfFGrvuX7oLYzuS/LzwhGCCl9ilirpJtlL4idy11nWt25HkCzfWT7eTXhcLxmYPOqTpuF9+g8G5FKm0B+FqusO8O608I8x/svlWn96VI6UCip30NBNF0WHnBaWpRqnanMl2rFJMNTaRos0ll21YpI3kFU5WARQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAlAQgIIAFASgIAAFASgIQEEACgJQEICCABQEoCAABQEoCEBBAAoCUBCAggAUBKAgAAUBKAhAQQAKAvwPvlfto96u9BcAAAAASUVORK5CYII=" /><!-- --></p>
+<p align="justify" style="line-height:200%;">
+As shown by the output, our model was able to identify one additional pixel not sampled by <em>presence.samples</em>. But how accurate is the output. To see that we can consult the F1-scores for presences and absences.
+</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" data-line-number="1"><span class="kw">kable_styling</span>(<span class="kw">kable</span>(<span class="kw">head</span>(resourceModel1<span class="op">$</span>f1, <span class="dv">2</span>), <span class="dt">format=</span><span class="st">&quot;html&quot;</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>, <span class="dt">full_width=</span><span class="ot">TRUE</span>), <span class="st">&quot;stripped&quot;</span>, <span class="dt">bootstrap_options=</span><span class="st">&quot;responsive&quot;</span>)</a></code></pre></div>
+<table class="table table-responsive" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:center;">
+presence
+</th>
+<th style="text-align:center;">
+absence
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+0.6666667
+</td>
+<td style="text-align:center;">
+0.9943925
+</td>
+</tr>
+</tbody>
+</table>
+<p align="justify" style="line-height:200%;">
+The accuracies were comparatively higher for absences suggesting an unbalance betwene both classes. This indicates that the chosen environmental predictors might not be the best ones to distinguish the selected resources from their surroundings. But what if we had used random background sampling instead of our sampling approach?
+</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" data-line-number="1">absence.samples &lt;-<span class="st"> </span><span class="kw">backSample</span>(presence.samples, ndvi, <span class="dt">sampling.method=</span><span class="st">&quot;random&quot;</span>) <span class="co"># identify absence samples (random)</span></a>
+<a class="sourceLine" id="cb11-2" data-line-number="2">env.absences &lt;-<span class="st"> </span><span class="kw">extract</span>(ndvi, absence.samples)  <span class="co"># extract environmental data for absences</span></a>
+<a class="sourceLine" id="cb11-3" data-line-number="3">resourceModel2 &lt;-<span class="st"> </span><span class="kw">predictResources</span>(env.presences, env.absences, sample.id, <span class="dt">env.data=</span>ndvi) <span class="co"># build model</span></a></code></pre></div>
+<pre><code>## note: only 2 unique complexity parameters in default grid. Truncating the grid to 2 .
+## 
+## note: only 2 unique complexity parameters in default grid. Truncating the grid to 2 .
+## 
+## note: only 2 unique complexity parameters in default grid. Truncating the grid to 2 .</code></pre>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="kw">plot</span>(resourceModel2<span class="op">$</span>probabilities <span class="op">&gt;=</span><span class="st"> </span><span class="fl">0.5</span>) <span class="co"># probability map</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="kw">points</span>(presence.samples) <span class="co"># presences</span></a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" data-line-number="1"><span class="kw">kable_styling</span>(<span class="kw">kable</span>(<span class="kw">head</span>(resourceModel2<span class="op">$</span>f1, <span class="dv">2</span>), <span class="dt">format=</span><span class="st">&quot;html&quot;</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>, <span class="dt">full_width=</span><span class="ot">TRUE</span>), <span class="st">&quot;stripped&quot;</span>, <span class="dt">bootstrap_options=</span><span class="st">&quot;responsive&quot;</span>)</a></code></pre></div>
+<table class="table table-responsive" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:center;">
+presence
+</th>
+<th style="text-align:center;">
+absence
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+NaN
+</td>
+<td style="text-align:center;">
+0.9905363
+</td>
+</tr>
+</tbody>
+</table>
+<p align="justify" style="line-height:200%;">
+As shown by the output, only the samples covered by <em>presence.samples</em> received a probability higher than 0.5. Additionally, the F1-score for presences was returned as <em>NaN</em> suggesting that the independent presence regions failed to predict each other.
+</p>
+<p></br></p>
+</div>
+<div id="plausibility-test" class="section level3">
+<h3>Plausibility Test</h3>
+<p align="justify" style="line-height:200%;">
+While modelling results might be satisfactory it is always useful to know how well do they adapt to our expectations, be them data driven or based on empirical observations of the target species. To assist on this, we developed <em>plausibilityTest()</em>. This function provides a simple tool to compare the output presence-absence map against existing categorical information such as land cover maps. To test this tool, we can use the land cover data provided through <em>rsMove</em>.
+</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" data-line-number="1">landCover &lt;-<span class="st"> </span><span class="kw">raster</span>(<span class="kw">system.file</span>(<span class="st">'extdata'</span>, <span class="st">'landCover.tif'</span>, <span class="dt">package=</span><span class="st">&quot;rsMove&quot;</span>))</a></code></pre></div>
+<p align="justify" style="line-height:200%;">
+Now let’s apply the function using the probability maps contained derived with <em>pca</em> and <em>random</em> sampling. We will also specify the class labels.
+</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb16-1" data-line-number="1">class.labels &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Arable land&quot;</span>, <span class="st">&quot;Land without use&quot;</span>, <span class="st">&quot;Open spaces&quot;</span>, <span class="st">&quot;Wetlands&quot;</span>, <span class="st">&quot;Permanent crops&quot;</span>, <span class="st">&quot;Extraction/Dump sites&quot;</span>, <span class="st">&quot;Industrial areas&quot;</span>, <span class="st">&quot;Green urban areas&quot;</span>)</a>
+<a class="sourceLine" id="cb16-2" data-line-number="2">probMask &lt;-<span class="st"> </span><span class="kw">stack</span>(resourceModel1<span class="op">$</span>probabilities<span class="op">&gt;</span><span class="st"> </span><span class="fl">0.5</span>, resourceModel2<span class="op">$</span>probabilities<span class="op">&gt;</span><span class="st"> </span><span class="fl">0.5</span>) <span class="co"># stack of probabilities (pca and random)</span></a>
+<a class="sourceLine" id="cb16-3" data-line-number="3">ptest &lt;-<span class="st"> </span><span class="kw">plausibilityTest</span>(probMask, landCover, <span class="dt">class.labels=</span>class.labels)</a></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb17-1" data-line-number="1">ptest<span class="op">$</span>relative.plot</a></code></pre></div>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" data-line-number="1"><span class="kw">kable_styling</span>(<span class="kw">kable</span>(<span class="kw">head</span>(ptest<span class="op">$</span>relative.count, <span class="dv">8</span>), <span class="dt">format=</span><span class="st">&quot;html&quot;</span>, <span class="dt">align=</span><span class="st">&quot;c&quot;</span>, <span class="dt">full_width=</span><span class="ot">TRUE</span>), <span class="st">&quot;stripped&quot;</span>, <span class="dt">bootstrap_options=</span><span class="st">&quot;responsive&quot;</span>)</a></code></pre></div>
+<table class="table table-responsive" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr>
+<th style="text-align:center;">
+code
+</th>
+<th style="text-align:center;">
+label
+</th>
+<th style="text-align:center;">
+Layer_1
+</th>
+<th style="text-align:center;">
+Layer_2
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">
+2
+</td>
+<td style="text-align:center;">
+Arable land
+</td>
+<td style="text-align:center;">
+0.625
+</td>
+<td style="text-align:center;">
+0.5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+3
+</td>
+<td style="text-align:center;">
+Land without use
+</td>
+<td style="text-align:center;">
+0.000
+</td>
+<td style="text-align:center;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+7
+</td>
+<td style="text-align:center;">
+Open spaces
+</td>
+<td style="text-align:center;">
+0.375
+</td>
+<td style="text-align:center;">
+0.5
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+12
+</td>
+<td style="text-align:center;">
+Wetlands
+</td>
+<td style="text-align:center;">
+0.000
+</td>
+<td style="text-align:center;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+13
+</td>
+<td style="text-align:center;">
+Permanent crops
+</td>
+<td style="text-align:center;">
+0.000
+</td>
+<td style="text-align:center;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+15
+</td>
+<td style="text-align:center;">
+Extraction/Dump sites
+</td>
+<td style="text-align:center;">
+0.000
+</td>
+<td style="text-align:center;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+21
+</td>
+<td style="text-align:center;">
+Industrial areas
+</td>
+<td style="text-align:center;">
+0.000
+</td>
+<td style="text-align:center;">
+0.0
+</td>
+</tr>
+<tr>
+<td style="text-align:center;">
+23
+</td>
+<td style="text-align:center;">
+Green urban areas
+</td>
+<td style="text-align:center;">
+0.000
+</td>
+<td style="text-align:center;">
+0.0
+</td>
+</tr>
+</tbody>
+</table>
+<p align="justify" style="line-height:200%;">
+The output suggests very similar results between both sampling approaches. Most of the of the pixels with probabilities higher than 0.5 were related to arable land while non-vegetated land cover types as well as <em>Permanent Crops</em> were ignored. Considering that the White Stork is reportedly attracted by agriculture, the output of <em>plausibilityTest()</em> suggests we built a reasonable predictive model.
+</p>
+<p></br> </br></p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

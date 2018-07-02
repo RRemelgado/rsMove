@@ -5,10 +5,10 @@
 #' @param x Object of class \emph{raster} and \emph{RasterStack} with the x(s).
 #' @param y Reference \emph{raster} (e.g. Land cover map).
 #' @param class.labels Labels of classes in \emph{y} provided as a character vector.
-#' @param sample.colors Hex color codes for each layer in \emph{x} provided as a character vector.
 #' @return A \emph{list} with statistical information on the distribution of samples per class and a comparative plot.
-#' @details {The function counts the number of non-NA pixels in \emph{x} within each class of \emph{y}.
-#' Then, the sample count is normalized by its largest value. The output of the function is a list consisting of:
+#' @details {For each lazer in \emph{x}, the function returns the absolute and relative count of non-NA pixels in \emph{x}
+#' within each class of \emph{y}. Then, the results for each layer are compared in a combined plot. The output of the function
+#' is a list consisting of:
 #'  \itemize{
 #'  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{x} within each class of \emph{y}.}
 #'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{x} within each class of \emph{y}.}
@@ -43,7 +43,7 @@
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-plausibilityTest <- function(x, y, class.labels=NULL, sample.colors=NULL) {
+plausibilityTest <- function(x, y, class.labels=NULL) {
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 1. Check input variables
@@ -59,14 +59,11 @@ plausibilityTest <- function(x, y, class.labels=NULL, sample.colors=NULL) {
   n.runs <- nlayers(x)
 
   # check auxiliary information
-  if (!is.null(class.labels)) {if (!is.character(class.labels)) {'"class.labels" is not a "character" vector'}}
-  if (!is.null(sample.colors)) {
-    if (!is.character(sample.colors)) {'"sample.colors" is not a "character" vector'}
-    if (length(sample.colors)!=n.runs) {'"x" and "sample.colors" have different lenghts'}
-  } else {sample.colors <- rainbow(n.runs, start=0.1, end=0.9)}
+  if (!is.null(class.labels)) {
+    if (!is.character(class.labels)) {'"class.labels" is not a "character" vector'}}
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
-# 2. Extract unique cases in "y" and check "class.labels" and "class.colors"
+# 2. Extract unique cases in "y" and check "class.labels"
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # unique raster values
@@ -82,13 +79,13 @@ plausibilityTest <- function(x, y, class.labels=NULL, sample.colors=NULL) {
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # extract layer names
-  layer.names <- names(x)
+  layer.names <- sapply(1:n.runs, function(j) {paste0('Layer_', as.character(j))})
 
   # count unique raster values per mask
   sample.count <- lapply(1:n.runs, function(i) {
     erv <-y[which.max(x[[i]])]
     erv <- sapply(unique.values, function(c) {sum(erv==c, na.rm=TRUE)})
-    return(list(absolute=erv, relative=erv/max(erv)))})
+    return(list(absolute=erv, relative=erv/sum(erv)))})
 
   # build final table (absolute count)
   absolute.count <- do.call(cbind, lapply(sample.count, function(i) {i$absolute}))
@@ -115,7 +112,7 @@ plausibilityTest <- function(x, y, class.labels=NULL, sample.colors=NULL) {
                                           axis.text.x=element_blank(), axis.ticks.x=element_blank(),
                                           axis.text=element_text(), axis.title=element_text(size=10),
                                           plot.margin=unit(c(0.5,0.5,0.5,0.5), "cm")) +
-    facet_wrap(as.formula(paste("~", "label")), nrow=floor(length(unique.values)/4)+1) + scale_fill_manual(values=sample.colors)
+    facet_wrap(as.formula(paste("~", "label")), nrow=floor(length(unique.values)/4)+1)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 # 5. return output

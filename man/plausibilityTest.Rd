@@ -4,7 +4,7 @@
 \alias{plausibilityTest}
 \title{plausibilityTest}
 \usage{
-plausibilityTest(x, y, class.labels = NULL, sample.colors = NULL)
+plausibilityTest(x, y, class.labels = NULL)
 }
 \arguments{
 \item{x}{Object of class \emph{raster} and \emph{RasterStack} with the x(s).}
@@ -12,8 +12,6 @@ plausibilityTest(x, y, class.labels = NULL, sample.colors = NULL)
 \item{y}{Reference \emph{raster} (e.g. Land cover map).}
 
 \item{class.labels}{Labels of classes in \emph{y} provided as a character vector.}
-
-\item{sample.colors}{Hex color codes for each layer in \emph{x} provided as a character vector.}
 }
 \value{
 A \emph{list} with statistical information on the distribution of samples per class and a comparative plot.
@@ -22,8 +20,9 @@ A \emph{list} with statistical information on the distribution of samples per cl
 Quantifies and plots the distribution of pixels within a mask over a reference categorical raster object.
 }
 \details{
-{The function counts the number of non-NA pixels in \emph{x} within each class of \emph{y}.
-Then, the sample count is normalized by its largest value. The output of the function is a list consisting of:
+{For each lazer in \emph{x}, the function returns the absolute and relative count of non-NA pixels in \emph{x}
+within each class of \emph{y}. Then, the results for each layer are compared in a combined plot. The output of the function
+is a list consisting of:
  \itemize{
  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{x} within each class of \emph{y}.}
  \item{\emph{relative.count} - Relative sample count for each layer of \emph{x} within each class of \emph{y}.}

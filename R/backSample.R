@@ -114,16 +114,16 @@ backSample <- function(x, y, z, sampling.method="random", nr.samples=NULL) {
     ai = vector('list', ncol(pca))
     for (p in 1:length(npc)) {
       usr = vector('list', length(uv))
-      for (z in 1:length(uv)) {
-        ri <- which(z==uv[z])
+      for (j in 1:length(uv)) {
+        ri <- which(z==uv[j])
         s1 <- median(pca[ri,p])
         s2 <- median(abs(pca[ri,p]-s1))
-        usr[[z]] <- i0[which(abs(pca[i0,p]-s1) > s2)]
+        usr[[j]] <- i0[which(abs(pca[i0,p]-s1) > s2)]
       }
       usr <- unlist(usr)
       ui <- unique(usr)
       count <- vector('numeric', length(ui))
-      for (z in 1:length(ui)) {count[z] <- length(which(usr==ui[z]))}
+      for (j in 1:length(ui)) {count[j] <- length(which(usr==ui[j]))}
       ai[[p]] <- ui[which(count==length(uv))]
     }
 
