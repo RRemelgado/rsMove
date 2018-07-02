@@ -30,7 +30,7 @@ Remote sensing became a fundamental tool in the scope of movement ecology. It of
 
 ### Reference Data
 <p align="justify" style="line-height:200%;">
-`rsMove` was developed using movement data from one population of White Storks (*ciconia ciconia*) tracked with high-resolution GPS devices. The data was collected by the Max Planck Institute for Ornithology ([MPIo](http://www.orn.mpg.de/en)) and it can be accessed  [here](https://doi.org/10.5441/001/1.78152p3q) through MoveBank. Within `rsMove`, we provide data for a single individual divided into two datasets: one resampled to a lower temporal resolution showing the individuals migration to Africa (`longMove`) and one with the original temporal resolution showing movements within its nesting site (`shortMove`). The files are provided as `SpatialPointsDataFrame`objects and can be accessed as seen below.
+`rsMove` was developed using movement data from one population of White Storks (*ciconia ciconia*) tracked with high-resolution GPS devices. The data was collected by the Max Planck Institute for Ornithology ([MPIo](https://www.orn.mpg.de/en)) and it can be accessed  [here](https://doi.org/10.5441/001/1.78152p3q) through MoveBank. Within `rsMove`, we provide data for a single individual divided into two datasets: one resampled to a lower temporal resolution showing the individuals migration to Africa (`longMove`) and one with the original temporal resolution showing movements within its nesting site (`shortMove`). The files are provided as `SpatialPointsDataFrame`objects and can be accessed as seen below.
 </p>
 
 ```{r message=FALSE}
