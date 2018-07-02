@@ -23,45 +23,37 @@ library(kableExtra)
 
 ### A Remote Sensing Perspective on Resource Suitability Modelling
 <p align="justify" style="line-height:200%;">
-This tutorial is based on the a recently published paper that you can find [here]([here](https://doi.org/10.5441/001/1.78152p3q). In this paper, we introduced a standardized machine learning approach to predict resource suitability and consistently validate the model output. And, more importantly, our approach offers a transferable approach to narrow the technical and theoretical gaps between Animal Movement and Remote Sensing data. In this vignette, we will show how users can replicate the approach proposed in our paper using *rsMove* to map resource suitability related to feeding behaviour.
+This tutorial is based on the a recently published paper that you can find [here]([here](https://doi.org/10.5441/001/1.78152p3q). This paper introduces a standardized, presence-absence, machine learning approach to predict animal resource suitability and consistently validate its output. This vignette shows users how to replicate this approach using *rsMove* to map resource suitability related to feeding behaviour.
 </p>
 
 
 ### Data
 <p align="justify" style="line-height:200%;">
-For this exercise we will use the local movement data set provided by *rsMove* (`shortMove`) that describes the movements of a White Stork around its nest.
+For this exercise we will movement data for one White Stork that describes its movements around its nest. Additionally, we will use a time-series of Normalized Difference Vegetation Index (NDVI) images as predictors.
 </p>
 
-```{r message=FALSE}
-data("shortMove")
-```
-
-<p align="justify" style="line-height:200%;">
-Additionally, we will use our time-series of Normalized Difference Vegetation Index (NDVI) images as predictors.
-</p>
-
-```{r message=FALSE}
-ndvi <- stack(list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE))
+``` {r message=FALSE}
+data("shortMove") # movement data
+ndvi <- stack(list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)) # environmental predictors
 ```
 
 </br>
 
 ### Movement Data Pre-Processing
 <p align="justify" style="line-height:200%;">
-As a first step, we need to remove redundant data points . As animals move through the landscape, they sometimes visit the same locations. Looking at our example data, this issue is frequent. Since the animal is nesting it performed several trips between its nest and the feeding sites.
+As a first step, we need to remove redundant data points. As animals move through the landscape, they sometimes visit the same locations. Looking at our example data, this issue is frequent. Since the animal is nesting it performed several trips between its nest and the feeding sites.
 </p>
 
-```{r message=FALSE}
+``` {r message=FALSE}
 plot(shortMove)
 ```
 
 <p align="justify" style="line-height:200%;">
-As a consequence, when using movement data to sample from satellite imagery with a much lower temporal resolution, most of those samples will be be replicated. Pseudo-replication has two main consequences. First, it offers misleading information on the preferences of a species. Since we can not monitor environmental conditions at the same temporal scale at which we can track animals we often miss environmental changes that influence animal decision making. Second, it becomes hard to consistently train and validate any predictive model due to potential abundance of of duplicated data.
+As a consequence, most of the samples will be replicated when sampling from satellite imagery with a much lower temporal resolution using movement data. This pseudo-replication phenomena has two main implications. First, it offers misleading information on the preferences of a species. Since we can not monitor environmental conditions at the same temporal scale at which we can track animals we often miss environmental changes that influence animal decision making. Second, it becomes hard to consistently train and validate any predictive model since samples acquired from the same pixel can be split between training and validation.
 </p>
 
-
 <p align="justify" style="line-height:200%;">
-To address this issue, we will use *moveReduce()*. This function derives a shapefile based on movement data that aggregates temporally consecutive data points when they fall within the same pixel and reports on the elapsed time at that location. In addition, the user can choose to derive a raster with the total amount of time elapsed at each pixel. We will take advantage of this functionality to remove duplicate samples and identify relevant ones.
+To address this issue, we will use *moveReduce()*. Considering a shapefile with movement dtaa, this function aggregates temporally consecutive data points that fall within the same pixel and reports on the elapsed time at that location. In addition, the user can choose to derive a raster with the total amount of time elapsed at each pixel. We will take advantage of this functionality.
 </p>
 
 ```{r}
@@ -72,7 +64,7 @@ plot(reduced.samples$total.time) # show total time image
 
 
 <p align="justify" style="line-height:200%;">
-Looking at the output image, we see one pixel standing out with about 400 minutes (i.e. roughly 7 hours). This is the nesting site. Since we are interested in feeding sites alone, we will remove ignore this location. Moreover, we will ignore all the pixels with 0 minutes. These are mainly pixels that were not visited by the animal but also consider those that, while visited, did not record more than one consecutive observation. To do this, we will use the raster package to create a mask, extract relevant pixel positions and build a new shapefile from it. The output will be our present sample.
+Looking at the output image, we see one pixel standing out with about 400 minutes (i.e. roughly 7 hours). This is the nesting site. Since we are interested in feeding sites alone, we will remove ignore this location. Moreover, we will ignore all the pixels with 0 minutes. These are mainly pixels that were not visited by the animal but also consider those that, while visited, did not record more than one consecutive observation. To do this, we will use the raster package to create a mask, identify the pixels with a value of 1 and use them to build a new shapefile. The output will be our presence samples.
 </p>
 
 ```{r message=FALSE}
@@ -85,19 +77,26 @@ presence.samples <- SpatialPoints(xyFromCell(move.mask, usable.pixels), proj4str
 
 ### Identify absence samples
 <p align="justify" style="line-height:200%;">
-In the previous steps we translated the *shortMove* movement data into samples that likely relate to feeding sites. However, to understand how these samples can be distinguished from the rest of the landscape, we need to collect background that describe unattractive environmental conditions. While movement data is a strong asset to understand the environmental preferences of an animal it tells us little about its dislikes. Even if a location was not visited by an animal it does not mean it was unsuitable. Factors such as distance and accessibility can condition animal decision leading to the neglect of potentially suitable resources. As a consequence, usual techniques such as random background sampling can be misleading as it does not account for the abundance of suitable resources. To address this issue, we developed *backSample()*. This function introduces a new technique that uses presence samples as informants. These are used to collect samples from the remote sensing data and identify pixels where the environmental conditions are statistically different. This approach is also sensitive to differences in resource selection. For example, the White Stork is a versatile animal. While they often search for prey in areas freshly harvested crop fields they can sometimes be found in grasslands and even wetlands. As a consequence, our presence samples can reflect a diverse set of environmental conditions. To account for this and to better define the spectral border between suitable and unsuitable environmental conditions, *backSample()* requires an index that defines the aggregation of samples with similar environmental attributes. This index is returned by *labelSample()*. In this exercise, we will aggregate samples within 60m of each other (i.e. 2 pixels).
+In the previous steps we translated the *shortMove* movement data into samples that likely relate to feeding sites. However, to understand how these samples can be distinguished from the rest of the landscape, we need to collect background samples that describe unattractive environmental conditions. While movement data is a strong asset to understand the environmental preferences of an animal it tells us little about its dislikes. Even if a location was not visited by an animal it does not mean it was unsuitable. Factors such as distance and accessibility can condition animal decision making leading it to neglect potentially suitable resources. As a consequence, random background sampling - a commonly used technique - can be misleading as it does not account for the abundance of suitable resources. To address this issue we developed *backSample()*. This function introduces a new sampling technique that uses presence samples as informants. These are used to collect samples from the remote sensing data and identify pixels where the environmental conditions are statistically different. 
 </p>
+
+<p align="justify" style="line-height:200%;">
+This approach is also sensitive to differences in resource selection. For example, the White Stork is a versatile animal. While they often search for prey in recently managed crop fields they can sometimes be found in grasslands and even wetlands. As a consequence, our presence samples can reflect a diverse set of environmental conditions. To account for this and to better define the environmental boundaries between suitable and unsuitable locations, *backSample()* requires an index that defines the aggregation of samples with similar environmental attributes. This index is returned by *labelSample()* which aggregates pixels based on their spatial neighborhood. In this exercise, we will aggregate samples within 60m of each other (i.e. 2 pixels).
+</p>
+
 
 ```{r message=FALSE}
 sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
+sample.id # show indices
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples
+absence.samples # show samples
 ```
 
 </br>
 
 ### Derive and Validate Predict Model
 <p align="justify" style="line-height:200%;">
-Our modelling approach follows similar lines than our background sampling. It relies on spatially independent samples to train a predictive model and validate its consistency. The function iterates through each of the presence regions given by *sample.id* and uses the corresponding samples for validation while the remaining ones are used for training. During this process, a random set of absence samples is selected. Ideally, the function will try to try to equalize the number of presence samples in the training and validation sets. The final validation is an F1 score estimated from the total number of correct and false positives among all iterations. The function *predictResources()* can be used to perform the training and validation steps.
+Similarly to the background sampling approach, the modelling approach follows relies on spatially independent samples to train a predictive model and validate its consistency. The function iterates through each of the presence regions given by *sample.id* and uses the corresponding samples for validation while the remaining ones are used for training. During this process, a random set of absence samples is selected. Ideally, the function will try to try to equalize the number of presence samples in the training and validation sets. The final validation is an F1 score estimated from the total number of correct and false positives among all iterations. The function *predictResources()* can be used to perform the training and validation steps.
 </p>
 
 ```{r message=FALSE}
@@ -116,7 +115,7 @@ points(presence.samples) # presences
 ```
 
 <p align="justify" style="line-height:200%;">
-As shown by the output, our model was able to identify one additional pixel not sampled by *presence.samples*. But how accurate is the output. To see that we can consult the F1-scores for presences and absences.
+As shown by the output, the model was able to identify one additional pixel not sampled by *presence.samples*. But how accurate is the output? To see that we can consult the F1-scores for presences and absences.
 </p>
 
 ```{r message=FALSE}
@@ -124,7 +123,7 @@ kable_styling(kable(head(resourceModel1$f1, 2), format="html", align="c", full_w
 ```
 
 <p align="justify" style="line-height:200%;">
-The accuracies were comparatively higher for absences suggesting an unbalance betwene both classes. This indicates that the chosen environmental predictors might not be the best ones to distinguish the selected resources from their surroundings. But what if we had used random background sampling instead of our sampling approach?
+The accuracies were comparatively higher for absences suggesting an unbalance betwene both classes. This indicates that the chosen environmental predictors might not be suitable to distinguish the selected resources from their surroundings. But what if we had used random background sampling instead of of the proposed approach?
 </p>
 
 ```{r message=FALSE}
@@ -137,22 +136,23 @@ kable_styling(kable(head(resourceModel2$f1, 2), format="html", align="c", full_w
 ```
 
 <p align="justify" style="line-height:200%;">
-As shown by the output, only the samples covered by *presence.samples* received a probability higher than 0.5. Additionally, the F1-score for presences was returned as *NaN* suggesting that the independent presence regions failed to predict each other.
+As shown by the output, only the samples covered by *presence.samples* received a probability higher than 0.5. Additionally, the F1-score was  *NaN* for presences suggesting that the independent presence regions failed to predict each other.
 </p>
 
 </br>
 
 ### Plausibility Test
 <p align="justify" style="line-height:200%;">
-While modelling results might be satisfactory it is always useful to know how well do they adapt to our expectations, be them data driven or based on empirical observations of the target species. To assist on this, we developed *plausibilityTest()*. This function provides a simple tool to compare the output presence-absence map against existing categorical information such as land cover maps. To test this tool, we can use the land cover data provided through *rsMove*.
+While modelling results might be satisfactory it is ideal to verify if they fit to our expectations, be them data driven or based on empirical observations of the target species. To assist on this, we developed *plausibilityTest()*. This function allows its user to compare presence-absence maps derived with different modelling approaches against existing categorical information such as land cover maps. Given a stack of masks - where 1 is the usable value - the function will iterate through each band and report on the sum of pixels for each class in a categorical layer. To test this tool, we can use the land cover data provided through *rsMove*.
 </p>
+
 
 ``` {r message=FALSE}
 landCover <- raster(system.file('extdata', 'landCover.tif', package="rsMove"))
 ```
 
 <p align="justify" style="line-height:200%;">
-Now let's apply the function using the probability maps contained derived with *pca* and *random* sampling. We will also specify the class labels.
+Now let's apply the function using the probability maps derived with *pca* and *random* sampling considering only probabilities higher than 0.5. We will also specify the class labels.
 </p>
 
 ``` {r message=TRUE}
@@ -167,7 +167,7 @@ kable_styling(kable(head(ptest$relative.count, 8), format="html", align="c", ful
 ```
 
 <p align="justify" style="line-height:200%;">
-The output suggests very similar results between both sampling approaches. Most of the of the pixels with probabilities higher than 0.5 were related to arable land while non-vegetated land cover types as well as *Permanent Crops* were ignored. Considering that the White Stork is reportedly attracted by agriculture, the output of *plausibilityTest()* suggests we built a reasonable predictive model.
+The output suggests very similar results between both sampling approaches. Most of the pixels with probabilities higher than 0.5 were related to arable land while non-vegetated land cover types as well as *Permanent Crops* were ignored. Considering that the White Stork is reportedly attracted by agriculture, the output of *plausibilityTest()* suggests we built a reasonable predictive model.
 </p>
 
 </br>
