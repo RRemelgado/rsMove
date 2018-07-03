@@ -15,7 +15,7 @@
 #' by \emph{agg.radius} and proceeds to reliable the pixels covered by samples. Finally, this information is used to label the original
 #' samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}
 #' and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may assign a raster object to \emph{pixel.res}.}
-#' @import raster rgdal
+#' @importFrom raster crs cellFromXY extent raster res freq clump rowFromCell colFromCell
 #' @seealso \code{\link{sampleMove}} \code{\link{hotMove}}
 #' @examples {
 #'
@@ -28,7 +28,7 @@
 #'  data(shortMove)
 #'
 #'  # derive region labels
-#'  labels <- labelSample(shortMove, 30, agg.radius=90, nr.pixels=2)
+#'  labels <- labelSample(shortMove, r, agg.radius=60)
 #'
 #' }
 #' @export
@@ -45,7 +45,6 @@ labelSample <- function(xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pixel
   if (!exists('xy')) {stop('"xy" is missing')}
   if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
   if (is.null(crs(xy)@projargs)) {stop('"xy" is missing a valid projection')}
-  if (!is.null(nr.pixels) & !is.null(nr.points)) {stop('"nr.pixels" and "nr.points" are both assigned. Choose one')}
   if (!is.null(nr.pixels)) {if (!is.numeric(nr.pixels) | length(nr.pixels)!=1) {stop('"nr.pixels" is not a valid input')}}
   if (!is.null(nr.points)) {if (!is.numeric(nr.points) | length(nr.points)!=1) {stop('"nr.points" is not a valid input')}}
   if (!is.null(agg.radius)) {if (!is.numeric(agg.radius) | length(agg.radius)!=1) {stop('"agg.radius" is not a valid input')}}

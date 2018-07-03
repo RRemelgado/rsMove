@@ -13,7 +13,7 @@ ndvi <- stack(list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif
 ## ----message=FALSE-------------------------------------------------------
 plot(shortMove)
 
-## ------------------------------------------------------------------------
+## ----message=FALSE-------------------------------------------------------
 obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="%Y/%m/%d %H:%M:%S") # format observation time
 reduced.samples <- moveReduce(shortMove, ndvi, obs.time, derive.raster=TRUE) # remove redundant data points
 plot(reduced.samples$total.time) # show total time image

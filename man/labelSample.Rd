@@ -45,7 +45,7 @@ and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may ass
  data(shortMove)
 
  # derive region labels
- labels <- labelSample(shortMove, 30, agg.radius=90, nr.pixels=2)
+ labels <- labelSample(shortMove, r, agg.radius=60)
 
 }
 }

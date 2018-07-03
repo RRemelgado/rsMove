@@ -55,7 +55,7 @@ As a consequence, most of the samples will be replicated when sampling from sate
 To address this issue, we will use *moveReduce()*. Considering a shapefile with movement dtaa, this function aggregates temporally consecutive data points that fall within the same pixel and reports on the elapsed time at that location. In addition, the user can choose to derive a raster with the total amount of time elapsed at each pixel. We will take advantage of this functionality.
 </p>
 
-```{r}
+```{r message=FALSE}
 obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="%Y/%m/%d %H:%M:%S") # format observation time
 reduced.samples <- moveReduce(shortMove, ndvi, obs.time, derive.raster=TRUE) # remove redundant data points
 plot(reduced.samples$total.time) # show total time image
