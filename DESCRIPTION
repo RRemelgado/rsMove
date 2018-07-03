@@ -2,7 +2,7 @@ Package: rsMove
 Type: Package
 Title: Remote Sensing for Movement Ecology
 Version: 0.2.4
-Date: 2018-06-19
+Date: 2018-07-03
 Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de")
 URL: https://github.com/RRemelgado/rsMove/tree/master/
 BugReports: https://github.com/RRemelgado/rsMove/issues/
@@ -12,5 +12,5 @@ LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, RCurl, spatialEco, lubridate, pryr
 RoxygenNote: 6.0.1
 License: GPL (>= 3)
-Suggests: knitr, rmarkdown, kableExtra, imager
+Suggests: knitr, rmarkdown, kableExtra, imager, devtools, igraph
 VignetteBuilder: knitr

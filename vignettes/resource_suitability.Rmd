@@ -11,11 +11,11 @@ vignette: >
 
 ```{r echo=FALSE, message=FALSE}
 # load packages
-library(rsMove)
-library(raster)
-library(ggplot2)
-library(knitr)
-library(kableExtra)
+require(rsMove)
+require(raster)
+require(ggplot2)
+require(knitr)
+require(kableExtra)
 ```
 
 </br>
@@ -84,7 +84,7 @@ This approach is also sensitive to differences in resource selection. For exampl
 </p>
 
 
-```{r message=FALSE}
+```{r error=TRUE}
 sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
 sample.id # show indices
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples

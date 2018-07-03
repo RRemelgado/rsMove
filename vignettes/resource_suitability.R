@@ -1,10 +1,10 @@
 ## ----echo=FALSE, message=FALSE-------------------------------------------
 # load packages
-library(rsMove)
-library(raster)
-library(ggplot2)
-library(knitr)
-library(kableExtra)
+require(rsMove)
+require(raster)
+require(ggplot2)
+require(knitr)
+require(kableExtra)
 
 ## ----message=FALSE-------------------------------------------------------
 data("shortMove") # movement data
@@ -23,7 +23,7 @@ move.mask <- reduced.samples$total.time > 0 & reduced.samples$total.time < 60 # 
 usable.pixels <- which.max(move.mask) # identify relevant pixels
 presence.samples <- SpatialPoints(xyFromCell(move.mask, usable.pixels), proj4string=crs(shortMove)) # build shapefile from samples (presences)
 
-## ----message=FALSE-------------------------------------------------------
+## ----error=TRUE----------------------------------------------------------
 sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
 sample.id # show indices
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples
