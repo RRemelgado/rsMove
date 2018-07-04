@@ -20,14 +20,14 @@ install.packages('rsMove')
 
 ### Examples
 <p align="justify">
- Please click <a href="https://cran.rstudio.com/web/packages/rsMove/vignettes/rsMove.html">here</a> for the package vignette.
+ Please click <a href="https://cran.r-project.org/package=rsMove/vignettes/rsMove.html">here</a> for the package vignette.
 </p>
 
 <br>
 
 ### Bug reports & contact
 
-For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/tree/master">https://github.com/RRemelgado/rsMove/issues</a>. Feature requests and other contributions are also welcome.
+For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/issues/"</a>. Feature requests and other contributions are also welcome.
 
 <br>
 
@@ -40,19 +40,19 @@ The Department of Remote Sensing of the University of Würzburg has developed ot
 * <a href="https://github.com/cran/moveVis/">moveVis</a>
 
 <p align="justify">
-Click <a href="https://remote-sensing.eu/">here</a> for news on our department.
+Click <a href="http://remote-sensing.eu/">here</a> for news on our department.
 </p>
 
 <br>
 
 ### Aknowledgements
 <p align="justify">
-This initiative is part of the <a href="https://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/research/projects/current_projects/opt4environment//">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo). Click below to reach the involved parties.
+This initiative is part of the <a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/research/completed-projects/opt4environment/">Opt4Environment</a> project and was funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant <b>50 EE 1403</b>. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo). Click below to reach the involved parties.
 </p>
 
 <br>
 <p align="justify">
-<a href="https://www.fernerkundung.geographie.uni-wuerzburg.de/en/lehrstuehle_und_arbeitsgruppen/department_of_remote_sensing/startseite//"><img width="150" height="100" src="https://www.uni-wuerzburg.de/typo3conf/ext/uw_sitepackage/Resources/Public/Images/uni-wuerzburg-logo.svg"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.dlr.de/eoc/en/"><img width="115" height="100" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/DLR_Logo.svg/744px-DLR_Logo.svg.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.bmwi.de/Navigation/DE/Home/home.html"><img width="220" height="100" src="https://www.bmwi.de/SiteGlobals/BMWI/StyleBundles/Bilder/bmwi_logo_de.null?__blob=normal&v=9"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.orn.mpg.de/en/"><img width="200" height="100" src="https://www.molgen.mpg.de/188611/mpi_Seew_LogoText-1355515314.gif"></a>
+<a href="https://www.geographie.uni-wuerzburg.de/en/fernerkundung/startseite/"><img width="150" height="100" src="https://www.uni-wuerzburg.de/typo3conf/ext/uw_sitepackage/Resources/Public/Images/uni-wuerzburg-logo.svg"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.dlr.de/eoc/en/desktopdefault.aspx/tabid-5278/8856_read-15911/"><img width="115" height="100" src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f5/DLR_Logo.svg/744px-DLR_Logo.svg.png"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.bmwi.de/Navigation/DE/Home/home.html"><img width="220" height="100" src="https://www.bmwi.de/SiteGlobals/BMWI/StyleBundles/Bilder/bmwi_logo_de.null?__blob=normal&v=9"></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href="https://www.orn.mpg.de/en/"><img width="200" height="100" src="https://www.molgen.mpg.de/188611/mpi_Seew_LogoText-1355515314.gif"></a>
 </p>
 
 <br>
