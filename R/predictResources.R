@@ -7,7 +7,7 @@
 #' @param env.data Object of class \emph{RasterStack} or \emph{RasterBrick} with environmental variables in \emph{x} and \emph{y}.
 #' @importFrom stats complete.cases
 #' @importFrom caret train trainControl
-#' @importFrom raster predict
+#' @importFrom raster calc nlayers
 #' @return A \emph{list}.
 #' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @details {Modeling of resource suitability using animal movement data following a recent paper (Remelgado et al, 2017). For each
@@ -59,7 +59,7 @@
 #'  bSamples <- backSample(shortMove, r.stk, label, sampling.method='pca')
 #'
 #'  # derive model predictions
-#'  out <- predictResources(rsQuery, bSamples@data, z=label, env.data=r.stk)
+#'  out <- predictResources(rsQuery, bSamples@data, label, env.data=r.stk)
 #'
 #' }
 #' @export
@@ -166,7 +166,7 @@ predictResources <-function(x, y, z, env.data=NULL) {
 
   # write output
   model <- train(rbind(x, y), as.factor(c(i1,i0)), method="rf", trControl=tc)
-  if (!is.null(env.data)) {prob <-  calc(env.data, function(x){predict(model, x, type='prob')$'1'})} else {prob <- NULL}
+  if (!is.null(env.data)) {prob <-  calc(env.data, function(x){stats::predict(model, x, type='prob')$'1'})} else {prob <- NULL}
   return(list(f1=acc, validation=val.set, iteration.models=m.ls, final.model=model, probabilities=prob))
 
 }

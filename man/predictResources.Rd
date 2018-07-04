@@ -72,7 +72,7 @@ The output of \emph{predictResources} is a list object consisting of:
  bSamples <- backSample(shortMove, r.stk, label, sampling.method='pca')
 
  # derive model predictions
- out <- predictResources(rsQuery, bSamples@data, z=label, env.data=r.stk)
+ out <- predictResources(rsQuery, bSamples@data, label, env.data=r.stk)
 
 }
 }

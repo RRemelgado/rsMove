@@ -5,6 +5,8 @@ require(raster)
 require(ggplot2)
 require(knitr)
 require(kableExtra)
+require(caret)
+require(lattice)
 
 ## ----message=FALSE-------------------------------------------------------
 data("shortMove") # movement data
@@ -23,8 +25,13 @@ move.mask <- reduced.samples$total.time > 0 & reduced.samples$total.time < 60 # 
 usable.pixels <- which.max(move.mask) # identify relevant pixels
 presence.samples <- SpatialPoints(xyFromCell(move.mask, usable.pixels), proj4string=crs(shortMove)) # build shapefile from samples (presences)
 
-## ----error=TRUE----------------------------------------------------------
-sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
+## ----eval=FALSE----------------------------------------------------------
+#  sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
+
+## ----echo=FALSE, message=FALSE-------------------------------------------
+sample.id <- read.table(list.files(system.file('extdata', '', package="rsMove"), 'sampleIndices.txt', full.names=TRUE))[,,1]
+
+## ----message=FALSE-------------------------------------------------------
 sample.id # show indices
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples
 absence.samples # show samples

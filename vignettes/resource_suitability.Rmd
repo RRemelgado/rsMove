@@ -16,6 +16,8 @@ require(raster)
 require(ggplot2)
 require(knitr)
 require(kableExtra)
+require(caret)
+require(lattice)
 ```
 
 </br>
@@ -84,8 +86,13 @@ This approach is also sensitive to differences in resource selection. For exampl
 </p>
 
 
-```{r error=TRUE}
+```{r eval=FALSE}
 sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
+```
+```{r echo=FALSE, message=FALSE}
+sample.id <- read.table(list.files(system.file('extdata', '', package="rsMove"), 'sampleIndices.txt', full.names=TRUE))[,,1]
+```
+```{r message=FALSE}
 sample.id # show indices
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples
 absence.samples # show samples
