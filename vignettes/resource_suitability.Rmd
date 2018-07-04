@@ -77,7 +77,7 @@ Looking at the output image, we see one pixel standing out with about 400 minute
 </p>
 
 ```{r message=FALSE}
-uper.limit <- quantile(reduced.samples$total.time, 0.95) # identify upper threshold using 95%-percentile
+upper.limit <- quantile(reduced.samples$total.time, 0.95) # identify upper threshold using 95%-percentile
 move.mask <- reduced.samples$total.time > 0 & reduced.samples$total.time < upper.limit # build sample mask
 usable.pixels <- which.max(move.mask) # identify relevant pixels
 presence.samples <- SpatialPoints(xyFromCell(move.mask, usable.pixels), proj4string=crs(shortMove)) # build shapefile from samples (presences)

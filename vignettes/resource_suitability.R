@@ -21,7 +21,8 @@ reduced.samples <- moveReduce(shortMove, ndvi, obs.time, derive.raster=TRUE) # r
 plot(reduced.samples$total.time) # show total time image
 
 ## ----message=FALSE-------------------------------------------------------
-move.mask <- reduced.samples$total.time > 0 & reduced.samples$total.time < 60 # build sample mask
+upper.limit <- quantile(reduced.samples$total.time, 0.95) # identify upper threshold using 95%-percentile
+move.mask <- reduced.samples$total.time > 0 & reduced.samples$total.time < upper.limit # build sample mask
 usable.pixels <- which.max(move.mask) # identify relevant pixels
 presence.samples <- SpatialPoints(xyFromCell(move.mask, usable.pixels), proj4string=crs(shortMove)) # build shapefile from samples (presences)
 
