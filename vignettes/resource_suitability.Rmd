@@ -114,7 +114,7 @@ absence.samples # show samples
 Similarly to the background sampling approach, the modelling of resource suitability relies on spatially independent samples for training and validation. The function iterates through each of the presence regions given by *sample.id* and uses the corresponding samples for validation while the remaining ones are used for training. During this process, a random set of absence samples is selected. Ideally, the function will try to try to equalize the number of presence samples in the training and validation sets. The final validation is an F1 score estimated from the total number of correct and false positives among all iterations. The function *predictResources()* can be used to perform the training and validation steps.
 </p>
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, results='hide'}
 env.presences <- extract(ndvi, presence.samples) # extract environmental data for presences
 env.absences <- extract(ndvi, absence.samples)  # extract environmental data for absences
 resourceModel1 <- predictResources(env.presences, env.absences, sample.id, env.data=ndvi) # build model
@@ -141,7 +141,7 @@ kable_styling(kable(head(resourceModel1$f1, 2), format="html", align="c", full_w
 The accuracies were comparatively higher for absences suggesting an unbalance betwene both classes. This indicates that the chosen environmental predictors might not be suitable to distinguish the selected resources from their surroundings. But what if we had used random background sampling instead of of the proposed approach?
 </p>
 
-```{r message=FALSE, warning=FALSE}
+```{r message=FALSE, warning=FALSE, results='hide'}
 absence.samples <- backSample(presence.samples, ndvi, sampling.method="random") # identify absence samples (random)
 env.absences <- extract(ndvi, absence.samples)  # extract environmental data for absences
 resourceModel2 <- predictResources(env.presences, env.absences, sample.id, env.data=ndvi) # build model
