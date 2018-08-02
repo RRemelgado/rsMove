@@ -53,7 +53,7 @@ Since the animal has a fixed resting site, samples related to resting behavior a
 As a first step, we need to remove redundant data points. As animals move through the landscape, they sometimes visit the same locations. Looking at our example data, this issue is frequent as a consequence of back-and-forth trips between the nest and the feeding sites.
 </p>
 
-``` {r message=FALSE}
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
 plot(shortMove)
 ```
 
@@ -65,7 +65,7 @@ As a consequence, when we use the movement data to sample from our environmental
 To address this issue, we will use *moveReduce()*. Considering a shapefile with movement data, this function aggregates temporally consecutive spatial points that fall within the same pixel and reports on the elapsed time within it. In addition, the user can choose to derive a raster with the total amount of time elapsed at each pixel. We will take advantage of this functionality to identify usable samples.
 </p>
 
-```{r message=FALSE}
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
 obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time), format="%Y/%m/%d %H:%M:%S") # format observation time
 reduced.samples <- moveReduce(shortMove, ndvi, obs.time, derive.raster=TRUE) # remove redundant data points
 plot(reduced.samples$total.time) # show total time image
@@ -114,7 +114,7 @@ absence.samples # show samples
 Similarly to the background sampling approach, the modelling of resource suitability relies on spatially independent samples for training and validation. The function iterates through each of the presence regions given by *sample.id* and uses the corresponding samples for validation while the remaining ones are used for training. During this process, a random set of absence samples is selected. Ideally, the function will try to try to equalize the number of presence samples in the training and validation sets. The final validation is an F1 score estimated from the total number of correct and false positives among all iterations. The function *predictResources()* can be used to perform the training and validation steps.
 </p>
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 env.presences <- extract(ndvi, presence.samples) # extract environmental data for presences
 env.absences <- extract(ndvi, absence.samples)  # extract environmental data for absences
 resourceModel1 <- predictResources(env.presences, env.absences, sample.id, env.data=ndvi) # build model
@@ -124,7 +124,7 @@ resourceModel1 <- predictResources(env.presences, env.absences, sample.id, env.d
 Now let's have a look at our results. First, let's make a mask from the output probability map with a threshold of 0.5. Then let's overlap the presence samples.
 </p>
 
-```{r message=FALSE}
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
 plot(resourceModel1$probabilities >= 0.5) # probability map
 points(presence.samples) # presences
 ```
@@ -133,7 +133,7 @@ points(presence.samples) # presences
 As shown by the output, the model was able to identify one additional pixel not sampled by *presence.samples*. But how accurate is the output? To see that we can consult the F1-scores for presences and absences.
 </p>
 
-```{r message=FALSE}
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
 kable_styling(kable(head(resourceModel1$f1, 2), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
 ```
 
@@ -141,10 +141,12 @@ kable_styling(kable(head(resourceModel1$f1, 2), format="html", align="c", full_w
 The accuracies were comparatively higher for absences suggesting an unbalance betwene both classes. This indicates that the chosen environmental predictors might not be suitable to distinguish the selected resources from their surroundings. But what if we had used random background sampling instead of of the proposed approach?
 </p>
 
-```{r message=FALSE}
+```{r message=FALSE, warning=FALSE}
 absence.samples <- backSample(presence.samples, ndvi, sampling.method="random") # identify absence samples (random)
 env.absences <- extract(ndvi, absence.samples)  # extract environmental data for absences
 resourceModel2 <- predictResources(env.presences, env.absences, sample.id, env.data=ndvi) # build model
+```
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
 plot(resourceModel2$probabilities >= 0.5) # probability map
 points(presence.samples) # presences
 kable_styling(kable(head(resourceModel2$f1, 2), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
@@ -158,7 +160,7 @@ As shown by the output, only the samples covered by *presence.samples* received 
 
 ### Plausibility Test
 <p align="justify" style="line-height:200%;">
-While modelling results might be satisfactory it is ideal to verify if they fit to our expectations, be them data driven or based on empirical observations of the target species. To assist on this, we developed *plausibilityTest()*. This function allows its user to compare presence-absence maps derived with different modelling approaches against existing categorical information such as land cover maps. Given a stack of masks - where 1 is the usable value - the function will iterate through each band and report on the sum of pixels for each class in a categorical layer. To test this tool, we can use the land cover data provided through *rsMove*.
+While modelling results might be satisfactory it is ideal to verify if they fit to our expectations, be them data driven or based on empirical observations of the target species. To assist on this, we developed `plausibilityTest()`. This function allows its user to compare presence-absence maps derived with different modelling approaches against existing categorical information such as land cover maps. Given a stack of masks - where 1 is the usable value - the function will iterate through each band and report on the sum of pixels for each class in a categorical layer. To test this tool, we can use the land cover data provided through *rsMove*.
 </p>
 
 
@@ -176,13 +178,13 @@ probMask <- stack(resourceModel1$probabilities> 0.5, resourceModel2$probabilitie
 ptest <- plausibilityTest(probMask, landCover, class.labels=class.labels)
 ```
 
-``` {r message=TRUE}
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
 ptest$relative.plot
 kable_styling(kable(head(ptest$relative.count, 8), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
 ```
 
 <p align="justify" style="line-height:200%;">
-The output suggests very similar results between both sampling approaches. Most of the pixels with probabilities higher than 0.5 were related to arable land while non-vegetated land cover types as well as *Permanent Crops* were ignored. Considering that the White Stork is reportedly attracted by agriculture, the output of *plausibilityTest()* suggests we built a reasonable predictive model.
+The output suggests very similar results between both sampling approaches. Most of the pixels with probabilities higher than 0.5 were related to arable land while non-vegetated land cover types as well as *Permanent Crops* were ignored. Considering that the White Stork is reportedly attracted by agriculture, the output of `plausibilityTest()` suggests we built a reasonable predictive model.
 </p>
 
 </br>

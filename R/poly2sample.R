@@ -1,6 +1,6 @@
 #' @title poly2sample
 #'
-#' @description {Converts a raster grid to points depending on how much each pixel is covered by a polygon.}
+#' @description {Converts a raster grid to points.}
 #' @param x Object of class \emph{SpatialPolygons} or \emph{SpatialPolygonDataFrame}.
 #' @param y A raster object or a numeric element.
 #' @param min.cover Minimum percent a pixel should be covered by a polygon for sampling (1-100). Default is 1.
@@ -67,7 +67,7 @@ poly2sample <- function(x, y, min.cover=1) {
     r <- extend(crop(y, extent(x[i,])), res(y)*2)
     r <- rasterToPoints(rasterize(x[i,], r, getCover=TRUE))
     ind <- which(r[,3] > min.cover) # usable pixels
-    if (length(ind) > 0) {return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3]))} else {return(NULL)}}
+    if (length(ind) > 0) {return(data.frame(x=r[ind,1], y=r[ind,2], c=r[ind,3], id=i))} else {return(NULL)}}
 
   df0 <- lapply(1:length(x), lf)
 
