@@ -89,7 +89,7 @@ labelSample <- function(xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pixel
     px.freq <- freq(regions,useNA="no")
     ind <- which(px.freq[,2] < nr.pixels)
     ind <- as.vector(px.freq[ind,1])
-    if (!is.na(ind[1])) {for (i in 1:length(ind)) {pixel.res[regions==ind[i]] <- 0}}
+    if (!is.na(ind[1])) {for (i in 1:length(ind)) {pixel.res[regions==ind[i]] <- NA}}
     rm(regions, px.freq, ind)
     up <- up[pixel.res[up] > 0]}
 
@@ -105,16 +105,8 @@ labelSample <- function(xy, pixel.res, agg.radius=NULL, nr.points=NULL, nr.pixel
 
   # dilate samples
   if (agg.radius > 0) {
-
-    for (p in 1:length(up)) {
-
-      rp <- rowFromCell(pixel.res, up[p]) # row position
-      cp <- colFromCell(pixel.res, up[p]) # column positon
-      pixel.res[(rp-agg.radius):(rp+agg.radius), (cp-agg.radius):(cp+agg.radius)] <- 1
-
-    }
-
-  }
+    pixel.res <- focal(pixel.res, matrix(0,agg.radius, agg.radius), function(j) {sum(!is.na(j))}, pad=TRUE, padValue=NA) > 0
+    pixel.res[pixel.res == 0] <- NA}
 
   # evaluate sample connectivity
   pixel.res <- clump(pixel.res)
