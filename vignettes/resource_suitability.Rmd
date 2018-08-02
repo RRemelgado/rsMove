@@ -9,7 +9,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r echo=FALSE, message=FALSE}
+```{r echo=FALSE, message=FALSE, message=FALSE, warning=FALSE}
 # load packages
 require(rsMove)
 require(raster)
@@ -53,8 +53,9 @@ Since the animal has a fixed resting site, samples related to resting behavior a
 As a first step, we need to remove redundant data points. As animals move through the landscape, they sometimes visit the same locations. Looking at our example data, this issue is frequent as a consequence of back-and-forth trips between the nest and the feeding sites.
 </p>
 
-```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
-plot(shortMove)
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
+plot(calc(ndvi, max, na.rm=TRUE))
+points(shortMove)
 ```
 
 <p align="justify" style="line-height:200%;">
