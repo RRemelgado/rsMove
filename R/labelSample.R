@@ -15,7 +15,7 @@
 #' by \emph{agg.radius} and proceeds to reliable the pixels covered by samples. Finally, this information is used to label the original
 #' samples provided by \emph{xy} based on their corresponding pixel coordinates. This analysis is based on the spatial extent of \emph{xy}
 #' and a given pixel resolution (\emph{pixel.res}). Alternatively, the user may assign a raster object to \emph{pixel.res}.}
-#' @importFrom raster crs cellFromXY extent raster res freq clump rowFromCell colFromCell
+#' @importFrom raster crs cellFromXY extent raster res freq clump rowFromCell colFromCell focal
 #' @seealso \code{\link{sampleMove}} \code{\link{hotMove}}
 #' @examples {
 #'
