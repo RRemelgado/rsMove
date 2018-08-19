@@ -76,17 +76,22 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy=NULL) {
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
   intTime <- function(x) {
-
-    tmp <- do.call(cbind, lapply(target.dates, function(d) {
+    
+    sapply(target.dates, function(d) {
 
       di <- which(env.dates==d & !is.na(x))
-      if (length(di)>0) {return(mean(x[di]))} else {
+      
+      if (length(di) > 0) {return(mean(x[di]))} else {
+        
         bi <- rev(which(!is.na(x) & env.dates < d & env.dates >= (d-time.buffer[1])))
         ai <- which(!is.na(x) & env.dates > d & env.dates <= (d+time.buffer[2]))
+        
         if (length(bi)>=1 & length(ai)>=1) {
           lc <- lm(c(x[bi[1]],x[ai[1]])~as.numeric(c(env.dates[bi[1]],env.dates[ai[1]])))
           return(as.numeric(d)*lc$coefficients[2]+lc$coefficients[1])
-        } else {return(NA)}}}))
+        } else {return(NA)}
+        
+      }})}
 
     return(tmp)
 
@@ -127,11 +132,8 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy=NULL) {
 
   # apply function (if data frame)
   if (!processRaster) {
-    out <- matrix(0, nrow(env.data), length(target.dates))
-    colnames(out) <- as.character(target.dates)
-    for (r in 1:length(target.dates)) {
-      otd <- target.dates[r]
-      out[,r] <- apply(env.data, 1, intTime)}}
+    out <- do.call(rbind, lapply(1:nrow(env.data), function(r) {intTime(as.numeric(env.data[r,]))}))
+    colnames(out) <- as.character(target.dates)}
 
   # provide output
   return(out)
