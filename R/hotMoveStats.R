@@ -1,14 +1,14 @@
 #' @title hotMoveStats
 #'
 #' @description {Segmentation and statistical analysis of the time spent by an animal within a geographical region.}
-#' @param region.id Region unique identifiers. Vector of class \emph{numeric}.
+#' @param x Region unique identifiers. Vector of class \emph{numeric}.
 #' @param individual.id Individual identifier. Vector of class \emph{character}.
-#' @param obs.time Observation time. Object of class \emph{Date}.
+#' @param y Observation time. Object of class \emph{Date}.
 #' @return A list containing statistical information for each region (\emph{region.stats}) and for each temporal segment (\emph{temporal.segment.stats}) and sample indices for each segment (temporal.segment.indices)
 #' @importFrom sp spTransform CRS
 #' @importFrom ggplot2 ggplot aes_string geom_bar scale_fill_gradientn xlab ylab theme_bw
 #' @importFrom grDevices colorRampPalette
-#' @details {For each unique region defined by \emph{region.id}, the function identifies unique temporal segments
+#' @details {For each unique region defined by \emph{x}, the function identifies unique temporal segments
 #' defined as periods of consecutive days with observations. Then, for each region, the function uses the identified segments
 #' to report on the minimum, maximum and mean time spent as well as the total amount of time spent within the region.
 #' Moreover, the function provides a detailed report of each segment and informs on the corresponding sample indices. If
@@ -29,42 +29,42 @@
 #' plot(hm$polygons)
 #'
 #' # add new information to original shapefile
-#' longMove@data <- cbind(longMove@data, hm$indices)
+#' longMove@data <- cbind(longMove@data, hm$region.id)
 #'
 #' # derive statistics
-#' hm.region.stats <- hotMoveStats(hm$indices, as.Date(longMove@data$timestamp))
+#' hm.region.stats <- hotMoveStats(hm$region.id, as.Date(longMove@data$timestamp))
 #'
 #' }
 #' @export
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-hotMoveStats <- function(region.id, obs.time, individual.id=NULL) {
+hotMoveStats <- function(x, y, individual.id=NULL) {
 
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
   # 1. check input variables
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-  if(is.null(region.id) & is.null(obs.time) & is.null(individual.id)) {stop('no information provided ("region.id", "obs.time" and "individual.id" are NULL)')}
-  if (!class(region.id)%in%c("numeric", "character")) {stop('"region.id" is not of a valid class')}
-  if (class(obs.time)[1]!="Date") {stop('"obs.time" is not of a valid class')}
+  if(is.null(x) & is.null(y) & is.null(individual.id)) {stop('no information provided ("x", "y" and "individual.id" are NULL)')}
+  if (!class(x)%in%c("numeric", "character")) {stop('"x" is not of a valid class')}
+  if (class(y)[1]!="Date") {stop('"y" is not of a valid class')}
   if (!is.null(individual.id)) {if (!class(individual.id)%in%c("numeric", "character")) {stop('"individual.id" is not of a valid class')}}
 
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
   # 2. define output stats
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-  ur <- sort(unique(region.id)) # unique regions
+  ur <- sort(unique(x)) # unique regions
   nr <- length(ur) # number of unique regions
 
   ura <- matrix(0, nr) # area of unique regions
   tns <- matrix(0, nr) # number of samples per region
   nui <- matrix(0, nr) # number of individuals per region
-  mnt <- matrix(0, nr) # smallest obs.time segment per region
-  avt <- matrix(0, nr) # average of obs.time segments per region
-  mxt <- matrix(0, nr) # largest obs.time segment per region
-  tts <- matrix(0, nr) # sum of recorded obs.time
-  nts <- matrix(0, nr) # number of obs.time segments
+  mnt <- matrix(0, nr) # smallest y segment per region
+  avt <- matrix(0, nr) # average of y segments per region
+  mxt <- matrix(0, nr) # largest y segment per region
+  tts <- matrix(0, nr) # sum of recorded y
+  nts <- matrix(0, nr) # number of y segments
   ss1 <- list() # temporal segment stats
   ss2 <- list() # temporal segment indices
 
@@ -76,15 +76,15 @@ hotMoveStats <- function(region.id, obs.time, individual.id=NULL) {
   for (r in 1:length(ur)) {
 
     # extract base stats
-    ind <- which(region.id==ur[r])
+    ind <- which(x==ur[r])
     if (!is.null(individual.id)) {nui[r] = length(unique(individual.id[ind]))} else {nui[r]<-NA}
     tns[r] = length(ind)
 
     # identify unique temporal segments and count number of days
     ts0 <- list()
     sp <- 1
-    si <- order(obs.time[ind])
-    st <- obs.time[ind[si]]
+    si <- order(y[ind])
+    st <- y[ind[si]]
     ui <- individual.id[ind[si]]
     if (length(st) > 1) {
       for (t in 2:length(st)) {
@@ -92,7 +92,7 @@ hotMoveStats <- function(region.id, obs.time, individual.id=NULL) {
         if (diff > 1) {
           ts0[[(length(ts0)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units="days")) + 1
           ss1[[length(ss1)+1]] <- data.frame(start=st[sp], end=st[(t-1)], id=ur[r], count=length(sp:(t-1)), individuals=length(unique(ui[sp:(t-1)])))
-          ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start & obs.time <= ss1[[length(ss1)]]$end & region.id==ur[r])
+          ss2[[length(ss2)+1]] <- which(y >= ss1[[length(ss1)]]$start & y <= ss1[[length(ss1)]]$end & x==ur[r])
           sp <- t
         }}
       ts0 <- unlist(ts0)
@@ -109,7 +109,7 @@ hotMoveStats <- function(region.id, obs.time, individual.id=NULL) {
         mxt[r] <- tts[r]
         nts[r] <- 1
         ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r], count=length(st), individuals=length(unique(ui)))
-        ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start & obs.time <= ss1[[length(ss1)]]$end & region.id==ur[r])
+        ss2[[length(ss2)+1]] <- which(y >= ss1[[length(ss1)]]$start & y <= ss1[[length(ss1)]]$end & x==ur[r])
       }
       rm(ts0, st, diff, sp)
     } else {
@@ -118,7 +118,7 @@ hotMoveStats <- function(region.id, obs.time, individual.id=NULL) {
       tts[r] <- 1
       nts[r] <- 1
       ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r], count=length(st), individuals=length(unique(ui)))
-      ss2[[length(ss2)+1]] <- which(obs.time >= ss1[[length(ss1)]]$start & obs.time <= ss1[[length(ss1)]]$end & region.id==ur[r])}
+      ss2[[length(ss2)+1]] <- which(y >= ss1[[length(ss1)]]$start & y <= ss1[[length(ss1)]]$end & x==ur[r])}
 
   }
 
@@ -148,7 +148,7 @@ hotMoveStats <- function(region.id, obs.time, individual.id=NULL) {
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # return output
-  colnames(df) <- c("Region ID", "Nr Samples", "Nr Individuals", "Min Time", "Average Time", "Max Time", "Total Time", "Nr Segments")
+  colnames(df) <- c("region.id", "nr.samples", "nr.individuals", "min.time", "avg.time", "max.time", "total.time", "nr.segments")
   return(list(region.stats=df, plot=p, temporal.segment.stats=time.seg, temporal.segment.indices=ss2))
 
 }

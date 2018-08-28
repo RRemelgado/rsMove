@@ -20,16 +20,9 @@ library(kableExtra)
 
 </br>
 
-### Why develop rsMove?
+### Introduction
 <p align="justify" style="line-height:200%;">
-Remote sensing became a fundamental tool in the scope of movement ecology. It offers information on the spatial and temporal variability of the landscape and provides us the means to understand the impact of environmental change over animal behavior. However, linking remote sensing and animal movement can be troublesome due to the different spatial and temporal scales at which they are acquired. satellite images are collected with a relatively rough temporal and spatial resolution failing to reflect the landscape as perceived by an animal. However, when used adequately, remote sensing can help charactize the environmental factors that affect animal behavior. To achieve this, deciding which remote sensing data to use demands careful thinking In particular, two important questions should be considered: 1) Does the spatial and temporal resolution of a satellite preserve sufficient, non-replicated samples? 2) which environmental variables do I need to consider? `rsMove` addresses these questions by providing users with tools that help select adequate satellite data as well as suitable environmental variables. Moreover, this package offers tools that are sensitive to the technical constraints of remote sensing and introduce a remote sensing perspective into animal movement research ^[`rsMove` was developed as part of the Opt4Environment project financed by the funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant 50 EE 1403. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo).].
-</p>
-
-</br>
-
-### Reference Data
-<p align="justify" style="line-height:200%;">
-`rsMove` was developed using movement data from one population of White Storks (*ciconia ciconia*) tracked with high-resolution GPS devices. The data was collected by the Max Planck Institute for Ornithology ([MPIo](https://www.orn.mpg.de/en)) and it can be accessed  [here](https://doi.org/10.5441/001/1.78152p3q) through MoveBank. Within `rsMove`, we provide data for a single individual divided into two datasets: one resampled to a lower temporal resolution showing the individuals migration to Africa (`longMove`) and one with the original temporal resolution showing movements within its nesting site (`shortMove`). The files are provided as `SpatialPointsDataFrame`objects and can be accessed as seen below.
+This vignette demonstrates how `rsMove`^[`rsMove` was developed as part of the Opt4Environment project financed by the funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant 50 EE 1403. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo).] can be used to designa remote sensing based study. We based this example on the datasets provided by `rsMove.` The package contains high resolution movement data from one White Stork (*ciconia ciconia*) collected by the Max Planck Institute for Ornithology ([MPIo](https://www.orn.mpg.de/en)). This dataset is a subset from its original, accessible [here](https://doi.org/10.5441/001/1.78152p3q) through MoveBank, and is provided in two datasets: one resampled to a relatively lower temporal resolution showing the individuals migration between Germany and Spain (`longMove`) and one with the original temporal resolution showing movements within the nesting site in Germany (`shortMove`). The files are provided as `SpatialPointsDataFrame`objects and can be accessed with the `data()` command as demonstrated below.
 </p>
 
 ```{r message=FALSE}
@@ -38,8 +31,10 @@ data("shortMove")
 ```
 
 <p align="justify" style="line-height:200%;">
-In addition, `rsMove` provides example remote sensing data. This consists of three Normalized Difference Vegetation Index (NDVI) images derived with Landsat surface reflectances. This data was acquired though the Earth Resources Observation and Science (EROS) Center Science Processing Architecture ([ESPA](https://espa.cr.usgs.gov/)), a service of the United States Geological Survey ([USGS](https://landsat.usgs.gov/)). Moreover, we provide land cover information (`landCover`) that overlaps with the `shortMove` dataset. This data was extracted from the European [Urban Atlas](https://land.copernicus.eu/local/urban-atlas). The code to access the remote sensing datasets is seen below.
+In addition, `rsMove` provides two remote sensing datasets. First, the package offers three Normalized Difference Vegetation Index (NDVI) images derived with Landsat surface reflectances. This data was acquired though the Earth Resources Observation and Science (EROS) Center Science Processing Architecture ([ESPA](https://espa.cr.usgs.gov/)), a service of the United States Geological Survey ([USGS](https://landsat.usgs.gov/)). Second, the user can find a land cover map (`landCover`) with 30 m resolution derived from the European [Urban Atlas](https://land.copernicus.eu/local/urban-atlas). Both datasets overlap with the `shortMove` dataset and can be accessed as shown below.
 </p>
+
+</br>
 
 ```{r message=FALSE}
 # read remote sensing data
@@ -53,27 +48,18 @@ ndvi.dates <- as.Date(paste0(substr(file.name, 2, 5), '-', substr(file.name, 7, 
 
 </br>
 
-### Input and output data
-<p align="justify" style="line-height:200%;">
-`rsMove` extends existing spatial analysis packages into movement ecology. Specifically, we focuses on the packages `raster` and `sp` as they are commonly used for image analysis thus facilitating the integration of rsMove in existing workflows. As a consequence, the input and processed movement data is often requested in `SpatialPoints` format while remote sensing data is provided in `raster` format. Moreover, `rsMove` provides a series of graphical outputs that accompany most of its functions. These plots are built with `ggplot2` serving as a template that can be easily edited by the user.
-</p>
-
-</br>
-
 ### Too much data, too little time. Where to start?
 <p align="justify" style="line-height:200%;">
-As GPS tracking technologies evolve, we are able to follow animal decision making at a finer temporal scale. Depending on the species and on the durability of the tracker, the observation periods can be extensive generating massive amounts of data to analyze. It is true that nowadays this issue has become smaller as the free access to cloud-computing platforms makes it easier to handle large volumes of data. However, when dealing with remote sensing, choosing the right combination of variables to explain a species behavior requires an iterative process of trial and error and a careful visual assessment. As a consequence, selecting representative test sites is essential.
+When dealing with large scale movement tracks, it is often important to select representative test sites over which we can test different environmental predictors. This is the case with `longMove` as it extends over Wester Europe. To limit the extent of out study site, we will use `hotMove()`. This function will help us select a representative test sites based on the spatial clustering of movement data. We will cluster the samples using a spatial resolution of 0.1° (~10000 km).
 </p>
-<p align="justify" style="line-height:200%;">
-`hotMove()` uses a relatively fast, pixel-based approach to address this issue. Given a pixel resolution, `hotMove()` translates a `SpatialPoints`  object into unique pixels and evaluates their spatial connectivity on a regional scale. Then, the original samples are labeled based on the region of their corresponding pixels. Let's consider the following example using the `longMove` dataset. As it extends over a large area and is provided with Geographic coordinates, we will use a pixel resolution of 0.1. This essentially means that samples which are within ~10 km of each other will be within the same pixel or within neighboring ones becoming part of the same region. Additionally, we will prompt the function to derive a shapefile with polygons for the sample regions by setting `return.shp` to `TRUE`.
-</p>
+
 
 ```{r message=FALSE}
 sample.regions <- hotMove(longMove, 0.1, return.shp=TRUE)
 ```
 
 <p align="justify" style="line-height:200%;">
-The function identified 21 unique sample regions. The code below plots the region shapefile showing the relation between the original samples (in black) and the resulting regions (in red).
+The function identified 21 unique sample regions. The code below plots the region shapefile showing the relation between the original samples (in black) and the resulting regions (in red). The results suggestz that, from the 21 regions, only a few (4-5) are represented by a large number of samples, possibly representive locations where the animal remained during relatively longer periods of time.
 </p>
 
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
@@ -82,7 +68,7 @@ plot(sample.regions$polygons, col=rgb(1,0,0,0.3), add=TRUE)
 ```
 
 <p align="justify" style="line-height:200%;">
-Using the output of `hotMove()`, we can then use `hotMoveStats()` to deconstruct the temporal composition of the sample regions. For each sample region, `hotMoveStats()` identifies individual temporal segments - defined by sequences of consecutive days with movement data - and reports on the total number of segments, minimum and maximum segment lengths and the total time spent. Moreover, for each segment, the function reports on its region, the start and end dates and the total amount of days. Aside from this report, `hotMoveStats()` also provides the sample indices for each temporal segment allowing the user to identify the samples for relevant time periods. To run the function, as seen below, the user must provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. The summary report for each region can be seen below.
+Using the output of `hotMove()`, we can then use `hotMoveStats()` to deconstruct the composition of the regions. This will help us make a more informed decision about which regions to choose as potential test sites. We will provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. The later will help `hotMoveStats()` evaluate the temporal composition of each region. Below, we can see the function call as well as the final report.
 </p>
 
 ```{r}
@@ -113,19 +99,13 @@ pol <- merge(pol, df, by="id")
 ggplot(pol, aes(x=long, y=lat, group=id, fill=time)) + theme_bw() + geom_polygon() + xlab("Long") + ylab("Lat")
 ```
 
-<p align="justify" style="line-height:200%;">
-The combination of `hotMove()`and `hotMoveStats()` provides us with a good understanding of the spatial and temporal distribution of the movement data allowing us to pinpoint relevant periods in space and time. Moreover, if the `individual.id` is specified within `hotMoveStats()`, the user will also receive information on how may individuals/species shared a temporal segment. If the user is interested in multi-species studies, this information can be useful to narrow down study sites and study periods over which remote sensing methods can be tested.
-</p>
-
 </br>
 
 ### Which satellite to use? Choosing a Spatial and Temporal resolution
 <p align="justify" style="line-height:200%;">
-Due to the differences in spatial and temporal scales at which animal movement and remote sensing data are collected, matching these two data sources is not always easy. Issues such as the pseudo-replication of values in space and time are common leading to the presence of redundant information. As a result, it becomes crucial to understand how the choice in spatial and temporal scale affects movement data. To help researchers chose adequate satellite data we developed `sMoveRes()`, `tMoveRes()` and `specVar()`.
+Now that we know where to focus, we need to decided which satellite data to use. Assuming we want to rely NDVI data, let's use `sMoveRes()` and `tMoveRes()` to quantify the data loss with a few common, open-access sensors, namely Sentinel-2 (10 m), Landsat (30 m) and MODIS (250 m).
 </p>
-<p align="justify" style="line-height:200%;">
-`sMoveRes()` helps select an adequate spatial resolution. Given a spatial resolution and a `SpatialPoints` object, the function determines which pixels in a `raster` are sampled and evaluates their spatial connectivity as done by `hotMove()`. Let's consider the following example. Taking the `shortMove` dataset, we will evaluate the suitability of the NDVI derived by commonly used satellite sensors: Sentinel-2 (10 m), Landsat (30 m) and MODIS (250 m). Below we can see the output which consisting of a `data.frame` and a `plot` depicting how the number of unique pixels and pixel regions changes with the change in spatial resolution. Moreover, the function reports on the pixel indices of each sample at each sample resolution showing which samples are grouped.
-</p>
+
 
 ```{r}
 s.res <- sMoveRes(xy=shortMove, pixel.res=c(10, 30, 250))
@@ -150,7 +130,7 @@ t.res$plot
 ```
 
 <p align="justify" style="line-height:200%;">
-In addition to these two tools, we developed `specVar()`. This function extends on `sMoveRes()` informing on how a spatial resolution reflects the complexity of the landscape. Let's consider that `sMoveRes()` suggested a spatial resolution of 250 m is sufficient. Based on these results, the next question we should consider is: does this reflect the spatial complexity we are trying to capture? Within highly fragmented landscapes, where subtle transitions in land cover may be relevant for the species, this question becomes particular important. To test if a resolution of 250 m is adequate we will use the second layer of `ndvi` as it is the closest to the observation date of `shortMove()`. The image is shown below. 
+In addition to these two tools, we have `specVar()`. This function extends on `sMoveRes()` informing on how a spatial resolution reflects the complexity of the landscape. Let's consider that `sMoveRes()` suggested a spatial resolution of 250 m is sufficient. Based on these results, the next question we should consider is: does this reflect the spatial complexity we are trying to capture? Within highly fragmented landscapes, where subtle transitions in land cover may be relevant for the species, this question becomes particular important. To test if a resolution of 250 m is adequate we will use the second layer of `ndvi` as it is the closest to the observation date of `shortMove()`. The image is shown below. 
 </p>
 
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", fig.show='hold', echo=FALSE}
@@ -182,7 +162,7 @@ s.var$plot
 
 ### Overcomming the Difference in Scales
 <p align="justify" style="line-height:200%;">
-Animal movement and satellite data often have different spatial and temporal resolutions. As a consequence, the pseudo-replication of samples is a frequent phenomena. This has implications in the analysis of species-environment interactions. On one side, it increases the amount of processing time due to the inclusion of redundant information. But more importantly, it creates serious issues when creating and validating predictive models. Due to the replication of samples, splitting them between training and validation can be difficult and model performances can be influenced. In response to this issue we created `moveReduce()`. This function helps users translate animal movement data into pixels and summarize key behavioral patterns. The function converts samples in a `SpatialPoints` object into pixel coordinates and identifies temporal segments corresponding to consecutive samples in time that fall within the same pixel. Then, for each segment, the function estimates the elapsed time and reports on the start and end timestamps and on the number of observations. Unlike a common rasterization function, `moveReduce` preserves periodic movement patterns. If a pixel is visited more than once within distinct temporal segments these are kept as unique observation allowing the user to exclude redundant observations while preserving the dynamic nature of movement data. Let's test this function using `shortMove` and `ndvi`. The original movement dataset has a total of 121 samples and, as we can see below, some of these are concentrated. This is related to the relative large amount of time the animal spent at its nest. As a consequence, some of the pixels are sampled frequently.
+ Let's test this function using `shortMove` and `ndvi`. The original movement dataset has a total of 121 samples and, as we can see below, some of these are concentrated. This is related to the relative large amount of time the animal spent at its nest. As a consequence, some of the pixels are sampled frequently.
 </p>
 
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
@@ -236,11 +216,9 @@ plotMove(reduced.samples$points$x, reduced.samples$points$y, size.var=reduced.sa
 </br>
 
 ### What Environmental Variables to Select? See What Your Animal is Doing
+
 <p align="justify" style="line-height:200%;">
-Once we select adequate satellite data we can consider which variables to derive from it. However, the amount of potentially relevant variables is seemingly endless. So which variables to chose? Unfortunately, `rsMove` cannot make that decision. But it can help on the decision process. To achieve this, the package includes functions such as `moveSeg()` and  `timeDir()`.
-</p>
-<p align="justify" style="line-height:200%;">
-`moveSeg()` helps the user visualize the distribution of the observed time in relation to changing environmental conditions. First, the function queries a `raster` using a `SpatialPoints` object. Then, the function divides consecutive observations in temporal segments defined as sequences of points collected over similar environmental conditions. Let's apply the function over the `shortMove` movement data and use the `landCover` dataset as environmental information. As we can see below, we need additionally to specify the data type of `landCover`. Here, setting it to `cat` will force `moveSeg()` to identify a new temporal segment every time a change in land cover occurs. 
+ Let's apply the function over the `shortMove` movement data and use the `landCover` dataset as environmental information. As we can see below, we need additionally to specify the data type of `landCover`. Here, setting it to `cat` will force `moveSeg()` to identify a new temporal segment every time a change in land cover occurs. 
 </p>
 
 ```{r}
@@ -265,7 +243,7 @@ plot(seg$plot)
 ```
 
 <p align="justify" style="line-height:200%;">
-Now that we know the animal spent a significant amount of time over *Arable land*, we can think on how to represent this class using remote sensing. As this qualifies as managed land, one can question if differences in management practices affect the animal decision making. In fact, the output of `moveSeg()` shows us that we did not record any time spent over several segments related to *Arable land*. When dealing with species such as the White Stork, this can particularly relevant. During activities such as crop harvesting, herbivores are attracted to the managed fields in search for food and as consequence, so are predatory species such as the White Stork. Thus, understanding and mapping differences in management practices can be helpful to accurately distinguish relevant resources. And it affects how we use remote sensing data. If intra-class differences in management practices exist, we might be forced to use satellite data with a higher temporal resolution to represent them. To help us detect potential differences in management practices over *Arable land* we can use `timeDir()`. This function quantifies temporal changes in environmental conditions with respect to the observation dates of the movement data. For each sample in a `SpatialPoints` object, the function searches for layers in a multi-temporal `RasterStack` that were acquired close to the sample observation date. Then, it estimates a user provided metric that is sensitive to the observation date of the selected `raster` layers. Let's consider our `ndvi` dataset. This contains data acquired in *2013-07-16*, *2013-08-01* and *2013-08-17*. On the other hand, `shortMove` was acquired in *2013-08-04*. As a consequence. we can quantify how the landscape was evolving during the observation date. To reach this, we can estimate the slope between the image acquisition dates and the NDVI. This metric is provided by default with `timeDir()`.
+Now that we know the animal spent a significant amount of time over *Arable land*, we can think on how to represent this class using remote sensing. As this qualifies as managed land, one can question if differences in management practices affect the animal decision making. In fact, the output of `moveSeg()` shows us that we did not record any time spent over several segments related to *Arable land*. When dealing with species such as the White Stork, this can particularly relevant. During activities such as crop harvesting, herbivores are attracted to the managed fields in search for food and as consequence, so are predatory species such as the White Stork. Thus, understanding and mapping differences in management practices can be helpful to accurately distinguish relevant resources. And it affects how we use remote sensing data. If intra-class differences in management practices exist, we might be forced to use satellite data with a higher temporal resolution to represent them. To help us detect potential differences in management practices over *Arable land* we can use `timeDir()`. Let's consider our `ndvi` dataset. This contains data acquired in *2013-07-16*, *2013-08-01* and *2013-08-17*. On the other hand, `shortMove` was acquired in *2013-08-04*. As a consequence. we can quantify how the landscape was evolving during the observation date. To reach this, we can estimate the slope between the image acquisition dates and the NDVI. This metric is provided by default with `timeDir()`.
 </p>
 <p align="justify" style="line-height:200%;">
 To do this analysis, let's first remove redundant information `moveReduce()`. Then. let's apply `timeDir()` with a `window.size` of `c(4,13)` to define a temporal buffer of 4 days in the past and 13 days in the future. This will force the function to use the second and third layers in `ndvi`. Below, we can see the output of the function. Together with the statistical metric for each sample, the function plots the spatial distribution on samples colored and sized in accordance with their corresponding statistical value.
@@ -285,7 +263,7 @@ time.change$plot
 ```
 
 <p align="justify" style="line-height:200%;">
-To finallize this analysis, let's focus on the samples that correspond to *Arable land*. To achieve this, we will use the `extract()` function of the `raster` package as subset `shortMove` based on this class. Then, we will plot the time spent per pixel - reported by `moveReduce()` - and the temporal change metric - reported by `timeDir()` - using the function `plotMove()`. The output, shown below, tells us something about the preferences of the species. At a first glance, we can see that the animal visited *Arable land* with a positive trend. This suggests that the vegetation was still achieving its maturity at the time of the visit.
+To finalize this analysis, let's focus on the samples that correspond to *Arable land*. To achieve this, we will use the `extract()` function of the `raster` package as subset `shortMove` based on this class. Then, we will plot the time spent per pixel - reported by `moveReduce()` - and the temporal change metric - reported by `timeDir()` - using the function `plotMove()`. The output, shown below, tells us something about the preferences of the species. At a first glance, we can see that the animal visited *Arable land* with a positive trend. This suggests that the vegetation was still achieving its maturity at the time of the visit.
 </p>
 
 ```{r}
