@@ -2,9 +2,9 @@
 #'
 #' @description Pixel based summary of movement data that preserves periodic movements.
 #' @param x Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.
+#' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the observation time of \emph{x}.
 #' @param y Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
-#' @param derive.raster Should a raster with the total time per pixel be provided?
+#' @param derive.raster Should a \emph{RasterLayer} with the total time per pixel be provided?
 #' @importFrom raster crs cellFromXY rasterize
 #' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{sampleMove}} \code{\link{moveSeg}}
@@ -51,14 +51,11 @@ moveReduce <- function(x, y, z, derive.raster=FALSE) {
 #----------------------------------------------------------------------------------------------------------#
 
   # samples
-  if (!exists('x')) {stop('"x" is missing')}
   if (!class(x)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"x" is not of a valid class')}
-  rProj <- crs(x) # output projection
 
   # sample dates
-  if (!is.null(z)) {
-    if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
-    if (length(z)!=length(x)) {stop('errorr: "x" and "z" have different lengths')}}
+  if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
+  if (length(z)!=length(x)) {stop('errorr: "x" and "z" have different lengths')}
 
   # environmental data
   if (!class(y)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
@@ -93,8 +90,7 @@ moveReduce <- function(x, y, z, derive.raster=FALSE) {
     e.time <- z[ind[length(ind)]]
     d.time <- as.numeric(difftime(e.time, s.time, units='mins'))
     return(data.frame(x=mx, y=my, start.time=s.time, end.time=e.time, diff.time=d.time, segment.id=s))}))
-  colnames(df) <- c("x", "y", "Timeststamp (start)", "Timeststamp (end)",
-                    "Elapsed time (minutes)", "Segment ID")
+  colnames(df) <- c("x", "y", "Timeststamp (start)", "Timeststamp (end)", "Elapsed time (minutes)", "Segment ID")
 
   # build statistic shapefile
   r.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=crs(x))
@@ -113,7 +109,7 @@ moveReduce <- function(x, y, z, derive.raster=FALSE) {
     t.sum <- sapply(up, function(p) {sum(df$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
 
     # build raster
-    t.sum.r <- rasterize(xyFromCell(y, up), crop(y, extent(x)), t.sum)
+    t.sum.r <- rasterize(xyFromCell(y, up), y, t.sum)
 
   } else {t.sum.r <- NULL}
 

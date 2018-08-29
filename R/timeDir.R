@@ -103,11 +103,12 @@ timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, st
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   f <- function(i) {
-    ind <- which(env.dates >= (obs.dates[i]-temporal.buffer[1]) & env.dates <= (obs.dates[i]+temporal.buffer[2]))
-    x <- as.numeric(env.dates[ind])
-    y <- env.data[i,]
-    u <- !is.na(y)
-    if (sum(u) >= min.count) {return(stat.fun(x[u],y[u]))} else {return(NA)}}
+    ind <- which(env.dates >= (obs.dates[i]-temporal.buffer[1]) & env.dates <= (obs.dates[i]+temporal.buffer[2]) & !is.na(env.data[i,]))
+    if (length(ind) >= min.count) {
+      x <- as.numeric(env.dates[ind])
+      y <- as.numeric(env.data[i,ind])
+      return(stat.fun(x,y))
+    } else {return(NA)}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 4. query samples
