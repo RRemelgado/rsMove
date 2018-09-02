@@ -11,20 +11,22 @@
 #' @importFrom raster crs extract
 #' @importFrom stats lm
 #' @importFrom grDevices colorRampPalette
-#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab element_text element_blank
+#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab element_text element_blank geom_hist aes_string
 #' @seealso \code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
-#' @return A \emph{vector} with a requested statistical metric for each point in \emph{xy}.
-#' @details {This function evaluates how environmental conditions change in time along a movement track.
-#' First, for each point in \emph{xy}, the function compares its observation date (\emph{obs.dates}) against
-#' the acquisition dates (\emph{env.dates}) of \emph{env.data} to select non \emph{NA} timesteps within a
-#' predefined temporal window (\emph{temporal.buffer}). The user can adjust this window to determine which
-#' images are the most important. For example, if one wishes to know how the landscape evolved up to the
-#' observation date of the target sample and daily satellite data is available, \emph{temporal.buffer} can be
-#' define as, e.g., c(30,0) forcing the function to use all images to only use pixels recorded within the previous
-#' 30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated.
-#' The statistical metric is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression
-#' between the acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
-#' for \emph{env.dates} and y for \emph{env.data}.}
+#' @return A \emph{vector} with a requested statistical metric for each point in \emph{xy} and informative plots.
+#' @details {This function quantifies environmental change in time along a movement track. First, for each point in \emph{xy},
+#' the function compares its observation date (\emph{obs.dates}) against the acquisition dates (\emph{env.dates}) of \emph{env.data}
+#' to select non \emph{NA} timesteps within a predefined temporal window (\emph{temporal.buffer}). The user can adjust this window to
+#' determine which images are the most important. For example, if one wishes to know how the landscape evolved up to the observation
+#' date of the target sample, \emph{temporal.buffer} can be define as, e.g., c(30,0) forcing the function to only consider pixels recorded
+#' within the previous 30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated. This
+#' statistical metric is specified by \emph{stat.fun}. By default, the function reports on the slope between the acquisition dates of \emph{env.data}
+#' and their corresponding values. When providing a new function, set x for \emph{env.dates} and y for \emph{env.data}. The final output is a list consisting of:
+#' \itemize{
+#' \item{\emph{stats} - \emph{data.frame} with the estimated statistical metric for each data point.}
+#' \item{\emph{hist.plot} - Histogram plot of the requested statistical metric. The bin size is the standard deviation of all estimated values.}
+#' \item{\emph{point.plot} - Plot of the \emph{xy} showing the spatial variability of the requested statistical metric.}
+#' }}
 #' @examples {
 #'
 #'  require(raster)
@@ -117,19 +119,24 @@ timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, st
   df <- data.frame(value=unlist(lapply(1:nrow(env.data), f)))
 
 #-------------------------------------------------------------------------------------------------------------------------------#
-# 5. build plot
+# 5. build plot(s)
 #-------------------------------------------------------------------------------------------------------------------------------#
+
+  p1 <- ggplot(df, aes_string(x="value")) + theme_bw() +
+    geom_histogram(binwidth=sd(df$value, na.rm=TRUE),
+                   aes(y=..count../sum(..count..))) +
+    ylab('Relative freq. (%)') + xlab("Value")
 
   # build plot object
   if (!is.null(xy)) {
     cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
     df0 <- data.frame(x=xy@coords[,1], y=xy@coords[,2], value=df$value)
-    p <- ggplot(df0) + theme_bw() + xlab('X') + ylab('Y') +
+    p2 <- ggplot(df0) + theme_bw() + xlab('X') + ylab('Y') +
       geom_point(aes_string(x="x", y="y", size="value", fill="value"), color="black", pch=21) +
       scale_size_continuous(guide=FALSE) + guides(col=cr(10)) +
       scale_fill_gradientn(colours=cr(10)) +
       theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
             panel.grid.minor=element_blank())
-    return(list(stats=df, plot=p))} else {return(list(stats=df))}
+    return(list(stats=df, hist.plot=p1, point.plot=p2))} else {return(list(stats=df, hist.plot=p1))}
 
 }

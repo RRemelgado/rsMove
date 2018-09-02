@@ -22,7 +22,7 @@ library(kableExtra)
 
 ### Introduction
 <p align="justify" style="line-height:200%;">
-This vignette demonstrates how `rsMove`^[`rsMove` was developed as part of the Opt4Environment project financed by the funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant 50 EE 1403. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo).] can be used to designa remote sensing based study. We based this example on the datasets provided by `rsMove.` The package contains high resolution movement data from one White Stork (*ciconia ciconia*) collected by the Max Planck Institute for Ornithology ([MPIo](https://www.orn.mpg.de/en)). This dataset is a subset from its original, accessible [here](https://doi.org/10.5441/001/1.78152p3q) through MoveBank, and is provided in two datasets: one resampled to a relatively lower temporal resolution showing the individuals migration between Germany and Spain (`longMove`) and one with the original temporal resolution showing movements within the nesting site in Germany (`shortMove`). The files are provided as `SpatialPointsDataFrame`objects and can be accessed with the `data()` command as demonstrated below.
+This vignette demonstrates how `rsMove`^[`rsMove` was developed as part of the Opt4Environment project financed by the funded by the German Aerospace Center (DLR) on behalf of the Federal Ministry for Economic Affairs and Energy (BMWi) with the research grant 50 EE 1403. The movement data we used was provided by the Max Planck institute for Ornithology (MPIo).] can help design a remote sensing based study. We based this example on high resolution movement data from one White Stork (*ciconia ciconia*) collected by the Max Planck Institute for Ornithology ([MPIo](https://www.orn.mpg.de/en)) and provided through MoveBank (see [here](https://doi.org/10.5441/001/1.78152p3q)). `rsMove` offers two subset datasets based of the White Stork movement data: one resampled to a relatively lower temporal resolution showing the individuals migration between Germany and Spain (`longMove`) and one with the original temporal resolution showing movements within the nesting site in Germany (`shortMove`). The files are provided as `SpatialPointsDataFrame`objects and can be accessed with the `data()` command as demonstrated below.
 </p>
 
 ```{r message=FALSE}
@@ -31,7 +31,7 @@ data("shortMove")
 ```
 
 <p align="justify" style="line-height:200%;">
-In addition, `rsMove` provides two remote sensing datasets. First, the package offers three Normalized Difference Vegetation Index (NDVI) images derived with Landsat surface reflectances. This data was acquired though the Earth Resources Observation and Science (EROS) Center Science Processing Architecture ([ESPA](https://espa.cr.usgs.gov/)), a service of the United States Geological Survey ([USGS](https://landsat.usgs.gov/)). Second, the user can find a land cover map (`landCover`) with 30 m resolution derived from the European [Urban Atlas](https://land.copernicus.eu/local/urban-atlas). Both datasets overlap with the `shortMove` dataset and can be accessed as shown below.
+In addition, `rsMove` provides two remote sensing datasets. The package offers three Normalized Difference Vegetation Index (NDVI) images derived with Landsat surface reflectances acquired though the Earth Resources Observation and Science (EROS) Center Science Processing Architecture ([ESPA](https://espa.cr.usgs.gov/)) and a land cover map (`landCover`) with 30 m resolution derived from the European [Urban Atlas](https://land.copernicus.eu/local/urban-atlas). Both datasets overlap with the `shortMove` dataset and can be accessed as shown below.
 </p>
 
 </br>
@@ -59,7 +59,7 @@ sample.regions <- hotMove(longMove, 0.1, return.shp=TRUE)
 ```
 
 <p align="justify" style="line-height:200%;">
-The function identified 21 unique sample regions. The code below plots the region shapefile showing the relation between the original samples (in black) and the resulting regions (in red). The results suggestz that, from the 21 regions, only a few (4-5) are represented by a large number of samples, possibly representive locations where the animal remained during relatively longer periods of time.
+The function identified 21 unique sample regions. The code below plots the region shapefile showing the relation between the original samples (in black) and the resulting regions (in red). The results suggestz that, from the 21 regions, only a few are visible. This represents locations where samples cluster that are potentially interesting to test new methods. But how can we be sure which ones to use?
 </p>
 
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
@@ -68,11 +68,11 @@ plot(sample.regions$polygons, col=rgb(1,0,0,0.3), add=TRUE)
 ```
 
 <p align="justify" style="line-height:200%;">
-Using the output of `hotMove()`, we can then use `hotMoveStats()` to deconstruct the composition of the regions. This will help us make a more informed decision about which regions to choose as potential test sites. We will provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. The later will help `hotMoveStats()` evaluate the temporal composition of each region. Below, we can see the function call as well as the final report.
+For that, we can use `hotMoveStats()` to deconstruct the temporal composition of each unique regions. We will provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. Below, we can see the function call as well as the final report. The output informs us that only 6 regions had more than 1 sample. Region 3 appears as the one with the largest amount of data accounting for a total of 3011 samples and 82 temporal segments.
 </p>
 
 ```{r}
-region.stats <- hotMoveStats(sample.regions$indices, as.Date(longMove@data$timestamp))
+region.stats <- hotMoveStats(sample.regions$region.id, as.Date(longMove@data$timestamp))
 ```
 
 ```{r, echo=FALSE, results='asis'}

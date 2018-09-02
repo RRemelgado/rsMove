@@ -135,7 +135,7 @@ moveSeg <- function(x, y, z, data.type='cont', threshold=NULL, summary.fun=NULL,
 # 3. identify segments
 #---------------------------------------------------------------------------------------------------------------------#
 
-  run.diff <- abs(diff(x)) >= threshold # compare consecutive data points and apply threshold
+  run.diff <- abs(c(0,diff(x))) >= threshold # compare consecutive data points and apply threshold
   seg.ls <- rle(run.diff) # find sequences of similar values
   seg.id <- vector('numeric', length(run.diff)) # label segments (1)
   for (s in 1:length(seg.ls$lengths)) {seg.id[(sum(seg.ls$lengths[0:(s-1)])+1):sum(seg.ls$length[1:s])] <- s} # label segments (1)

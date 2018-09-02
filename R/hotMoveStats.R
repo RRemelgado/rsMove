@@ -2,18 +2,22 @@
 #'
 #' @description {Segmentation and statistical analysis of the time spent by an animal within a geographical region.}
 #' @param x Region unique identifiers. Vector of class \emph{numeric}.
-#' @param individual.id Individual identifier. Vector of class \emph{character}.
+#' @param z Individual identifier. Vector of class \emph{character}.
 #' @param y Observation time. Object of class \emph{Date}.
-#' @return A list containing statistical information for each region (\emph{region.stats}) and for each temporal segment (\emph{temporal.segment.stats}) and sample indices for each segment (temporal.segment.indices)
+#' @return A list.
 #' @importFrom sp spTransform CRS
 #' @importFrom ggplot2 ggplot aes_string geom_bar scale_fill_gradientn xlab ylab theme_bw
 #' @importFrom grDevices colorRampPalette
-#' @details {For each unique region defined by \emph{x}, the function identifies unique temporal segments
-#' defined as periods of consecutive days with observations. Then, for each region, the function uses the identified segments
-#' to report on the minimum, maximum and mean time spent as well as the total amount of time spent within the region.
-#' Moreover, the function provides a detailed report of each segment and informs on the corresponding sample indices. If
-#' \emph{individual.id} is specified, the function will in addition count the number of individuals found within each region
-#' and within each temporal segment.}
+#' @details {For each unique region defined by \emph{x}, the function identifies unique temporal segments defined as periods
+#' of consecutive days with observations. Then, for each region, the function uses the identified segments to report on the
+#' minimum, maximum and mean time spent as well as the total amount of time spent within the region. Moreover, the function
+#' provides a detailed report of each segment and informs on the corresponding sample indices. If \emph{z} is specified, the
+#' function will in addition count the number of individuals found within each region and within each temporal segment. The
+#' final output consists of:
+#' \itemize{
+#' \item{\emph{region.stats} - \emph{data.frame} with the distribution of samples per region.}
+#' \item{\emph{segment.stats} - \emph{data.frame} with all temporal segments assigned to each region.}
+#' \item{region.plot} - Plot describing the distribution of samples and recorded time per region.}}
 #' @seealso \code{\link{hotMove}}
 #' @examples {
 #'
@@ -39,107 +43,70 @@
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-hotMoveStats <- function(x, y, individual.id=NULL) {
+hotMoveStats <- function(x, y, z) {
 
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
   # 1. check input variables
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-  if(is.null(x) & is.null(y) & is.null(individual.id)) {stop('no information provided ("x", "y" and "individual.id" are NULL)')}
+  if (!missing(z)) {
+    if (!class(z)%in%c("numeric", "character")) {stop('"z" is not of a valid class')}
+    if (length(x)!=length(z)) {stop('"x"/"y" and "z" have different lenghts')}
+  } else {z <- replicate(length(x), 1)}
   if (!class(x)%in%c("numeric", "character")) {stop('"x" is not of a valid class')}
   if (class(y)[1]!="Date") {stop('"y" is not of a valid class')}
-  if (!is.null(individual.id)) {if (!class(individual.id)%in%c("numeric", "character")) {stop('"individual.id" is not of a valid class')}}
+  if (length(x)!=length(y)) {stop('"x" and "y" have different lenghts')}
 
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-  # 2. define output stats
+  # 2. evaluate each region
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   ur <- sort(unique(x)) # unique regions
-  nr <- length(ur) # number of unique regions
 
-  ura <- matrix(0, nr) # area of unique regions
-  tns <- matrix(0, nr) # number of samples per region
-  nui <- matrix(0, nr) # number of individuals per region
-  mnt <- matrix(0, nr) # smallest y segment per region
-  avt <- matrix(0, nr) # average of y segments per region
-  mxt <- matrix(0, nr) # largest y segment per region
-  tts <- matrix(0, nr) # sum of recorded y
-  nts <- matrix(0, nr) # number of y segments
-  ss1 <- list() # temporal segment stats
-  ss2 <- list() # temporal segment indices
+  tmp <- lapply(ur, function(r) {
 
-  #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-  # 3. evaluate each region
-  #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
+    ri <- which(x == r) # region indices
 
-  # evaluate each region separately
-  for (r in 1:length(ur)) {
+    # evaluate temporal composition
+    y.diff <- c(0, diff(y[ri])) > 1 # running day difference
+    seg.ls <- rle(y.diff) # find data sequences
+    seg.id <- vector('numeric', length(y.diff)) # label segments (1)
+    for (s in 1:length(seg.ls$lengths)) {seg.id[(sum(seg.ls$lengths[0:(s-1)])+1):sum(seg.ls$length[1:s])] <- s} # label segments (1)
+    unique.seg <- unique(seg.id) # unique segment ID's
 
-    # extract base stats
-    ind <- which(x==ur[r])
-    if (!is.null(individual.id)) {nui[r] = length(unique(individual.id[ind]))} else {nui[r]<-NA}
-    tns[r] = length(ind)
+    # single segment stats
+    odf1 <- do.call("rbind", lapply(unique.seg, function(s) {
+      si <- which(seg.id == s)
+      ui <- length(unique(z[ri[si]])) # number of individuals
+      ns <- length(which(x == r & y >= y[ri[si[1]]] & y <= y[ri[si[length(si)]]])) # number of samples
+      tt <- as.numeric(max(y[ri[si]])-min(y[ri[si]])) + 1
+      odf <- data.frame(region.id=r, start.date=min(y[ri[si]]), end.date=max(y[ri[si]]), total.time=tt, nr.individuals=ui, nr.samples=ns, stringsAsFactors=FALSE)
+      return(odf)}))
 
-    # identify unique temporal segments and count number of days
-    ts0 <- list()
-    sp <- 1
-    si <- order(y[ind])
-    st <- y[ind[si]]
-    ui <- individual.id[ind[si]]
-    if (length(st) > 1) {
-      for (t in 2:length(st)) {
-        diff <- as.numeric(difftime(st[t], st[(t-1)], units="days")) + 1
-        if (diff > 1) {
-          ts0[[(length(ts0)+1)]] <- as.numeric(difftime(st[(t-1)], st[sp], units="days")) + 1
-          ss1[[length(ss1)+1]] <- data.frame(start=st[sp], end=st[(t-1)], id=ur[r], count=length(sp:(t-1)), individuals=length(unique(ui[sp:(t-1)])))
-          ss2[[length(ss2)+1]] <- which(y >= ss1[[length(ss1)]]$start & y <= ss1[[length(ss1)]]$end & x==ur[r])
-          sp <- t
-        }}
-      ts0 <- unlist(ts0)
-      if(!is.null(ts0)) {
-        mnt[r] <- min(ts0)
-        avt[r] <- mean(ts0)
-        mxt[r] <- max(ts0)
-        tts[r] <- sum(ts0)
-        nts[r] <- length(ts0)
-      } else {
-        tts[r] <- as.numeric(difftime(max(st), min(st), units="days")) + 1
-        mnt[r] <- tts[r]
-        avt[r] <- tts[r]
-        mxt[r] <- tts[r]
-        nts[r] <- 1
-        ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r], count=length(st), individuals=length(unique(ui)))
-        ss2[[length(ss2)+1]] <- which(y >= ss1[[length(ss1)]]$start & y <= ss1[[length(ss1)]]$end & x==ur[r])
-      }
-      rm(ts0, st, diff, sp)
-    } else {
-      mnt[r] <- 1
-      mxt[r] <- 1
-      tts[r] <- 1
-      nts[r] <- 1
-      ss1[[length(ss1)+1]] <- data.frame(start=min(st), end=max(st), id=ur[r], count=length(st), individuals=length(unique(ui)))
-      ss2[[length(ss2)+1]] <- which(y >= ss1[[length(ss1)]]$start & y <= ss1[[length(ss1)]]$end & x==ur[r])}
+    # region stats
+    odf2 <- data.frame(region.id=r, start.date=min(odf1$start.date), end.date=min(odf1$end.date), total.time=sum(odf1$total.time), nr.segments=nrow(odf1),
+                       nr.individuals=length(unique(odf1$nr.individuals)), nr.samples=sum(odf1$nr.samples))
 
-  }
+    return(list(region=odf2, segment=odf1))
+
+  })
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-# 4. build output data frames
+# 3. derive output
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
-  # build data frame with statistics
-  df <- data.frame(region.id=ur, tns=tns, nui=nui, mnt=mnt, avt=avt, mxt=mxt, tts=tts, nts=nts)
+  region.df <- do.call("rbind", lapply(tmp, function(i) {i$region})) # region
+  segment.df <- do.call("rbind", lapply(tmp, function(i) {i$segment}))# segment report
 
-  # temporal segments
-  time.seg <- do.call(rbind, ss1)
-  colnames(time.seg) <- c("Start Time", "End Time", "Region ID", "Nr Samples", "Nr Individuals")
+  rm(tmp)
 
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
-# 5. build output data frames
+# 4. build plot
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))
-  df$region.id <- factor(df$region.id, levels=unique(df$region.id))
-  p <- ggplot(df, aes_string(x="region.id", y="nts", fill="tns")) +
+  region.df$region.id <- factor(region.df$region.id, levels=sort(unique(region.df$region.id)))
+  p <- ggplot(region.df, aes_string(x="region.id", y="total.time", fill="nr.samples")) +
     theme_bw() + geom_bar(stat="identity") + xlab("\nRegion ID") +
     ylab("Number of Days") + scale_fill_gradientn(name="Nr. Samples", colours=cr(10))
 
@@ -148,7 +115,7 @@ hotMoveStats <- function(x, y, individual.id=NULL) {
 #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
 
   # return output
-  colnames(df) <- c("region.id", "nr.samples", "nr.individuals", "min.time", "avg.time", "max.time", "total.time", "nr.segments")
-  return(list(region.stats=df, plot=p, temporal.segment.stats=time.seg, temporal.segment.indices=ss2))
+  return(list(region.stats=region.df, segment.tats=segment.df, region.plot=p))
 
 }
+
