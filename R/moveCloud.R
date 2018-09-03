@@ -13,16 +13,14 @@
 #' @importFrom utils download.file
 #' @importFrom RCurl url.exists
 #' @return A \emph{list} object reporting on the variability of cloud cover within and around each observation dates.
-#' @details {This function uses daily cloud fraction data from NASA's NEO service.
-#' For each observation date in \emph{obs.dates}, the function downloads the correspondent image
-#' and extracts the percent of cloud cover for the corresponding samples in \emph{y}. If
-#' \emph{data.path} is specified, the function will look within the provided directory for the
-#' cloud cover images. If they exist, they won't be downloaded reducing the amount of time required
-#' by the function. Moreover, if \emph{buffer.size} is specified, for each date, the function will only
-#' consider images that are within the specified temporal buffer. \emph{buffer.size} requires a two
-#' element vector which specifies the buffer size before and after the target dates. These additional
-#' images will be used to report on the closest time step with the lowest possible cloud cover. The
-#' final output provides a \emph{data.frame} ($report) with information on:
+#' @details {This function uses daily cloud fraction data from NASA's NEO service. For each observation date in \emph{obs.dates},
+#' the function downloads the correspondent image and extracts the percent cloud cover for the corresponding samples in \emph{y}.
+#' Before downloading any data, the function will look within \emph{data.path} for previoulsy acquired data. If they exist, they
+#' won't be downloaded reducing the processing time required by the function. Moreover, if \emph{buffer.size} is specified, for
+#' each date, the function will download all images that are within the specified temporal buffer. \emph{buffer.size} requires a
+#'  twoelement vector which specifies the buffer size before and after the target dates. These additional images will be used to
+#'  report on the closest time step with the lowest possible cloud cover. The final output provides a \emph{data.frame} ($report)
+#'  with information on:
 #' \itemize{
 #'  \item{\emph{cloud cover \% (day)}: cloud cover for the observation dates.}
 #'  \item{\emph{best date (after)}: dates before the observation dates with the lowest cloud cover.}
@@ -30,7 +28,7 @@
 #'  \item{\emph{best date (after)}: dates after the observation dates with the lowest cloud cover.}
 #'  \item{\emph{best date cloud cover \% (after)}: cloud cover best after dates.}}
 #'  Finally, the function generates a plot ($plot) reporting on the variability of cloud cover
-#'  within the dates provided by \emph{obs.dates} and the number of samples registered within them.}
+#'  and the number of observation registered in \emph{y} for each date.}
 #' @references \url{https://cneos.jpl.nasa.gov/}
 #' @seealso \code{\link{sMoveRes}} \code{\link{tMoveRes}}
 #' @examples \dontrun{
