@@ -9,15 +9,14 @@
 #' @importFrom sp SpatialPointsDataFrame
 #' @seealso \code{\link{sampleMove}} \code{\link{moveSeg}}
 #' @return A \emph{list} object.
-#' @details {Reduces a set of input samples (\emph{x}) based on their corresponding pixel coordinates
-#' within a reference raster (\emph{y}). Using this data, the function identifies temporal segments
-#' corresponding to groups of consecutive samples found within the same pixel. In this process, revisits
+#' @details {Translates (\emph{x}) into pixel coordinates within a reference raster (\emph{y}). The function
+#' identifies temporal segments corresponding to groups of consecutive observations within the same pixel. In this process, revisits
 #' to recorded pixels are preserved. Once the segments are identified, the function derives mean x and y
 #' coordinates for each of them and evaluates the time spent within each pixel. The function reports on
 #' the start and end timestamps, the mean timestamp and the elapsed time. The output of the function
 #' consists of:
 #' \itemize{
-#' \item{\emph{r.shp} - Shapefile with reduced sample set and its corresponding temporal information.}
+#' \item{\emph{points} - Shapefile with reduced sample set and its corresponding temporal information.}
 #' \item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
 #' \item{\emph{indices} - Indices for each sample in \emph{x} showing which samples were aggregated.}}
 #'

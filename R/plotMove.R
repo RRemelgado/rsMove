@@ -3,8 +3,8 @@
 #' @description {Standardized plotting of environmental and temporal information for a set of coordinate pairs.}
 #' @param x Vector of x coordinates.
 #' @param y Vector of y coordinates.
-#' @param size.var Optional. Vector with elapsed time as report by \code{\link{moveReduce}}, \code{\link{sampleMove}} or \code{\link{timeDir}}. Controls the point size.
-#' @param fill.var Optional. Vector with environmental information. Controls the fill color.
+#' @param size.var Optional. Controls the point size.
+#' @param fill.var Optional. Controls the fill color.
 #' @param var.type One of 'cont' or 'cat'. Defines the type of \emph{fill.var}.
 #' @importFrom ggplot2 ggplot aes_string theme geom_bar scale_fill_gradientn xlab ylab theme_bw geom_point guides
 #' scale_size_continuous scale_color_discrete scale_fill_gradientn scale_size_continuous guide_legend element_text element_blank

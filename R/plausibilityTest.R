@@ -2,17 +2,17 @@
 #' @title plausibilityTest
 #----------------------------------------------------------------------------------------------------------------------------------------------------------#
 #' @description Quantifies and plots the distribution of pixels within a mask over a reference categorical raster object.
-#' @param x Object of class \emph{raster} and \emph{RasterStack} with the x(s).
-#' @param y Reference \emph{raster} (e.g. Land cover map).
+#' @param x Object of class \emph{RasterLayer} and \emph{RasterStack}.
+#' @param y Object of class \emph{RasterLayer}.
 #' @param class.labels Labels of classes in \emph{y} provided as a character vector.
-#' @return A \emph{list} with statistical information on the distribution of samples per class and a comparative plot.
-#' @details {For each lazer in \emph{x}, the function returns the absolute and relative count of non-NA pixels in \emph{x}
-#' within each class of \emph{y}. Then, the results for each layer are compared in a combined plot. The output of the function
-#' is a list consisting of:
+#' @return A \emph{list}.
+#' @details {For each lazer in \emph{x}, (e.g. classification mask) the function returns the absolute and relative count of non-NA
+#' pixels within each unique value of \emph{y} (e.g. land cover map). Then, the results for each layer are compared in a combined
+#' plot. The output of the function is a list consisting of:
 #'  \itemize{
-#'  \item{\emph{absolute.count} - Absolute sample count for each layer of \emph{x} within each class of \emph{y}.}
-#'  \item{\emph{relative.count} - Relative sample count for each layer of \emph{x} within each class of \emph{y}.}
-#'  \item{\emph{relative.plot} - Plot comparing the relative sample count of the layers in \emph{x} within each class of \emph{y}.}}}
+#'  \item{\emph{absolute.count} - Absolute pixel count for each layer of \emph{x} overlapping with each value of \emph{y}.}
+#'  \item{\emph{relative.count} - Relative pixel count for each layer of \emph{x} overlapping with each value of \emph{y}.}
+#'  \item{\emph{relative.plot} - Plot comparing the relative pixel count of the layers in \emph{x} within each value of \emph{y}.}}}
 #' @importFrom raster crs extract nlayers
 #' @importFrom ggplot2 ggplot aes_string geom_bar theme_bw ylim theme xlab ylab scale_fill_manual facet_wrap element_blank unit
 #' @importFrom stats as.formula
