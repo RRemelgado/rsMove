@@ -24,7 +24,7 @@ require(lattice)
 
 ### A Remote Sensing Perspective on Resource Suitability Modelling
 <p align="justify" style="line-height:200%;">
-This tutorial is based on [this]([here](https://doi.org/10.5441/001/1.78152p3q) paper which introduces a standardized, presence-absence, machine learning approach to map animal resource suitability and consistently validate its spatial predictions. This vignette shows users how to replicate the proposed approach using `rsMove`.
+This tutorial is based on [this](https://doi.org/10.5441/001/1.78152p3q) paper which introduces a standardized, presence-absence, machine learning approach to map animal resource suitability and consistently validate its spatial predictions. This vignette shows users how to replicate the proposed approach using `rsMove`.
 </p>
 
 </br>
