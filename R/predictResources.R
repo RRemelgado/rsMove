@@ -23,16 +23,15 @@
 #' samples. The output of the function is a list object consisting of:
 #' \itemize{
 #'  \item{\emph{f1} - \emph{data.frame} with final F1-measure for presences and absences.}
-#'  \item{validation - \emph{data.frame} with region identifiers and validation sample count at each iteration.}
+#'  \item{\emph{overal..validation} - \emph{data.frame} with region identifiers and validation sample count at each iteration.}
+#'  \item{\emph{sample.validation} -:Logical vector with the validation of each observation in \emph{x}.}
 #'  \item{\emph{iteration.models} - List of models estimated at each iteration.}
 #'  \item{\emph{final.model} - Final predictive model based on all samples.}
 #'  \item{\emph{probabilities} - Predicted probability image. Given if \emph{env.data} is set.}}}
 #' @seealso \code{\link{sampleMove}} \code{\link{labelSample}} \code{\link{backSample}} \code{\link[caret]{train}}
 #' @examples \dontrun{
 #'
-#'  require(rgdal)
 #'  require(raster)
-#'  require(sp)
 #'
 #'  # read remote sensing data
 #'  file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
@@ -108,6 +107,7 @@ predictResources <-function(x, y, z, env.data=NULL) {
 
   # initiate outputs
   val.set <- data.frame(region=vector(class(z), length(uv)), count=vector('numeric', length(uv)))
+  uid.val <- i1
   m.ls <- vector('list', length(uv)) # model list
 
   pp <- 0
@@ -146,6 +146,8 @@ predictResources <-function(x, y, z, env.data=NULL) {
     val.set$region[v] = uv[v] # unique identifyer
     val.set$count[v] = length(i1.v) # sample count
 
+    uid.val[i1.v] <- pred == 1 # validate individual samples
+
     # remove temporary variables
     rm(i1.t, i1.v, i0.t, i0.v, vi, si)
 
@@ -166,6 +168,6 @@ predictResources <-function(x, y, z, env.data=NULL) {
   # write output
   model <- train(rbind(x, y), as.factor(c(i1,i0)), method="rf", trControl=tc)
   if (!is.null(env.data)) {prob <-  calc(env.data, function(x){stats::predict(model, x, type='prob')$'1'})} else {prob <- NULL}
-  return(list(f1=acc, validation=val.set, iteration.models=m.ls, final.model=model, probabilities=prob))
+  return(list(f1=acc, overall.validation=val.set, sample.validation=uid.val, iteration.models=m.ls, final.model=model, probabilities=prob))
 
 }
