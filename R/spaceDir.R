@@ -1,9 +1,9 @@
 #' @title spaceDir
 #'
-#' @description Analysis of environmental change in space along a set of coordinate pairs.
-#' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.
-#' @param img Object of class \emph{RasterLayer}.
+#' @description Analysis of environmental change in space along a movement track.
+#' @param x Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
+#' @param obs.time Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.
+#' @param y Object of class \emph{RasterLayer}.
 #' @param sample.direction One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.
 #' @param data.type One of 'cont' or 'cat'. Defines which type of variable is in use.
 #' @param distance.method One of 'm' or 'deg' specifying the projection unit. Default is 'm'.
@@ -16,20 +16,19 @@
 #' @importFrom ggplot2 aes_string geom_line theme scale_color_gradientn xlab ylab fortify geom_path element_text element_blank geom_histogram xlim
 #' @seealso \code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{list} containing shapefiles with information on environmental change and travel distance/time and a plot of the results.
-#' @details {This function evaluates how do environmental conditions change in space along a movement track. For
-#' each set of consecutive points, the function applies a spatial moving window which boundaries depend on the
-#' definition of \emph{sample.direction}. Then, within each segment, the function extracts all pixels within it.
-#' If \emph{buffer.size} is defined, the function will consider a buffer when performing this extraction. Finally,
-#' the the extracted \emph{NA} values are summarized into a given metric. If \emph{data.type} is \emph{cont}, a
-#' statistical function can be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the
-#' function will report on the dominant class and on the shannon index for each segment. Note that the function
-#' will work with the raster value associated to each class. On top of this, \emph{spaceDir} will also report on
-#' the linear distance traveled between endpoints (in meters) and the travel time (in minutes). The output of the
-#' function is a list consisting of:
+#' @details {This function quantifies environmnetal changes in space along a movement track. For each set of consecutive points, the
+#' function will derive coordinates for all unique pixels that overlap with - and are beteween - each point in a spatial moving widow
+#' with a shape defined by \emph{sample.direction}. The user can define \emph{buffer.size} to consider all pixels within a predefined
+#' spatial distance of the initially selected pixels. Once all pixels are selected, the function will extract the corresponding values
+#' in \emph{y} summarize them using a pre-defined statistical function. If \emph{data.type} is \emph{cont}, a statistical function can
+#' be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the function will report on the dominant class and
+#' on the shannon index for each window. If the number of pixels within the a window is lower than \emph{min.count} the function will
+#' return \emph{NA}. On top of this, \emph{spaceDir} will also report on the linear distance traveled between endpoints (in meters) and
+#' the travel time (in minutes). The output of the function is a list consisting of:
 #' \itemize{
 #'  \item{\emph{endpoints} - Point shapefile with endpoints of each spatial segment. Reports on a given statistical metric, traveled distance, travel time and the mean timestamp.}
 #'  \item{\emph{segments} - Line shapefile with spatial segments. Reports on the same information as \emph{endpoints}.
-#'  \item{\emph{plot} - Plotting of \emph{segments} where each segment is colored according to its corresponding statistical value.}}}}
+#'  \item{\emph{plot} - Plotting of \emph{segments} where each segment is colored according to the extracted raster value.}}}}
 #'
 #' @examples {
 #'
@@ -46,7 +45,7 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
+#'  of <- function(i) {lm(i~c(1:length(i)))$coefficients[2]}
 #'  s.sample <- spaceDir(shortMove, r, "backward", "cont", obs.time=obs.time, stat.fun=of)
 #'
 #' }
@@ -54,25 +53,25 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distance.method='m', buffer.size=NULL, stat.fun=NULL, min.count=2) {
+spaceDir <- function(x, y, sample.direction, data.type, obs.time=NULL, distance.method='m', buffer.size=NULL, stat.fun=NULL, min.count=2) {
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 # 1. check variables
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   # samples
-  if (!exists('xy')) {stop('"xy" is missing')}
-  if (!class(xy)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  if (!exists('x')) {stop('"x" is missing')}
+  if (!class(x)%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"x" is not of a valid class')}
 
   # sample dates
   if (!is.null(obs.time)) {
     if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
-    if (length(obs.time)!=length(xy)) {stop('errorr: "xy" and "obs.time" have different lengths')}}
+    if (length(obs.time)!=length(x)) {stop('errorr: "x" and "obs.time" have different lengths')}}
 
   # raster
-  if (!exists('img')) {stop('"img" is missing')}
-  if (!class(img)[1]=='RasterLayer') {stop('"img" is not of a valid class')}
-  if (crs(xy)@projargs!=crs(img)@projargs) {stop('"xy" and "img" have different projections')}
+  if (!exists('y')) {stop('"y" is missing')}
+  if (!class(y)[1]=='RasterLayer') {stop('"y" is not of a valid class')}
+  if (crs(x)@projargs!=crs(y)@projargs) {stop('"x" and "y" have different projections')}
 
   # query direction
   if (!is.null(sample.direction)) {
@@ -85,7 +84,7 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
     if (!data.type%in%c('cont', 'cat')) {stop('"data.type" is not a recognized keyword')}}
 
   # check/define input metrics
-  if (is.null(stat.fun)) {stat.fun <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}} else {
+  if (is.null(stat.fun)) {stat.fun <- function(i) {lm(i~c(1:length(i)))$coefficients[2]}} else {
     if(!is.function(stat.fun)) {stop('"stat.fun" is not a valid function')}}
 
 #-------------------------------------------------------------------------------------------------------------------------------#
@@ -93,18 +92,18 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   # base raster info
-  rProj <- crs(img)
-  pxr <- res(img)
+  rProj <- crs(y)
+  pxr <- res(y)
 
   # backward sampling
   if (sample.direction=='backward') {
     f1 <- function(i) {
       si <- i-1
       ei <- i
-      d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
+      d0 <- sqrt((x@coords[si,1]-x@coords[ei,1])^2 + (x@coords[si,2]-x@coords[ei,2])^2)
       if (!is.null(obs.time)) {t0 <- difftime(obs.time[ei], obs.time[si], units='mins')} else {t0 <- NA}
-      x0 <- xy@coords[si:ei,1]
-      y0 <- xy@coords[si:ei,2]
+      x0 <- x@coords[si:ei,1]
+      y0 <- x@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
         dx <- x0[1]-x0[2]
         dy <- y0[1]-y0[2]
@@ -119,8 +118,8 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
           y0 <- (y0[1]+cm)
           x0 <- m[1] + y0 * m[2]}}
       if (distance.method=='deg') {
-        x00 <- xy@coords[si:ei,1]*pi/180
-        y00 <- xy@coords[si:ei,2]*pi/180
+        x00 <- x@coords[si:ei,1]*pi/180
+        y00 <- x@coords[si:ei,2]*pi/180
         sf <- function(o) {
           xDiff <- abs(x00[(o-1)]-x00[o])
           yDiff <- abs(y00[(o-1)]-y00[o])
@@ -129,17 +128,17 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
           return(6371000 * cCoef)}
         d0 <- sum(sapply(2:length(x00), sf))}
       return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), i)))}
-    op <- lapply(2:length(xy), f1)}
+    op <- lapply(2:length(x), f1)}
 
   # forward sampling
   if (sample.direction=='forward') {
     f1 <- function(i) {
       si <- i
       ei <- i+1
-      d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
+      d0 <- sqrt((x@coords[si,1]-x@coords[ei,1])^2 + (x@coords[si,2]-x@coords[ei,2])^2)
       if (!is.null(obs.time)) {t0 <- difftime(obs.time[ei], obs.time[si], units='mins')} else {t0 <- NA}
-      x0 <- xy@coords[si:ei,1]
-      y0 <- xy@coords[si:ei,2]
+      x0 <- x@coords[si:ei,1]
+      y0 <- x@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
         dx <- x0[1]-x0[2]
         dy <- y0[1]-y0[2]
@@ -154,8 +153,8 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
           y0 <- (y0[1]+cm)
           x0 <- m[1] + y0 * m[2]}}
       if (distance.method=='deg') {
-        x00 <- xy@coords[si:ei,1]*pi/180
-        y00 <- xy@coords[si:ei,2]*pi/180
+        x00 <- x@coords[si:ei,1]*pi/180
+        y00 <- x@coords[si:ei,2]*pi/180
         sf <- function(o) {
           xDiff <- abs(x00[(o-1)]-x00[o])
           yDiff <- abs(y00[(o-1)]-y00[o])
@@ -164,17 +163,17 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
           return(6371000 * cCoef)}
         d0 <- sum(sapply(2:length(x00), sf))}
       return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), i)))}
-    op <- lapply(1:(length(xy)-1), f1)}
+    op <- lapply(1:(length(x)-1), f1)}
 
   # backward-forward sampling
   if (sample.direction=='both') {
     f1 <- function(i) {
       si <- i-1
       ei <- i+1
-      d0 <- sqrt((xy@coords[si,1]-xy@coords[ei,1])^2 + (xy@coords[si,2]-xy@coords[ei,2])^2)
+      d0 <- sqrt((x@coords[si,1]-x@coords[ei,1])^2 + (x@coords[si,2]-x@coords[ei,2])^2)
       if (!is.null(obs.time)) {t0 <- difftime(obs.time[ei], obs.time[si], units='mins')} else {t0 <- NA}
-      x0 <- xy@coords[si:ei,1]
-      y0 <- xy@coords[si:ei,2]
+      x0 <- x@coords[si:ei,1]
+      y0 <- x@coords[si:ei,2]
       if((d0 > (pxr[1]*2))) {
         x00 <- vector('list', 2)
         y00 <- vector('list', 2)
@@ -200,8 +199,8 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
         x0 <- unlist(x00)
         y0 <- unlist(y00)}
       if (distance.method=='deg') {
-        x00 <- xy@coords[si:ei,1]*pi/180
-        y00 <- xy@coords[si:ei,2]*pi/180
+        x00 <- x@coords[si:ei,1]*pi/180
+        y00 <- x@coords[si:ei,2]*pi/180
         sf <- function(o) {
           xDiff <- abs(x00[(o-1)]-x00[o])
           yDiff <- abs(y00[(o-1)]-y00[o])
@@ -210,7 +209,7 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
           return(6371000 * cCoef)}
         d0 <- sum(sapply(1:length(x00), sf))}
       return(list(x=x0, y=y0, d=d0, t=t0, p=replicate(length(x0), i)))}
-    op <- lapply(2:(length(xy)-1), f1)}
+    op <- lapply(2:(length(x)-1), f1)}
 
   # retrieve x, y and p
   xc <- unlist(lapply(op, function(i){i$x}))
@@ -230,26 +229,26 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
   if (!is.null(buffer.size)) {
 
     # dilate samples and update sample indices
-    tmp <- lapply(unique(us), function(x) {
-      ind <- which(us==x)
+    tmp <- lapply(unique(us), function(i) {
+      ind <- which(us==i)
       ind <- do.call(rbind, lapply(ind, function(y) {
         r0 <- raster(extent((xc[y]-buffer.size), (xc[y]+buffer.size),
                             (yc[y]-buffer.size), (yc[y]+buffer.size)),
                      res=pxr[1], crs=rProj)
         return(xyFromCell(r0, 1:ncell(r0)))}))
-      ind <- ind[!duplicated(cellFromXY(img, ind)),]
-      return(list(c=ind, s=replicate(nrow(ind), x)))})
-    us1 <- unlist(lapply(tmp, function(x) {x$s}))
-    tmp <- do.call(rbind, lapply(tmp, function(x) {x$c}))
+      ind <- ind[!duplicated(cellFromXY(y, ind)),]
+      return(list(c=ind, s=replicate(nrow(ind), i)))})
+    us1 <- unlist(lapply(tmp, function(i) {i$s}))
+    tmp <- do.call(rbind, lapply(tmp, function(i) {i$c}))
 
     # retrieve environmental data
-    edata <- extract(img, tmp)
+    edata <- extract(y, tmp)
 
     rm(tmp)
 
   } else {
     us1 = us
-    edata <- extract(img, cbind(xc,yc))
+    edata <- extract(y, cbind(xc,yc))
   }
 
 #-------------------------------------------------------------------------------------------------------------------------------#
@@ -272,7 +271,7 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
   if (data.type=='cat') {
 
     # unique classes
-    uc <- unique(img)
+    uc <- unique(y)
 
     # function to sumarize class composition
     f2 <- function(i) {
@@ -281,12 +280,12 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
     ov <- do.call(rbind, lapply(unique(us1), f2))
 
     # derive additional statistics
-    dc <- apply(ov, 1, function(x) {(uc[which(x==max(x))])[1]})
+    dc <- apply(ov, 1, function(i) {(uc[which(i==max(i))])[1]})
     ind <- !is.na(uc) # avoid NA values are used in calculation
-    si <- apply(ov[,ind], 1, function(x) {
-      ind <- which(x>0)
-      x[ind] <- (x[ind]/sum(x[ind]))*log(x[ind]/sum(x[ind]))
-      return(-sum(x))})
+    si <- apply(ov[,ind], 1, function(i) {
+      ind <- which(i>0)
+      i[ind] <- (i[ind]/sum(i[ind]))*log(i[ind]/sum(i[ind]))
+      return(-sum(i))})
 
     # update output table
     ov <- as.data.frame(cbind(ov, dc, si))
@@ -302,16 +301,16 @@ spaceDir <- function(xy, img, sample.direction, data.type, obs.time=NULL, distan
   us0 <- unique(us)
 
   # subset variables (depends on sampling strategy)
-  df <- data.frame(x=xy@coords[us0,1], y=xy@coords[us0,2], timestamp=obs.time[us0], travel.distance=pd, travel.time=td, sid=us0)
+  df <- data.frame(x=x@coords[us0,1], y=x@coords[us0,2], timestamp=obs.time[us0], travel.distance=pd, travel.time=td, sid=us0)
   df <- cbind(df, ov)
 
   # build segment endpoint shapefile
   p.shp <- SpatialPointsDataFrame(df[,1:2], df, proj4string=rProj)
 
   # build segment path shapefile
-  f <- function(x) {
-    loc <- which(us==us0[x])
-    return(Lines(list(Line(cbind(xc[loc],yc[loc]))), x))}
+  f <- function(i) {
+    loc <- which(us==us0[i])
+    return(Lines(list(Line(cbind(xc[loc],yc[loc]))), i))}
   l.shp = SpatialLinesDataFrame(SpatialLines(lapply(1:length(us0), f), proj4string=rProj), df)
 
   #-------------------------------------------------------------------------------------------------------------------------------#

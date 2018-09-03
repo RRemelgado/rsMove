@@ -13,19 +13,21 @@
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar scale_fill_discrete element_blank element_text
 #' @seealso \code{\link{dataQuery}} \code{\link{imgInt}} \code{\link{timeDir}} \code{\link{spaceDir}}
 #' @return A \emph{list}.
-#' @details {This function identifies segments of comparable environmental conditions along the movement track given by \emph{y}.
+#' @details {This function identifies segments of comparable environmental conditions along a movement track given by \emph{y}.
 #' Looking at consecutive data points, the function queries \emph{x} and proceeds to identify a new segment if \emph{threshold}
-#' is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount
-#' of points found within it. Moreover, if \emph{z} is set, the function reports on the start and end timestamps and the elapsed time.
-#' If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
-#' define \emph{threshold} which indicates when the difference between consecutive points should be considered a change.
-#' In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
-#' each sample in \emph{y} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
-#' In this case, the function will report on the majority value within the buffer. The output of this function consists of:
+#' is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount of
+#' points found within it. Moreover, if \emph{z} is set, the function reports on the start and end timestamps and the elapsed
+#' time for each segment. If \emph{data.type} is set as \emph{'cont'}, the function assumes \emph{y} is a continuous variable. This
+#' will require the user to define \emph{threshold} which indicates when the difference between consecutive points should be
+#' considered as a change. If \emph{data.type} is set as \emph{'cat'}, then the function will ignore \emph{threshold} and map
+#' a change every time a change in value occurs. The user might choose to smooth the extracted values using \emph{buffer.size}.
+#' This will prompt the function to summarize the values arounde ach sample in \emph{y} using a metric define by\emph{smooth.fun}.
+#' However, if \emph{data.type} is set to \emph{cat}, \emph{smooth.fun} is ignored. In this case, the function will report on the
+#' majority value within the spatial buffer. The output of this function consists of:
 #'\itemize{
-#'  \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{y}.}
-#'  \item{\emph{stats} - Statistical information for each segment reporting on the corresponding environmental and temporal information.}
-#'  \item{\emph{plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
+#'  \item{\emph{segment.id} - Vector reporting on the segment identifiers associated to each sample in \emph{y}.}
+#'  \item{\emph{segment.stats} - Statistical information for each segment reporting on the corresponding environmental and temporal information.}
+#'  \item{\emph{segment.plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
 #' @examples {
 #'
 #'  require(raster)
@@ -41,7 +43,7 @@
 #'  format="%Y/%m/%d %H:%M:%S")
 #'
 #'  # perform directional sampling
-#'  seg <- moveSeg(r, shortMove, z, data.type="cat")
+#'  seg <- moveSeg(r, z, shortMove, data.type="cat")
 #'
 #' }
 #' @export
@@ -140,10 +142,26 @@ moveSeg <- function(x, z, y, data.type='cont', threshold=NULL, summary.fun=NULL,
 # 3. identify segments
 #---------------------------------------------------------------------------------------------------------------------#
 
-  run.diff <- abs(c(0,diff(x))) >= threshold # compare consecutive data points and apply threshold
-  seg.ls <- rle(run.diff) # find sequences of similar values
-  seg.id <- vector('numeric', length(run.diff)) # label segments (1)
-  for (s in 1:length(seg.ls$lengths)) {seg.id[(sum(seg.ls$lengths[0:(s-1)])+1):sum(seg.ls$length[1:s])] <- s} # label segments (1)
+  sc <- list() # segment list
+  sp <- 0 # segment start position
+
+  # identify segments
+  for (s in 2:length(x)) {
+
+    x.diff <- abs(x[(s)]-x[(s-1)])
+
+    if (x.diff > threshold & sp==0) {
+      sc[[length(sc)+1]] <- c(sp, (s-1))
+      sp <- s-1}
+
+    if (x.diff < threshold & s == length(x)) {sc[[length(sc)+1]] <- c(sp, s)}
+    if (x.diff > threshold & s == length(x)) {sc[[length(sc)+1]] <- c(s, s)}
+
+  }
+
+  # label segments
+  seg.id <- replicate(length(x), 0)
+  for (s in 1:length(sc)) {seg.id[sc[[s]][1]:sc[[s]][2]] <- s}
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 4. derive segment statistics
@@ -225,7 +243,7 @@ moveSeg <- function(x, z, y, data.type='cont', threshold=NULL, summary.fun=NULL,
   # 6. return output
   #---------------------------------------------------------------------------------------------------------------------#
 
-  colnames(odf) <- c("Segment ID", "Nr. Samples", "Timestamp (start)", "Timestamp (end)", "Total time (minutes)", "Value")
-  return(list(indices=id, stats=odf, plot=p))
+  colnames(odf) <- c("segment.id", "nr.samples", "start.time", "end.time", "total.time", "summary.value")
+  return(list(segment.id=id, segment.stats=odf, segment.plot=p))
 
 }
