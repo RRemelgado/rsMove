@@ -1,3 +1,19 @@
+=================================================================================
+
+#### rsMove 0.2.5
+
+=================================================================================
+
+### Changes
+  * timeDir() Now returns a histogram ggplot object.
+  * plausibilityTest() informs on the validation of each presence sample.
+  * hotMove() returns a ggplot object with region polygons.
+  * The output of hotMoveStats() was simplified.
+
+### Fixes:
+  * checkOverlap() returned a warning when combining rasters and polygons.
+  * Overall improvement of the detailed description of each function.
+  * Simplification of variable names.
 
 =================================================================================
 
