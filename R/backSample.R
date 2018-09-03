@@ -10,18 +10,17 @@
 #' @importFrom sp SpatialPoints SpatialPointsDataFrame
 #' @importFrom stats complete.cases prcomp median
 #' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
-#' @return A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame} of background samples for unique pixels in \emph{y}.
-#' @details {First, the function determines the unique pixel coordinates for \emph{x} based on the dimensions
-#' of \emph{y} and retrieves n background samples where n is determined by \emph{nr.samples}. Then, the
-#' selection of samples is dependent on the method chosen by the user. If \emph{sampling.method} is set to \emph{random},
-#' the function will select samples randomly. However, if \emph{pca} is used, the function will use a Principal
-#' Components Analysis (PCA) over \emph{y} to evaluate the similarity between the samples associated to \emph{x}
-#' and the initial set of random samples First, based on this PCA, the function selects the most important Principal Components
-#' (PC's) using the kaiser rule (i.e. PC's with eigenvalues greater than 1). Then, for each PC, the function estimates
-#' the median and the Median Absolute Deviation (MAD) for each unique identifier in \emph{z}) and selects background
-#' samples where the difference between their variance and the variance of the region samples exceeds the MAD. Then, the
-#' algorithm removes the background samples that were not selected by all sample regions. If \emph{nr.samples} is not provided
-#' all background pixels are returned.}
+#' @return A \emph{SpatialPoints} or a \emph{SpatialPointsDataFrame}.
+#' @details {First, the function determines the unique pixel coordinates for \emph{x} based on the dimensions of \emph{y} and retrieves
+#' \emph{n}, random background samples where \emph {n} is determined by \emph{nr.samples}. If \emph{sampling.method} is set to \emph{"random"},
+#' the function will return the selected samples as a \emph{SpatialPoints} object. However, if \emph{sampling.method} is set to \emph{"pca"}, the
+#' function performs a Principal Components Analysis (PCA) over \emph{y} to evaluate the similarity between the samples associated to \emph{x} and
+#' the initial set of random samples. To achieve this, the function selects the most important Principal Components (PC's) using the kaiser rule
+#' (i.e. PC's with eigenvalues greater than 1) and, for each PC, estimates the median and the Median Absolute Deviation (MAD) based on the samples
+#' of related ot each unique identifier in \emph{z}). Based on this data, the function selects background samples where the difference between their
+#' variance and the variance of the region samples exceeds the absolute difference between the median and the MAD. Finally, the algorithm filteres out
+#' all the background samples that were not selected by all sample regions. The ouptut is a \emph{SpatialPointsDataFrame} containing the selected samples
+#' and the corresponding \emph{y} values. If \emph{nr.samples} is not provided all background pixels are considered.}
 #' @seealso \code{\link{labelSample}} \code{\link{hotMove}} \code{\link{dataQuery}}
 #' @examples {
 #'

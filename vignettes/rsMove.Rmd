@@ -68,7 +68,7 @@ plot(sample.regions$polygons, col=rgb(1,0,0,0.3), add=TRUE)
 ```
 
 <p align="justify" style="line-height:200%;">
-For that, we can use `hotMoveStats()` to deconstruct the temporal composition of each unique regions. We will provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. Below, we can see the function call as well as the final report. The output informs us that only 6 regions had more than 1 sample. Region 3 appears as the one with the largest amount of data accounting for a total of 3011 samples and 82 temporal segments.
+For that, we can use `hotMoveStats()` to deconstruct the temporal composition of each unique regions. We will provide `hotMoveStats()` with the sample indices acquired through `hotMove()` and the observation date of each sample. Below, we can see the function call as well as the final report. The output informs us that Region 3 is much larger than the other ones accounting for a total of 3011 observation recorded over 83 days within a single temporal segment. This corresponds to the nesting site and would be a good palce to start testing our methods given the high concentration of data.
 </p>
 
 ```{r}
@@ -80,30 +80,31 @@ kable_styling(kable(head(region.stats$region.stats, 5), format="html", align="c"
 ```
 
 <p align="justify" style="line-height:200%;">
-Aside from this information, `hotMoveStats()` also provides a plot showing the distribution of samples per sample region and the amount of time spent within them. Based on our example data, the plot shown below portraits an uneven distribution of samples with the region 21 accounting for ~3000 samples and ~80 days.
+These observations are better depicted in the plot provided by `hotMoveStats()`, show below. The plot describes the distribution of samples per region as well as the total amount of time spent within them.
 </p>
 
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
-region.stats$plot
+region.stats$region.plot
 ```
 
 <p align="justify" style="line-height:200%;">
-To make sense of these results, we can plot the polygons created by `hotMove()` and color them based on the output of `hotMoveStats()`. For this example, we used the total time spent per region. The plot shown below depicts the distribution of time per sample region. As a we can see, the region with most samples and time spent is clearly highlighted showing the location of the summering site of this  White Stork.
+Using the code shown below, the results of `hotMoveStats()` can combine these results with the output of `hotMove()` to show the spatial variabily of the statistical results.
 </p>
 
-
-```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE, message=FALSE}
-df <- data.frame(id=region.stats$region.stats$`Region ID`, time=region.stats$region.stats$`Total Time`)
+```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", message=FALSE}
+df <- region.stats$region.stats
+df$id <- as.character(df$region.id)
 pol <- fortify(SpatialPolygonsDataFrame(sample.regions$polygons, df))
 pol <- merge(pol, df, by="id")
-ggplot(pol, aes(x=long, y=lat, group=id, fill=time)) + theme_bw() + geom_polygon() + xlab("Long") + ylab("Lat")
+ggplot(pol, aes(x=long, y=lat, group=id, fill=total.time)) + theme_bw() + geom_polygon() + xlab("Long") + ylab("Lat") + scale_fill_continuous(name="Nr. Days")
+ggplot(pol, aes(x=long, y=lat, group=id, fill=nr.samples)) + theme_bw() + geom_polygon() + xlab("Long") + ylab("Lat") + scale_fill_continuous(name="Nr. samples")
 ```
 
 </br>
 
 ### Which satellite to use? Choosing a Spatial and Temporal resolution
 <p align="justify" style="line-height:200%;">
-Now that we know where to focus, we need to decided which satellite data to use. Assuming we want to rely NDVI data, let's use `sMoveRes()` and `tMoveRes()` to quantify the data loss with a few common, open-access sensors, namely Sentinel-2 (10 m), Landsat (30 m) and MODIS (250 m).
+Now that we know where to focus, we need to decided which satellite data to use. Assuming we want to use Normalized difference Vegetation Index (NDVI) data, let's use `sMoveRes()` and `tMoveRes()` to quantify the data loss with a few common, open-access sensors, namely Sentinel-2 (10 m), Landsat (30 m) and MODIS (250 m).
 </p>
 
 
