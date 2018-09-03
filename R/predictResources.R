@@ -146,7 +146,7 @@ predictResources <-function(x, y, z, env.data=NULL) {
     val.set$region[v] = uv[v] # unique identifyer
     val.set$count[v] = length(i1.v) # sample count
 
-    uid.val[i1.v] <- pred == 1 # validate individual samples
+    uid.val[i1.v] <- pred[1:length(i1.v)] == 1 # validate individual samples
 
     # remove temporary variables
     rm(i1.t, i1.v, i0.t, i0.v, vi, si)
