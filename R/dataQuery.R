@@ -15,7 +15,7 @@
 #' @details {Returns environmental variables from a multi-layer raster object \emph{x} for a given set of coordinates (\emph{y}) depending
 #' on the temporal distance between the observation dates (\emph{y.dates}) and the date on which each layer in the environmental data was
 #' collected (\emph{x.dates}). \emph{time.buffer} controls the search for non-NA values in time and is adjusted to the observation date of
-#' each element in \empH{y}. The user may also provide \emph{spatial.buffer} to spatially smooth the selected environmental information. In
+#' each element in \emph{y}. The user may also provide \emph{spatial.buffer} to spatially smooth the selected environmental information. In
 #' this case, for each sample, the function will consider the neighboring pixels within the selected acquisition and apply a smoothing function
 #' defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean will be returned by default.}
 #' @examples {

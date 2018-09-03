@@ -10,7 +10,8 @@ Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>
 Description: Tools that support the combined use of animal movement and remote sensing data. Based on the paper on the paper by Remelgado et al. (2015) <doi:10.1002/rse2.70>.
 LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, RCurl, spatialEco, lubridate, pryr, igraph, lattice, randomForest
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 License: GPL (>= 3)
 Suggests: knitr, rmarkdown, kableExtra, imager, devtools
 VignetteBuilder: knitr
+Encoding: UTF-8

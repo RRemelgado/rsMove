@@ -23,23 +23,25 @@ timeDir(env.data, env.dates, obs.dates, temporal.buffer, xy = NULL,
 \item{min.count}{Minimum number of samples required by \emph{stat.fun}. Default is 2.}
 }
 \value{
-A \emph{vector} with a requested statistical metric for each point in \emph{xy}.
+A \emph{vector} with a requested statistical metric for each point in \emph{xy} and informative plots.
 }
 \description{
 Analysis of environmental change in time for a set of coordinate pairs.
 }
 \details{
-{This function evaluates how environmental conditions change in time along a movement track.
-First, for each point in \emph{xy}, the function compares its observation date (\emph{obs.dates}) against
-the acquisition dates (\emph{env.dates}) of \emph{env.data} to select non \emph{NA} timesteps within a
-predefined temporal window (\emph{temporal.buffer}). The user can adjust this window to determine which
-images are the most important. For example, if one wishes to know how the landscape evolved up to the
-observation date of the target sample and daily satellite data is available, \emph{temporal.buffer} can be
-define as, e.g., c(30,0) forcing the function to use all images to only use pixels recorded within the previous
-30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated.
-The statistical metric is provided by (\emph{stat.fun}). By default, the slope is reported from a linear regression
-between the acquisition times of \emph{env.data} and their corresponding values. When providing a new function, set x
-for \emph{env.dates} and y for \emph{env.data}.}
+{This function quantifies environmental change in time along a movement track. First, for each point in \emph{xy},
+the function compares its observation date (\emph{obs.dates}) against the acquisition dates (\emph{env.dates}) of \emph{env.data}
+to select non \emph{NA} timesteps within a predefined temporal window (\emph{temporal.buffer}). The user can adjust this window to
+determine which images are the most important. For example, if one wishes to know how the landscape evolved up to the observation
+date of the target sample, \emph{temporal.buffer} can be define as, e.g., c(30,0) forcing the function to only consider pixels recorded
+within the previous 30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated. This
+statistical metric is specified by \emph{stat.fun}. By default, the function reports on the slope between the acquisition dates of \emph{env.data}
+and their corresponding values. When providing a new function, set x for \emph{env.dates} and y for \emph{env.data}. The final output is a list consisting of:
+\itemize{
+\item{\emph{stats} - \emph{data.frame} with the estimated statistical metric for each data point.}
+\item{\emph{hist.plot} - Histogram plot of the requested statistical metric. The bin size is the standard deviation of all estimated values.}
+\item{\emph{point.plot} - Plot of the \emph{xy} showing the spatial variability of the requested statistical metric.}
+}}
 }
 \examples{
 {

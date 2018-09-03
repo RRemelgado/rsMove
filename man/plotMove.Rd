@@ -11,9 +11,9 @@ plotMove(x, y, size.var = NULL, fill.var = NULL, var.type = NULL)
 
 \item{y}{Vector of y coordinates.}
 
-\item{size.var}{Optional. Vector with elapsed time as report by \code{\link{moveReduce}}, \code{\link{sampleMove}} or \code{\link{timeDir}}. Controls the point size.}
+\item{size.var}{Optional. Controls the point size.}
 
-\item{fill.var}{Optional. Vector with environmental information. Controls the fill color.}
+\item{fill.var}{Optional. Controls the fill color.}
 
 \item{var.type}{One of 'cont' or 'cat'. Defines the type of \emph{fill.var}.}
 }

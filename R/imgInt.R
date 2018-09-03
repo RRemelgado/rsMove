@@ -76,22 +76,23 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy=NULL) {
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
   intTime <- function(x) {
-    
-    sapply(target.dates, function(d) {
+
+    tmp <- sapply(target.dates, function(d) {
 
       di <- which(env.dates==d & !is.na(x))
-      
+
       if (length(di) > 0) {return(mean(x[di]))} else {
-        
+
         bi <- rev(which(!is.na(x) & env.dates < d & env.dates >= (d-time.buffer[1])))
         ai <- which(!is.na(x) & env.dates > d & env.dates <= (d+time.buffer[2]))
-        
+
         if (length(bi)>=1 & length(ai)>=1) {
           lc <- lm(c(x[bi[1]],x[ai[1]])~as.numeric(c(env.dates[bi[1]],env.dates[ai[1]])))
           return(as.numeric(d)*lc$coefficients[2]+lc$coefficients[1])
         } else {return(NA)}
-        
-      }})}
+
+
+      }})
 
     return(tmp)
 
@@ -122,11 +123,7 @@ imgInt <- function(env.data, env.dates, target.dates, time.buffer, xy=NULL) {
 
     out <- brick(env.data[[1]], nl=length(target.dates)) # output array
 
-    for (i in 1:nr) {
-
-      out[(1+(n*(i-1))):(n*i)] <- t(apply(env.data[(1+(n*(i-1))):(n*i)], 1, intTime))
-
-    }
+    for (i in 1:nr) {out[(1+(n*(i-1))):(n*i)] <- t(apply(env.data[(1+(n*(i-1))):(n*i)], 1, intTime))}
 
   }
 

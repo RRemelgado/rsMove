@@ -18,8 +18,8 @@ A two element numeric \emph{vector}.
 Reports on how much two spatial objects overlap.
 }
 \details{
-{Uses \link[raster]{intersect} to estimate the amount of overlap between two spatial objects (i.e. \emph{x}
-and \emph{y}). The function reports on the percentage of the area in each spatial object represented by their overlap.}
+{Uses \link[raster]{intersect} to report on the percentage of the area
+of \emph{x} and \emph{y} that coincides with their common spatial overlap.}
 }
 \examples{
 {
@@ -38,7 +38,4 @@ and \emph{y}). The function reports on the percentage of the area in each spatia
  checkOverlap(img, roi)
 
 }
-}
-\seealso{
-\code{\link{poly2sample}}
 }

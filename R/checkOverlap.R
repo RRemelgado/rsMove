@@ -7,7 +7,6 @@
 #' @importFrom raster extent intersect ncell raster
 #' @details {Uses \link[raster]{intersect} to report on the percentage of the area
 #' of \emph{x} and \emph{y} that coincides with their common spatial overlap.}
-#' @seealso \code{\link{poly2sample}}
 #' @examples {
 #'
 #'  require(raster)
@@ -37,12 +36,12 @@ checkOverlap <- function(x, y) {
 
   r1 <- tryCatch(extent(x), error=function(e) return(FALSE)) # is x a spatial object?
   r2 <- tryCatch(extent(y), error=function(e) return(FALSE)) # is y a spatial object?
-  if (!r1 & r2) {return(warning('"x" is not a spatial object'))}
-  if (!r2 & r1) {return(warning('"y" is not a spatial object'))}
-  if (!r1 & !r2) {return(warning('neither "x" and "y" are spatial object'))}
+  if (isFALSE(r1) & isTRUE(r2)) {return(warning('"x" is not a spatial object'))}
+  if (isTRUE(r1) & isFALSE(r2)) {return(warning('"y" is not a spatial object'))}
+  if (isFALSE(r1) & isFALSE(r2)) {return(warning('neither "x" and "y" are spatial object'))}
 
   oc <- tryCatch(intersect(r1,r2), error=function(e) return(FALSE)) # do they overlap?
-  if (!oc) {return(c(0,0))}
+  if (isFALSE(oc)) {return(c(0,0))}
 
   #-----------------------------------------------------------------------------------------------------------------------------------------------#
   # 2. Compare input variables

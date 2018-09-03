@@ -4,15 +4,15 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(x, y, z, data.type = "cont", threshold = NULL, summary.fun = NULL,
-  buffer.size = NULL, smooth.fun = NULL)
+moveSeg(x, z, y, data.type = "cont", threshold = NULL,
+  summary.fun = NULL, buffer.size = NULL, smooth.fun = NULL)
 }
 \arguments{
 \item{x}{Object of class \emph{RasterLayer} or \emph{data.frame}.}
 
-\item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct}.}
 
-\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{y} observation dates.}
+\item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
 \item{data.type}{Raster data data.type. One of \emph{cont} (continuous) or \emph{cat} (for categorical).}
 
@@ -31,19 +31,21 @@ A \emph{list}.
 Pixel based segmentation of movement data using environmental data.
 }
 \details{
-{This function identifies segments of comparable environmental conditions along the movement track given by \emph{y}.
+{This function identifies segments of comparable environmental conditions along a movement track given by \emph{y}.
 Looking at consecutive data points, the function queries \emph{x} and proceeds to identify a new segment if \emph{threshold}
-is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount
-of points found within it. Moreover, if \emph{z} is set, the function reports on the start and end timestamps and the elapsed time.
-If \emph{method} is set as \emph{'cont'}, the function assumes the raster data is a continuous variable. This will require the user to
-define \emph{threshold} which indicates when the difference between consecutive points should be considered a change.
-In order to smooth the extracted values the user can specify \emph{buffer.size}. This will prompt the function to summarize the values around
-each sample in \emph{y} using a metric define by\emph{smooth.fun}. However, if \emph{data.type} is set to \emph{cat} \emph{smooth.fun} is ignored.
-In this case, the function will report on the majority value within the buffer. The output of this function consists of:
+is exceeded. Then, for each segment, the function summarizes \emph{x} using \emph{summary.fun} and reports on the amount of
+points found within it. Moreover, if \emph{z} is set, the function reports on the start and end timestamps and the elapsed
+time for each segment. If \emph{data.type} is set as \emph{'cont'}, the function assumes \emph{y} is a continuous variable. This
+will require the user to define \emph{threshold} which indicates when the difference between consecutive points should be
+considered as a change. If \emph{data.type} is set as \emph{'cat'}, then the function will ignore \emph{threshold} and map
+a change every time a change in value occurs. The user might choose to smooth the extracted values using \emph{buffer.size}.
+This will prompt the function to summarize the values arounde ach sample in \emph{y} using a metric define by\emph{smooth.fun}.
+However, if \emph{data.type} is set to \emph{cat}, \emph{smooth.fun} is ignored. In this case, the function will report on the
+majority value within the spatial buffer. The output of this function consists of:
 \itemize{
- \item{\emph{indices} - Vector reporting on the segment identifiers associated to each sample in \emph{y}.}
- \item{\emph{stats} - Statistical information for each segment reporting on the corresponding environmental and temporal information.}
- \item{\emph{plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
+ \item{\emph{segment.id} - Vector reporting on the segment identifiers associated to each sample in \emph{y}.}
+ \item{\emph{segment.stats} - Statistical information for each segment reporting on the corresponding environmental and temporal information.}
+ \item{\emph{segment.plot} - plot of \emph{stats} showing the variability of environmental conditions and time spent per segment.}}}
 }
 \examples{
 {
@@ -57,11 +59,11 @@ In this case, the function will report on the majority value within the buffer. 
  data(shortMove)
 
  # observation time
- obs.time <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
+ z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- seg <- moveSeg(r, shortMove, obs.time, data.type="cat")
+ seg <- moveSeg(r, z, shortMove, data.type="cat")
 
 }
 }

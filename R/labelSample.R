@@ -2,10 +2,10 @@
 #'
 #' @description {Pixel-based labeling of spatially connected groups of points in a \emph{SpatialPoints} object.}
 #' @param x Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.
+#' @param y Pixel resolution or a valid raster layer.
 #' @param agg.radius Minimum radius for pixel aggregation. Unit depends on the projection of the data.
 #' @param nr.points Minimum number of observations per pixel.
 #' @param nr.pixels Minimum number of pixels per region.
-#' @param y Pixel resolution or a valid raster layer.
 #' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @return A numeric \emph{vector} with region identifiers for each observation in \emph{x} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 #' @details {First, the observations are converted to pixel coordinates and pixels with a corresponding number of observations greater than \emph{nr.points}
@@ -41,7 +41,6 @@ labelSample <- function(x, y, nr.points=1, nr.pixels=NULL, agg.radius=NULL) {
 #--------------------------------------------------------------------------------------------------------------------------------------------#
 
   # check input variables
-  if (!exists('x')) {stop('"x" is missing')}
   if (!class(x)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"x" is not of a valid class')}
   if (is.null(crs(x)@projargs)) {stop('"x" is missing a valid projection')}
   if (!is.null(nr.pixels)) {if (!is.numeric(nr.pixels) | length(nr.pixels)!=1) {stop('"nr.pixels" is not a valid input')}}
@@ -100,7 +99,7 @@ labelSample <- function(x, y, nr.points=1, nr.pixels=NULL, agg.radius=NULL) {
   #--------------------------------------------------------------------------------------------------------------------------------------------#
 
   #determine radius (in pixels)
-  agg.radius <- round((agg.radius/res(y)[1])+0.1)
+  agg.radius <- (round((agg.radius/res(y)[1])+0.1)*2) + 1
 
   # dilate samples
   if (agg.radius > 0) {

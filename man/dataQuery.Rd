@@ -8,7 +8,7 @@ dataQuery(x, y, x.dates, y.dates, time.buffer, spatial.buffer = NULL,
   smooth.fun = NULL)
 }
 \arguments{
-\item{x}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
+\item{x}{Object of class \emph{RasterStack}, \emph{RasterBrick}.}
 
 \item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
@@ -16,30 +16,25 @@ dataQuery(x, y, x.dates, y.dates, time.buffer, spatial.buffer = NULL,
 
 \item{y.dates}{Object of class \emph{Date} with \emph{y} observation dates.}
 
-\item{time.buffer}{Two element vector with temporal search buffer (expressed in days).}
+\item{time.buffer}{Two element vector with a temporal search buffer (expressed in days).}
 
 \item{spatial.buffer}{Spatial buffer size used to smooth the returned values. The unit depends on the spatial projection.}
 
 \item{smooth.fun}{Smoothing function applied with \emph{spatial.buffer}.}
 }
 \value{
-An object of class \emph{data.frame} with the selected values and their corresponding dates.
+A \emph{data.frame} with the selected values and their corresponding dates.
 }
 \description{
 Query environmental data for coordinate pairs using the nearest non NA value in time.
 }
 \details{
-{Returns environmental variables from a raster object for a given set of x and y coordinates depending on the
-temporal distance between the sample observation date (\emph{y.dates}) and the date on which the environmental data was
-collected (\emph{x.dates}). Within the buffer specified by \emph{time.buffer}, the function will search for the nearest
-non \emph{NA} value with the shortest temporal distance. The user can adjust \emph{time.buffer} to control which pixels
-are considered in this analysis. For example, \emph{time.buffer} can be set to c(30,0) prompting the function to ignore
-environmental information acquired after the sample observation date and limit the search to -30 days. If \emph{time.buffer}
-is set to null all acquisitions are considered. The user may also provide \emph{spatial.buffer} to spatially smooth the selected
-environmental information. In this case, for each sample, the function will consider the neighboring pixels within the selected
-acquisition and apply a smoothing function defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean
-will be returned by default. If \emph{x} is a \emph{data.frame} \emph{spatial.buffer} and \emph{smooth.fun} are ignored and
-\emph{x.dates} should refer to each column.}
+{Returns environmental variables from a multi-layer raster object \emph{x} for a given set of coordinates (\emph{y}) depending
+on the temporal distance between the observation dates (\emph{y.dates}) and the date on which each layer in the environmental data was
+collected (\emph{x.dates}). \emph{time.buffer} controls the search for non-NA values in time and is adjusted to the observation date of
+each element in \emph{y}. The user may also provide \emph{spatial.buffer} to spatially smooth the selected environmental information. In
+this case, for each sample, the function will consider the neighboring pixels within the selected acquisition and apply a smoothing function
+defined by \emph{smooth.fun}. If \emph{smooth.fun} is not specified, a weighted mean will be returned by default.}
 }
 \examples{
 {

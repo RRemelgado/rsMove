@@ -6,7 +6,7 @@
 #' @param return.shp Logical. Should the function return polygons of the regions? Default is FALSE.
 #' @return A List containing a vector of region ID's per data point (\emph{$indices}) and region polygons (\emph{$polygons}).
 #' @importFrom sp Polygon Polygons SpatialPolygons SpatialPolygonsDataFrame
-#' @importFrom ggplot2 fortify ggplot aes geom_polygon labs
+#' @importFrom ggplot2 fortify ggplot aes_string geom_polygon labs
 #' @importFrom raster extent crs
 #' @importFrom grDevices chull
 #' @details {First, the function builds a raster with a resolution equal to \emph{y} and the
@@ -102,7 +102,7 @@ hotMove <- function(x, y, return.shp=FALSE) {
     tmp <- lapply(uv, pc)
     shp <- SpatialPolygonsDataFrame(SpatialPolygons(tmp, proj4string=crs(x)), data.frame(region=uv))
     shp.df <- fortify(shp, region="region")
-    shp.p <- ggplot(shp.df, aes(x=long, y=lat, fill=factor(id, levels=as.character(sort(as.numeric(unique(shp.df$id))))))) +
+    shp.p <- ggplot(shp.df, aes_string(x="long", y="lat", fill=factor("id", levels=as.character(sort(as.numeric(unique(shp.df$id))))))) +
       geom_polygon() + labs(x="Lon", y="Lat", fill="Region ID")
 
     # return output

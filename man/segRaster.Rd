@@ -20,13 +20,10 @@ A list object.
 {Connected-region based raster segmentation that preserves spatial gradients.}
 }
 \details{
-{The function segments an input raster layer (\emph{x}) using a
-connected component region labeling approach. For each pixel, the function
-estimates the difference between it and its immediate neighbors. If the
-difference is below the threshold defined by \emph{break.point} these are
-aggregated into a single region. Moreover, the user can define a minimum pixel
-value using \emph{min.value} which will ignore all pixels below that value. The
-output of this function consists of:
+{The function segments \emph{x} using a connected component region labeling approach. For each pixel, the
+function estimates the difference between it and its immediate neighbors. The pixels where the difference is below
+\emph{break.point} are aggregated into a single region. Moreover, the user can define a minimum pixel value using
+\emph{min.value} which will ignore all pixels below it. The output of this function consists of:
 \itemize{
  \item{\emph{regions} - Region raster image.}
  \item{\emph{stats} - Basic statistics for each pixel region.}}}

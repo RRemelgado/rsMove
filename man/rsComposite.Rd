@@ -4,43 +4,41 @@
 \alias{rsComposite}
 \title{rsComposite}
 \usage{
-rsComposite(img, img.dates, obs.dates, comp.method = "closest",
+rsComposite(x, x.dates, obs.dates, comp.method = "closest",
   temporal.buffer = NULL)
 }
 \arguments{
-\item{img}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
+\item{x}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{img.dates}{Object of class \emph{Date} with \emph{img} observation dates.}
+\item{x.dates}{Object of class \emph{Date} with \emph{x} observation dates.}
 
 \item{obs.dates}{Object of class \emph{Date} with reference dates.}
 
-\item{comp.method}{One of "closest" or "phenological".}
+\item{comp.method}{One of "closest" or "phenological". The default is "closest".}
 
-\item{temporal.buffer}{Search buffer (expressed in days). The default is 30.}
+\item{temporal.buffer}{Search buffer (expressed in days). The default is NULL.}
 }
 \value{
 A \emph{list}.
 }
 \description{
-{Phenological and date driven Pixel Based Compositing (PBC)
-of remote sensing data supported by GPS tracking date information.}
+{Phenological and date driven Pixel Based Compositing (PBC).}
 }
 \details{
-{The function uses a multi-layer raster object to build a composite for
-a reference date which corresponds to the median of \emph{obs.dates}. Moreover,
-the function determines the Median Absolute Deviation (MAD) of \emph{obs.dates}
-which determines the temporal buffer that is used to search for usable images.
-As an alternative, \emph{temporal.buffer} can be specified manually and will
-be required if \emph{obs.dates} consists of a single value. The user can also
-specify how the compositing should be done. \emph{comp.method} can be set to:
+{The function uses a multi-layer raster object to build a composite for a reference date which
+corresponds to the median of \emph{obs.dates}. Moreover,the function estimates the Median Absolute Deviation
+(MAD) of \emph{obs.dates} which determines the temporal buffer that is used to search for usable data. As an
+alternative, \emph{temporal.buffer} can be specified manually and will be required if \emph{obs.dates} consists
+of a single value. The user can also specify how the compositing should be done. \emph{comp.method} can be set to:
 #' \itemize{
- \item{\emph{closest} - Uses layer with the closest possible date in relation to the reference date.}
- \item{\emph{phenological} - Uses the layer with the Day of the Year (DoY) in relation to the reference date.}}
+ \item{\emph{closest} - Selects pixels from layers with the closest possible date.}
+ \item{\emph{phenological} - Selects pixels from layers with the closest Day of the Year (DoY).}}
 The final output of \emph{rsComposite} is a list consisting of:
 #' \itemize{
  \item{\emph{composite} - Final image composite}
- \item{\emph{dates} - Temporal composition of the composite reporting on the julian day}
+ \item{\emph{dates} - Temporal composition of the composite reporting on the julian day (origin is "1970-01-01").}
  \item{\emph{pixel.count} - pixel count of unique values in \emph{dates}. Additionally, it reports on NA values.}
+ \item{\emph{pixel.count.plot} - Plot with relative frequency of pixels per date extracted from \emph{pixel.count}.}
  \item{\emph{target.date} - Reference date used during compositing.}
  \item{\emph{temporal.buffer} - Temporal buffer used during compositing.}}
  If \emph{pheno2} is used, for each pixel, the function will estimate a weighted
@@ -60,14 +58,14 @@ The final output of \emph{rsComposite} is a list consisting of:
 
  # raster dates
  file.name <- names(r.stk)
- img.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
+ x.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # target date
  obs.dates = as.Date("2013-06-01")
 
  # build composite
- r.comp <- rsComposite(r.stk, img.dates, obs.dates, comp.method="closest", temporal.buffer=90)
+ r.comp <- rsComposite(r.stk, x.dates, obs.dates, comp.method="closest", temporal.buffer=90)
 
 }
 }

@@ -4,28 +4,35 @@
 \alias{hotMove}
 \title{hotMove}
 \usage{
-hotMove(xy, pixel.res, return.shp = FALSE)
+hotMove(x, y, return.shp = FALSE)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
+\item{x}{Object of class \emph{SpatialPoints} of \emph{SpatialPointsDataFrame}.}
 
-\item{pixel.res}{Grid resolution. Unit depends on \emph{xy} projection.}
+\item{y}{Grid resolution. Unit depends on \emph{x} projection.}
 
 \item{return.shp}{Logical. Should the function return polygons of the regions? Default is FALSE.}
 }
 \value{
-List containing a vector of region ID's per data point (\emph{$indices}) and region polygons (\emph{$polygons}).
+A List containing a vector of region ID's per data point (\emph{$indices}) and region polygons (\emph{$polygons}).
 }
 \description{
 Detection of geographic regions of samples using a pixel based approach.
 }
 \details{
-{First, the function builds a raster with a resolution equal to \emph{pixel.res} and the
-spatial extent of \emph{xy}. Then, each point in \emph{xy} is converted into pixel coordinates. Based
-on the unique pixel coordinates, the function then evaluates the spatial connectivity of these pixels
-using a 8-neighbor connected component labeling algorithm to detect regions. Finally, the ID's are related
-back to each individual data point in \emph{xy} based on their pixel coordinates and - if \emph{return.shp} is TRUE -
- a polygon is derived from the convex hull of the points within each region.}
+{First, the function builds a raster with a resolution equal to \emph{y} and the
+spatial extent of \emph{x}. Then, each point in \emph{x} is converted into pixel coordinates.
+Based on the unique pixel coordinates, the function then evaluates the spatial connectivity of
+these pixels using a 8-neighbor connected component labeling algorithm to detect regions. Finally,
+the ID's are related back to each individual data point in \emph{x} based on their pixel coordinates
+and - if \emph{return.shp} is TRUE - a polygon is derived from the convex hull of the points within
+each region. The output of the function consists of:
+ \itemize{
+ \item{\emph{region.id} - Vector reporting on the region each element in \emph{x} belongs to.}
+ \item{\emph{polygons} - Polygons for each unique region in \emph{region.id} specified by the data column \emph{region}.}
+ \item{\emph{plot} - A plot with the output of \emph{polygons} accessible if \emph{return.shp} is TRUE.}
+ }
+ }
 }
 \examples{
 {
@@ -39,7 +46,7 @@ data(longMove)
 hm <- hotMove(longMove, 0.1, return.shp=TRUE)
 
 # plot shapefile (color by region)
-plot(hm$polygons, col=hm$indices)
+plot(hm$polygons, col=hm$region.id)
 
 }
 }

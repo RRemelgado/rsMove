@@ -11,9 +11,9 @@ moveReduce(x, y, z, derive.raster = FALSE)
 
 \item{y}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
-\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.}
+\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the observation time of \emph{x}.}
 
-\item{derive.raster}{Should a raster with the total time per pixel be provided?}
+\item{derive.raster}{Should a \emph{RasterLayer} with the total time per pixel be provided?}
 }
 \value{
 A \emph{list} object.
@@ -22,15 +22,14 @@ A \emph{list} object.
 Pixel based summary of movement data that preserves periodic movements.
 }
 \details{
-{Reduces a set of input samples (\emph{x}) based on their corresponding pixel coordinates
-within a reference raster (\emph{y}). Using this data, the function identifies temporal segments
-corresponding to groups of consecutive samples found within the same pixel. In this process, revisits
+{Translates (\emph{x}) into pixel coordinates within a reference raster (\emph{y}). The function
+identifies temporal segments corresponding to groups of consecutive observations within the same pixel. In this process, revisits
 to recorded pixels are preserved. Once the segments are identified, the function derives mean x and y
 coordinates for each of them and evaluates the time spent within each pixel. The function reports on
 the start and end timestamps, the mean timestamp and the elapsed time. The output of the function
 consists of:
 \itemize{
-\item{\emph{r.shp} - Shapefile with reduced sample set and its corresponding temporal information.}
+\item{\emph{points} - Shapefile with reduced sample set and its corresponding temporal information.}
 \item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
 \item{\emph{indices} - Indices for each sample in \emph{x} showing which samples were aggregated.}}
 

@@ -4,12 +4,12 @@
 \alias{specVar}
 \title{specVar}
 \usage{
-specVar(img, pixel.res)
+specVar(x, y)
 }
 \arguments{
-\item{img}{Object of class \emph{RasterLayer}.}
+\item{x}{Object of class \emph{RasterLayer}.}
 
-\item{pixel.res}{Spatial resolution (unit depends on the spatial projection).}
+\item{y}{Spatial resolution (unit depends on the spatial projection).}
 }
 \value{
 A \emph{list}.
@@ -19,12 +19,12 @@ A \emph{list}.
 how the spectral variability within a pixel change with the change in spatial resolution.}
 }
 \details{
-{Given a raster object (\emph{img}), the function determines how degrading its spatial resolution impacts
-our ability to perceive the complexity of the landscape. For the pixel resolution given by \emph{pixel.res}, The
-function resamples \emph{img} and estimates the Mean Absolute Percentage Error (MAPE) for each pixel. The MAPE is
-estimated as \eqn{100 / n * sum(abs(O - A / O)} where \emph{O} are the original value in \emph{img}, \emph{A} the
-aggregated value in the aggregated image and \emph{n} the number of non-NA pixels in the original image The
-output of the function consists of:
+{Given a raster object (\emph{x}), the function determines how degrading its spatial resolution
+impacts our ability to perceive the complexity of the landscape. For the pixel resolution given by \emph{y},
+The function resamples \emph{x} and estimates the Mean Absolute Percentage Error (MAPE) for each pixel. The
+MAPE is estimated as \eqn{100 / n * sum(abs(O - A / O)} where \emph{O} are the original value in \emph{x},
+\emph{A} the aggregated value in the aggregated image and \emph{n} the number of non-NA pixels in the original
+image The output of the function consists of:
 \itemize{
  \item{\emph{mape} - MAPE raster.}
  \item{\emph{plot} - Histogram of \emph{mape}.}}}

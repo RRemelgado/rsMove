@@ -106,7 +106,7 @@ specVar <- function(x, y) {
   # build plot object
   out <- data.frame(MAPE=out)
   p <- ggplot(out, aes_string(x="MAPE")) + theme_bw() +
-    geom_histogram(binwidth=sd(out$MAPE, na.rm=TRUE), aes(y=..count../sum(..count..)*100)) +
+    geom_histogram(binwidth=sd(out$MAPE, na.rm=TRUE)) +
     ylab('Relative freq. (%)') + xlab("Value") + ylim(0,100)
 
   #---------------------------------------------------------------------------------------------------------------------#

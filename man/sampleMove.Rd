@@ -12,27 +12,35 @@ sampleMove(xy, obs.time, search.radius, distance.method = "m",
 
 \item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the same length as \emph{xy}.}
 
-\item{search.radius}{Sample search radius (in meters).}
+\item{search.radius}{Numeric element with search radius (in meters).}
 
 \item{distance.method}{How should the distance be estimated? One of 'm' or 'deg'. Default is 'm'.}
 
 \item{time.unit}{Time unit to estimate elapsed time. See \code{\link[base]{difftime}} for keywords. Default is \emph{mins}.}
 }
 \value{
-A \emph{SpatialPointsDataFrame} with a reduced sample set.
+A \emph{SpatialPointsDataFrame}.
 }
 \description{
 Remote sensing oriented sampling of stops along a movement track.
 }
 \details{
-{This function finds location where an animal showed little or no movement based on GPS tracking data.
-It looks at the distance among consecutive samples and places pointer when the distance is bellow the defined
-threshold (\emph{search.radius}). When a pointer is found, the function looks at the distance between the pointer and
-the following samples. While this is below the distance threshold, the samples are assigned to the same segment.
-Then, for each segment, the function summarizes the corresponding samples deriving mean coordinates, the start,
-end and total time spent and the total number of samples per segment ('count'). The user should selected \emph{distance.method}
-in accordance with the projection system associated to the data. If 'm' it bases this analysis on the the ecludian distance.
-However, if 'deg' it set, the function uses the haversine formula.}
+{This function finds location where an animal showed little or no movement based on GPS tracking data. It looks at
+the distance among consecutive samples and identifies the start of a segment when the distance is bellow \emph{search.radius}.
+When a segment is started, the function looks at the distance between the starting point and the following observations are
+assigned to the same segment until the threshold is exceeded. When this occurs, the function summarizes the observations assigned
+to the segment deriving mean coordinates, the start, end and total time spent and the total number of observations per segment.
+The user should selected \emph{distance.method} in accordance with the projection system associated to the data. If 'm', the
+function bases this analysis on the the ecludian distance. However, if 'deg' it set, the function uses the haversine formula.
+The final output is a \emph{SpatialPointsDataFrame} containing the following information:
+\itemize{
+\item{\emph{x} - X coordinate.}
+\item{\emph{y} - Y coordinate.}
+\item{\emph{start.time} - Start time of segment.}
+\item{\emph{end.time} - End time of segment.}
+\item{\emph{total.time} - Elapsed time within the segment.}
+\item{\emph{nr.samples} - Number of observations.}
+}}
 }
 \examples{
 {

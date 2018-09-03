@@ -25,7 +25,7 @@
 #' \item{\emph{end.time} - End time of segment.}
 #' \item{\emph{total.time} - Elapsed time within the segment.}
 #' \item{\emph{nr.samples} - Number of observations.}
-#' }
+#' }}
 #' @examples {
 #'
 #'  require(raster)

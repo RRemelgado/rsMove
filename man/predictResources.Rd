@@ -11,7 +11,7 @@ predictResources(x, y, z, env.data = NULL)
 
 \item{y}{Object of class \emph{data.frame} with environmental variables for background samples.}
 
-\item{z}{Numeric or character vector with sample region labels. If missing, "x" is assumed as one region.}
+\item{z}{\emph{Numeric} or \emph{character} vector with sample region labels. If missing, \emph{x} is assumed as being one region.}
 
 \item{env.data}{Object of class \emph{RasterStack} or \emph{RasterBrick} with environmental variables in \emph{x} and \emph{y}.}
 }
@@ -22,21 +22,21 @@ A \emph{list}.
 Spatially stratified predictive modeling of resource suitability based on presence/absence samples.
 }
 \details{
-{Modeling of resource suitability using animal movement data following a recent paper (Remelgado et al, 2017). For each
-unique label in \emph{z}, the function keeps it for validation and uses the remaining samples for training. Then, the
-function evaluates the performance of this model reporting (internally) on the number of true positives, false positives and the
-number of validation and predicted cases for both presences and absences. Once all sample regions are used for validation, the
-reported values are summed and used to derive the F1-measure. The F1-measure is estimated as \emph{2 * (P * R) / (P + R)} where
-\emph{P} is the Precision (ratio of true positives within the number of predicted values) and \emph{R} is the Recall (ratio of
-true positives within the number of validation samples). As a consequence, rather than reporting on an average performance, the
-final performance assessment reported by \emph{predictResources} depicts an objective picture on how the model performed among the
-different sets sample regions. This metric is provided for presences (\emph{x}) and absences ({\emph{y}})
-separately offering an overview on the stability of the model. This analysis is performed using a Random Forest model as provided
-within the \code{\link[caret]{train}} function of the caret package. The final predictive model is then derived with all samples.
-The output of \emph{predictResources} is a list object consisting of:
+{Modeling of resource suitability using animal movement data following the method of Remelgado et al (2017). Each
+unique label in \emph{z} is kept for validation while the remaining samples are used for training. Then, the function evaluates
+the performance of this model reporting (internally) on the number of true positives, false positives and the number of cases for
+both presences and absences. Once all sample regions are used for validation, the reported values are summed and used to derive a
+F1-measure. The F1-measure is estimated as \emph{2 * (P * R) / (P + R)} where \emph{P} is the Precision (ratio of true positives
+within the number of predicted values) and \emph{R} is the Recall (ratio of true positives within the number of validation samples).
+As a consequence, rather than reporting on an average performance, the final performance assessment reported by \emph{predictResources}
+depicts an objective picture on how the model performed among the different sets sample regions. This metric is provided for presences
+(\emph{x}) and absences ({\emph{y}}) separately informing on the stability of the model. This analysis is performed using a Random Forest
+model as provided within the \code{\link[caret]{train}} function of the caret package. The final predictive model is then derived with all
+samples. The output of the function is a list object consisting of:
 \itemize{
  \item{\emph{f1} - \emph{data.frame} with final F1-measure for presences and absences.}
- \item{validation - \emph{data.frame} with region identifiers and validation sample count at each iteration.}
+ \item{\emph{overal..validation} - \emph{data.frame} with region identifiers and validation sample count at each iteration.}
+ \item{\emph{sample.validation} -:Logical vector with the validation of each observation in \emph{x}.}
  \item{\emph{iteration.models} - List of models estimated at each iteration.}
  \item{\emph{final.model} - Final predictive model based on all samples.}
  \item{\emph{probabilities} - Predicted probability image. Given if \emph{env.data} is set.}}}
@@ -44,9 +44,7 @@ The output of \emph{predictResources} is a list object consisting of:
 \examples{
 \dontrun{
 
- require(rgdal)
  require(raster)
- require(sp)
 
  # read remote sensing data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
@@ -60,7 +58,7 @@ The output of \emph{predictResources} is a list object consisting of:
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # remove redundant samples
- shortMove <- moveReduce(shortMove, obs.time, r.stk)$points
+ shortMove <- moveReduce(shortMove, r.stk, obs.time)$points
 
  # retrieve remote sensing data for samples
  rsQuery <- extract(r.stk, shortMove)

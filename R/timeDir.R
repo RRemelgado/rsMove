@@ -11,7 +11,7 @@
 #' @importFrom raster crs extract
 #' @importFrom stats lm
 #' @importFrom grDevices colorRampPalette
-#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab element_text element_blank geom_hist aes_string
+#' @importFrom ggplot2 ggplot geom_point theme guides scale_fill_gradientn scale_size_continuous ylab xlab element_text element_blank geom_histogram aes_string
 #' @seealso \code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
 #' @return A \emph{vector} with a requested statistical metric for each point in \emph{xy} and informative plots.
 #' @details {This function quantifies environmental change in time along a movement track. First, for each point in \emph{xy},
@@ -123,8 +123,7 @@ timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, st
 #-------------------------------------------------------------------------------------------------------------------------------#
 
   p1 <- ggplot(df, aes_string(x="value")) + theme_bw() +
-    geom_histogram(binwidth=sd(df$value, na.rm=TRUE),
-                   aes(y=..count../sum(..count..))) +
+    geom_histogram(binwidth=sd(df$value, na.rm=TRUE)) +
     ylab('Relative freq. (%)') + xlab("Value")
 
   # build plot object

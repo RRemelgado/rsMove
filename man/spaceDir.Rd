@@ -4,20 +4,20 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(xy, img, sample.direction, data.type, obs.time = NULL,
+spaceDir(x, y, sample.direction, data.type, obs.time = NULL,
   distance.method = "m", buffer.size = NULL, stat.fun = NULL,
   min.count = 2)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
 
-\item{img}{Object of class \emph{RasterLayer}.}
+\item{y}{Object of class \emph{RasterLayer}.}
 
 \item{sample.direction}{One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.}
 
 \item{data.type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{xy} observation dates.}
+\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.}
 
 \item{distance.method}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
 
@@ -31,23 +31,22 @@ spaceDir(xy, img, sample.direction, data.type, obs.time = NULL,
 A \emph{list} containing shapefiles with information on environmental change and travel distance/time and a plot of the results.
 }
 \description{
-Analysis of environmental change in space along a set of coordinate pairs.
+Analysis of environmental change in space along a movement track.
 }
 \details{
-{This function evaluates how do environmental conditions change in space along a movement track. For
-each set of consecutive points, the function applies a spatial moving window which boundaries depend on the
-definition of \emph{sample.direction}. Then, within each segment, the function extracts all pixels within it.
-If \emph{buffer.size} is defined, the function will consider a buffer when performing this extraction. Finally,
-the the extracted \emph{NA} values are summarized into a given metric. If \emph{data.type} is \emph{cont}, a
-statistical function can be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the
-function will report on the dominant class and on the shannon index for each segment. Note that the function
-will work with the raster value associated to each class. On top of this, \emph{spaceDir} will also report on
-the linear distance traveled between endpoints (in meters) and the travel time (in minutes). The output of the
-function is a list consisting of:
+{This function quantifies environmnetal changes in space along a movement track. For each set of consecutive points, the
+function will derive coordinates for all unique pixels that overlap with - and are beteween - each point in a spatial moving widow
+with a shape defined by \emph{sample.direction}. The user can define \emph{buffer.size} to consider all pixels within a predefined
+spatial distance of the initially selected pixels. Once all pixels are selected, the function will extract the corresponding values
+in \emph{y} summarize them using a pre-defined statistical function. If \emph{data.type} is \emph{cont}, a statistical function can
+be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the function will report on the dominant class and
+on the shannon index for each window. If the number of pixels within the a window is lower than \emph{min.count} the function will
+return \emph{NA}. On top of this, \emph{spaceDir} will also report on the linear distance traveled between endpoints (in meters) and
+the travel time (in minutes). The output of the function is a list consisting of:
 \itemize{
  \item{\emph{endpoints} - Point shapefile with endpoints of each spatial segment. Reports on a given statistical metric, traveled distance, travel time and the mean timestamp.}
  \item{\emph{segments} - Line shapefile with spatial segments. Reports on the same information as \emph{endpoints}.
- \item{\emph{plot} - Plotting of \emph{segments} where each segment is colored according to its corresponding statistical value.}}}}
+ \item{\emph{plot} - Plotting of \emph{segments} where each segment is colored according to the extracted raster value.}}}}
 }
 \examples{
 {
@@ -65,7 +64,7 @@ function is a list consisting of:
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # perform directional sampling
- of <- function(x) {lm(x~c(1:length(x)))$coefficients[2]}
+ of <- function(i) {lm(i~c(1:length(i)))$coefficients[2]}
  s.sample <- spaceDir(shortMove, r, "backward", "cont", obs.time=obs.time, stat.fun=of)
 
 }
