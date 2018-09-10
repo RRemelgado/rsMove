@@ -102,7 +102,7 @@ plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL) {
         scale_fill_gradientn(name="Value", colours=cr(10))}
     if (var.type=="cat") {
       df$value <- factor(df$value)
-      p <- ggplot(df, aes_string(x="x", y="y", color="value", size="time")) + theme_bw() + geom_point() +
+      p <- ggplot(df) + theme_bw() + geom_point(aes_string(x="x", y="y", color="value", size="time")) +
         guides(col=guide_legend(override.aes=list(shape=15, size=6))) +
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
               panel.grid.minor=element_blank()) +
