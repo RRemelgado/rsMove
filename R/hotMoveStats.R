@@ -84,7 +84,7 @@ hotMoveStats <- function(x, y, z) {
       return(odf)}))
 
     # region stats
-    odf2 <- data.frame(region.id=r, start.date=min(odf1$start.date), end.date=min(odf1$end.date), total.time=sum(odf1$total.time), nr.segments=nrow(odf1),
+    odf2 <- data.frame(region.id=r, start.date=min(odf1$start.date), end.date=max(odf1$end.date), total.time=sum(odf1$total.time), nr.segments=nrow(odf1),
                        nr.individuals=length(unique(odf1$nr.individuals)), nr.samples=sum(odf1$nr.samples))
 
     return(list(region=odf2, segment=odf1))

@@ -9,6 +9,7 @@
 #' @importFrom ggplot2 fortify ggplot aes_string geom_polygon labs
 #' @importFrom raster extent crs
 #' @importFrom grDevices chull
+#' @importFrom plyr join
 #' @details {First, the function builds a raster with a resolution equal to \emph{y} and the
 #' spatial extent of \emph{x}. Then, each point in \emph{x} is converted into pixel coordinates.
 #' Based on the unique pixel coordinates, the function then evaluates the spatial connectivity of
@@ -100,9 +101,11 @@ hotMove <- function(x, y, return.shp=FALSE) {
     # build/merge polygons
     uv <- sort(unique(rid))
     tmp <- lapply(uv, pc)
-    shp <- SpatialPolygonsDataFrame(SpatialPolygons(tmp, proj4string=crs(x)), data.frame(region=uv))
-    shp.df <- fortify(shp, region="region")
-    shp.p <- ggplot(shp.df, aes_string(x="long", y="lat", fill=factor("id", levels=as.character(sort(as.numeric(unique(shp.df$id))))))) +
+    shp <- SpatialPolygonsDataFrame(SpatialPolygons(tmp, proj4string=crs(x)), data.frame(id=uv))
+    shp.df <- fortify(shp, region="id")
+    shp.df <- join(shp.df, shp@data, by="id")
+    shp.df$id <- factor(shp.df$id, levels=as.character(sort(as.numeric(unique(shp.df$id)))))
+    shp.p <- ggplot(shp.df, aes_string(x="long", y="lat", group="group", fill="id")) +
       geom_polygon() + labs(x="Lon", y="Lat", fill="Region ID")
 
     # return output
