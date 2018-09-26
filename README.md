@@ -2,6 +2,7 @@
 # rsMove
 [![CRAN version](https://www.r-pkg.org/badges/version/rsMove)](https://CRAN.R-project.org/package=rsMove)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=rsMove)
+[![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=fieldRS)
 
 ### Why develop rsMove?
 
