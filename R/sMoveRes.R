@@ -2,20 +2,19 @@
 #'
 #' @description {Tool to support the selection of an adequate satellite spatial resolution. Evaluates how the change
 #' in spatial resolution changes the amount of samples and sample regions based on a set of coordinate pairs.}
-#' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param pixel.res vector of spatial resolutions (unit depends on spatial projection).
+#' @param x Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
+#' @param y vector of spatial resolutions (unit depends on spatial projection).
 #' @importFrom raster extent
 #' @importFrom grDevices colorRampPalette
 #' @importFrom ggplot2 ggplot xlab ylab theme geom_bar
 #' @return A \emph{list}.
-#' @details {Given a vector of pixel resolutions (\emph{pixel.res}), the function determines the number of unique pixels
+#' @details {Given a vector of pixel resolutions (\emph{y}), the function determines the number of unique pixels
 #' and unique pixel regions after their temporal aggregation. For each spatial resolution, the function starts by converting
-#' \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number
+#' \emph{x} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number
 #' of samples and sample regions. The output of the function consists of:
 #' \itemize{
 #'  \item{\emph{stats} - Summary statistics reporting on the number of unique samples and sample regions per spatial resolution.}
-#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}
-#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each spatial resolution.}}}
+#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}}}
 #' @seealso \code{\link{tMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'
@@ -32,74 +31,46 @@
 
 #-------------------------------------------------------------------------------------------------------------------------------#
 
-sMoveRes <- function(xy, pixel.res) {
+sMoveRes <- function(x, y) {
 
 #---------------------------------------------------------------------------------------------------------------------#
 #  1. check inpur variables
 #---------------------------------------------------------------------------------------------------------------------#
 
-  if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
-  if (!is.numeric(pixel.res)) {stop('"pixel.res" is not numeric')}
-  if (!is.vector(pixel.res)) {stop('"pixel.res" is not a vector')}
+  if (!class(x)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"x" is not of a valid class')}
+  if (!is.numeric(y)) {stop('"y" is not numeric')}
+  if (!is.vector(y)) {stop('"y" is not a vector')}
 
   # evaluate each resolution
-  ext <- extent(xy) # reference extent
   out <- list() # output variable
-  for (p in 1:length(pixel.res)) {
 
 #---------------------------------------------------------------------------------------------------------------------#
-# 2. determine grid coordinates for given pixels
+# 2. find unique sample regions
 #---------------------------------------------------------------------------------------------------------------------#
 
-    nc <- round((ext[2]-ext[1]) / pixel.res[p]) + 1 # number of columns
-    nr <- round((ext[4]-ext[3]) / pixel.res[p]) + 1 # number of rows
-    sp <- (round((ext[4]-xy@coords[,2])/pixel.res[p])+1) + nr * round((xy@coords[,1]-ext[1])/pixel.res[p]) # convert coordinates to pixel positions
-    up <- unique(sp) # unique pixel positions
+  out <-do.call(rbind, lapply(pixe.res, function(r) {
+
+    # reference raster (extend to avoid missing samples along the borders)
+    ext <- extend(raster(extent(x), res=r, crs=crs(x)), c(2,2))
+
+    # cell positions of x
+    sp <- cellFromx(ext, x)
+    up <- unique(sp)
+
+    # build connected component image
+    regions <- clump(rasterize(x, ext, 1))
+
+    # output data frame with statistics
+    return(data.frame(nr.pixels=length(up), nr.regions=length(unique(extract(regions, up))), resolution=r))
+
+  }))
 
 #---------------------------------------------------------------------------------------------------------------------#
-# 3. find unique sample regions
-#---------------------------------------------------------------------------------------------------------------------#
-
-    # evaluate pixel connectivity
-    regions <- matrix(0, nr, nc)
-    for (r in 1:length(up)) {
-      rp <- ((up[r]-1) %% nr)+1
-      cp <- ((up[r]-1) %/% nr)+1
-      if (cp > 1) {sc<-cp-1} else {sc<-cp}
-      if (cp < nc) {ec<-cp+1} else {ec<-cp}
-      if (rp > 1) {sr<-rp-1} else {sr<-rp}
-      if (rp < nr) {er<-rp+1} else {er<-rp}
-      if (max(regions[sr:er,sc:ec])>0) {
-        uv <- unique(regions[sr:er,sc:ec])
-        uv <- uv[which(uv > 0)]
-        mv <- min(uv)
-        regions[rp,cp] <- mv
-        for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
-      } else {regions[rp,cp] <- max(regions)+1}
-    }
-
-    # update output
-    uv <- unique(regions[which(regions>0)])
-    out[[p]] <- list(count=length(up), regions=length(uv), indices=sp)
-
-  }
-
-  # output data frame with statistics
-  out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}),
-                    n.regions=sapply(out, function(x) {x$regions}))
-  row.names(out1) <- as.character(pixel.res)
-
-  # output data frame with sample indices
-  out <- lapply(out, function(x) {x$indices})
-  out2 <- do.call(cbind, lapply(out, data.frame, stringsAsFactors=FALSE))
-  colnames(out2) <- as.character(pixel.res)
-
-#---------------------------------------------------------------------------------------------------------------------#
-# 4. plot output
+# 3. plot output
 #---------------------------------------------------------------------------------------------------------------------#
 
   # determine fill scale range
-  mv = max(out1$n.regions)
+  mv = max(out$nr.regions)
   if (mv < 100) {
     mv <- mv / 10
     fr <- round(mv*2)/2
@@ -111,7 +82,7 @@ sMoveRes <- function(xy, pixel.res) {
     if (mv > fr) {fr <- (fr+0.5)*100} else {fr <- fr*100}}
 
   # determine yscale range
-  mv <- max(out1$n.pixels)
+  mv <- max(out$nr.pixels)
   if (mv < 100) {
     mv <- mv / 10
     yr <- round(mv*2)/2
@@ -125,8 +96,8 @@ sMoveRes <- function(xy, pixel.res) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # build plot object
-  out1$pixel.res <- factor(pixel.res, levels=unique(pixel.res))
-  p <- ggplot(out1, aes_string(x="pixel.res", y="n.pixels", fill="n.regions")) +
+  out$resolution <- factor(out$resolution, levels=y)
+  p <- ggplot(out, aes_string(x="pixel.res", y="nr.pixels", fill="nr.regions")) +
     theme_bw() + scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr),
     limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (m)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat="identity") +
@@ -138,6 +109,6 @@ sMoveRes <- function(xy, pixel.res) {
           legend.title=element_text(size=14)) + ylim(0,yr)
 
   # return data frame and plot
-  return(list(stats=out1, plot=p, indices=out2))
+  return(list(stats=out, plot=p))
 
 }

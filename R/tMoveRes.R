@@ -17,8 +17,7 @@
 #' samples and sample regions. The output of the function consists of:
 #' \itemize{
 #'  \item{\emph{stats} - Summary statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
-#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}
-#'  \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each temporal resolution.}}}
+#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}}}
 #' @seealso \code{\link{sMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'
@@ -46,99 +45,45 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
   if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
   if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
   if (class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
+  rp <- crs(xy) # reference projection
 
 #---------------------------------------------------------------------------------------------------------------------#
-# 2. determine grid coordinates for given pixels
-#---------------------------------------------------------------------------------------------------------------------#
-
-  ext <- extend(raster(extent(xy), res=pixel.res, crs=crs(xy)), c(2,2)) # raster extent
-  rd <- dim(ext)# raster dimensions
-  nr <- rd[1] # number of rows
-  nc <- rd[2] # number of columns
-  sp <- cellFromXY(ext, xy) # unique pixels
-  up <- unique(sp) # unique pixel positions
-
-#---------------------------------------------------------------------------------------------------------------------#
-# 3. find unique sample regions
-#---------------------------------------------------------------------------------------------------------------------#
-
-  # evaluate pixel connectivity
-  regions <- matrix(0, nr, nc)
-  for (r in 1:length(up)) {
-    rp <- ((up[r]-1) %% nr)+1
-    cp <- ((up[r]-1) %/% nr)+1
-    if (cp > 1) {sc<-cp-1} else {sc<-cp}
-    if (cp < nc) {ec<-cp+1} else {ec<-cp}
-    if (rp > 1) {sr<-rp-1} else {sr<-rp}
-    if (rp < nr) {er<-rp+1} else {er<-rp}
-    if (max(regions[sr:er,sc:ec])>0) {
-      uv <- unique(regions[sr:er,sc:ec])
-      uv <- uv[which(uv > 0)]
-      mv <- min(uv)
-      regions[rp,cp] <- mv
-      for (u in 1:length(uv)) {regions[which(regions==uv[u])] <- mv}
-    } else {regions[rp,cp] <- max(regions)+1}
-  }
-
-  # update region ID's
-  uregions <- sapply(up, function(x) {regions[x]})
-
-  rm(regions)
-
-#---------------------------------------------------------------------------------------------------------------------#
-# 4. determine pixel aggregations
+# 2. determine pixel aggregations
 #---------------------------------------------------------------------------------------------------------------------#
 
   st <- min(obs.date) # start time
   et <- max(obs.date) # end time
 
-  out <- list() # output variable
-  for (r in 1:length(time.res)) {
+  out <- do.call(rbind, lapply(time.res, function(r) {
 
-    id <- 0 # reference sample ID
-    ind <- vector('numeric', length(xy)) # position index
-    nw <- as.numeric(((et - st) / time.res[r]) + 1) # number of temporal windows
-    sc <- nr <- vector('numeric', nw) # number of regions
+    nw <- as.numeric((et - st) / r + 1) # number of temporal windows
 
-    for (w in 1:nw) {
+    tmp <- do.call(rbind, lapply(1:nw, function(w) {
 
-      # locate pixels within the temporal window
-      loc1 <- which(obs.date >= (st+(time.res[r]*(w-1))) & obs.date <= ((st+time.res[r])+(time.res[r]*(w-1))))
+      loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= ((st+r)+(r*(w-1)))) # reference samples
+      ext <- extend(raster(extent(xy[loc,]), res=pixel.res, crs=rp), c(2,2), vals=NA)
+      regions <- clump(ext) # connected component analysis
+      sp <- cellFromXY(ext, xy[loc,]) # pixel positions of xy
+      up <- unique(sp) # unique pixels
 
-      # quantify unique samples
-      upr <- unique(sp[loc1])
-      for (p in 1:length(upr)) {
-        id <- id + 1
-        loc2 <- which(sp[loc1]==upr[p])
-        ind[loc1[loc2]] <- id}
+      # return stats
+      return(data.frame(nr.pixels=length(up), nr.regions=length(unique(extract(regions, up)))))
 
-      # derive statistics
-      nr[w] <- length(unique(uregions[up%in%upr])) # number of regions
-      sc[w] <- length(upr) # number of samples
+    }))
 
-    }
+    #  estimate final count of pixels/regions
+    return(as.data.frame(t(apply(tmp, 2, sum))))
 
-    # update output
-    out[[r]] <- list(indices=ind, regions=sum(nr), count=sum(sc), window.count=nw)
+  }))
 
-  }
+  row.names(out) <- NULL
 
-  # output data frame with statistics
-  out1 <- data.frame(n.pixels=sapply(out, function(x) {x$count}),
-                     n.regions=sapply(out, function(x) {x$regions}),
-                     n.windows=sapply(out, function(x) {x$regions}),
-                     resolution=time.res)
-
-  # output data frame with sample indices
-  out2 <- do.call(cbind, lapply(out, function(x) {x$indices}))
-  colnames(out2) <- as.character(time.res)
-
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 4. plot output
-  #---------------------------------------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------------------------------------#
+# 3. plot output
+#---------------------------------------------------------------------------------------------------------------------#
 
   # determine yscale range
-  mv <- max(out1$n.pixels)
+  mv <- max(out$nr.pixels)
   if (mv < 100) {
     mv <- mv / 10
     yr <- round(mv*2)/2
@@ -152,8 +97,8 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # build plot object
-  out1$resolution <- as.factor(out1$resolution)
-  p <- ggplot(out1, aes_string(x="resolution", y="n.pixels", fill="n.regions")) + theme_bw() +
+  out$resolution <- as.factor(sort(time.res))
+  p <- ggplot(out, aes_string(x="resolution", y="nr.pixels", fill="nr.regions")) + theme_bw() +
     scale_fill_gradientn(colors=cr(10), name="Nr. Regions\n") + xlab("\nResolution (days)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") +
     theme(axis.text.x=element_text(size=12),
@@ -164,6 +109,6 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
           legend.title=element_text(size=14)) + ylim(0,yr)
 
   # return data frame and plot
-  return(list(stats=out1, plot=p, indices=out2))
+  return(list(stats=out, plot=p))
 
 }
