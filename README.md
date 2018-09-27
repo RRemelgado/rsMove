@@ -2,6 +2,7 @@
 # rsMove
 [![CRAN version](https://www.r-pkg.org/badges/version/rsMove)](https://CRAN.R-project.org/package=rsMove)
 [![CRAN downloads](https://cranlogs.r-pkg.org/badges/last-month/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=rsMove)
+[![CRAN downloads](http://cranlogs.r-pkg.org/badges/grand-total/rsMove?color=brightgreen)](https://CRAN.R-project.org/package=rsMove)
 
 ### Why develop rsMove?
 
@@ -38,6 +39,8 @@ The Department of Remote Sensing of the University of Würzburg has developed ot
 
 * <a href="https://bleutner.github.io/RStoolbox/">RStoolbox</a>
 * <a href="https://github.com/cran/moveVis/">moveVis</a>
+* <a href="https://github.com/RRemelgado/rsMove">fieldRS</a>
+* <a href="https://github.com/RRemelgado/CAWaR">CAWaR</a>
 
 <p align="justify">
 Click <a href="http://remote-sensing.eu/">here</a> for news on our department.
