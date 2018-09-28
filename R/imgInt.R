@@ -32,11 +32,9 @@
 #'  x.dates <- as.Date(paste0(substr(file.name, 2, 5), '-',
 #'  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 #'
-#'  # target dates
-#'  y = as.Date("2013-08-10")
-#'
 #'  # interpolate raster data to target dates
-#'  i.x <- imgInt(r.stk, x.dates, y, c(60,60), xy=shortMove)
+#'  out <- imgInt(extract(r.stk, shortMove), x.dates,
+#'  as.Date("2013-08-10"), c(60,60))
 #'
 #' }
 #' @export
@@ -56,7 +54,7 @@ imgInt <- function(x, x.dates, y, time.buffer) {
   if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')}
 
   # check environmnetal information
-  if (!class(x)[1]%in%c('RasterStack', 'RasterBrick', 'data.frame')) {stop('"x" is not of a valid class')}
+  if (!class(x)[1]%in%c('RasterStack', 'RasterBrick', 'data.frame', 'matrix')) {stop('"x" is not of a valid class')}
   if (class(x)[1]%in%c('RasterStack', 'RasterBrick')) {
     if (nlayers(x) != length(x.dates)) {stop('"x" and "x.dates" have a different dimensions')}
     processRaster <- TRUE}
@@ -100,7 +98,7 @@ imgInt <- function(x, x.dates, y, time.buffer) {
       out <- brick(x[[1]], nl=length(y)) # output image stack
       v <- getValues(x) # import values into memory
       v <- t(apply(v, 1, intTime)) # interpolate values
-      out <- setValues(s, v) # assign data values
+      out <- setValues(out, v) # assign data values
       names(out) <- as.character(y) # assign band names
 
   }
@@ -108,7 +106,8 @@ imgInt <- function(x, x.dates, y, time.buffer) {
   # apply function (if data frame/matrix)
   if (!processRaster) {
 
-    out <- t(apply(x, 1, intTime))
+    out <- as.data.frame(apply(x, 1, intTime))
+    if (length(y) > 1) {out <- t(out)}
     colnames(out) <- as.character(y)
 
   }

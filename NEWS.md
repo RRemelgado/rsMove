@@ -5,10 +5,11 @@
 =================================================================================
 
 ### Changes
-  * timeDir() Now returns a histogram ggplot object.
+  * timeDir() returns a histogram ggplot object.
   * plausibilityTest() informs on the validation of each presence sample.
   * hotMove() returns a ggplot object with region polygons.
   * The output of hotMoveStats() was simplified.
+  * moveReduce() allows the summary of movement data across temporal windows.
 
 ### Fixes:
   * checkOverlap() returned a warning when combining rasters and polygons.

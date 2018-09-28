@@ -48,13 +48,13 @@ sMoveRes <- function(x, y) {
 # 2. find unique sample regions
 #---------------------------------------------------------------------------------------------------------------------#
 
-  out <-do.call(rbind, lapply(pixe.res, function(r) {
+  out <-do.call(rbind, lapply(y, function(r) {
 
     # reference raster (extend to avoid missing samples along the borders)
     ext <- extend(raster(extent(x), res=r, crs=crs(x)), c(2,2))
 
     # cell positions of x
-    sp <- cellFromx(ext, x)
+    sp <- cellFromXY(ext, x)
     up <- unique(sp)
 
     # build connected component image

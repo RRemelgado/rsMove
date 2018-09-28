@@ -56,7 +56,7 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
 
   out <- do.call(rbind, lapply(time.res, function(r) {
 
-    nw <- as.numeric((et - st) / r + 1) # number of temporal windows
+    nw <- as.numeric((et - st)) / r + 1 # number of temporal windows
 
     tmp <- do.call(rbind, lapply(1:nw, function(w) {
 

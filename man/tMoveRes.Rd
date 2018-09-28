@@ -29,8 +29,7 @@ converting \emph{xy} to unique pixel coordinates and labels them based on their 
 samples and sample regions. The output of the function consists of:
 \itemize{
  \item{\emph{stats} - Summary statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
- \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}
- \item{\emph{indices} - Indices for each sample in \emph{xy} based on their spatial aggregation within each temporal resolution.}}}
+ \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}}}
 }
 \examples{
 {
