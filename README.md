@@ -14,14 +14,16 @@ In the scope of movement ecology, Global Positioning Systems (GPS) have evolved 
 
 ### Installation
 This gitHub is used as a basis for the improvement of *rsMove*. A stable release is available on <a href="https://cran.r-project.org/package=rsMove">CRAN</a> and can installed with:
+
 ```R
 install.packages('rsMove')
 ```
+
 <br>
 
 ### Examples
 <p align="justify">
- Please click <a href="https://cran.r-project.org/package=rsMove/vignettes/rsMove.html">here</a> for the package vignette.
+A paper on the package is currently under review (cross your fingers) and thus the vignette on the general applicability of *rsMove* was removed to avoid conflicts. Hopefully, I'll announce the paper here soon. For the time being, you can click <a href="https://cran.r-project.org/package=rsMove/vignettes/rsMove.html">here</a> for a vignette on the use of *rsMove* to predict environmental resource suitability following the methodology described in <a href="http://onlinelibrary.wiley.com/doi/10.1002/rse2.70/full">this</a> paper.
 </p>
 
 <br>

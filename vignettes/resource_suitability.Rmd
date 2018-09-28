@@ -94,15 +94,8 @@ In the previous steps we translated the `shortMove` dataset into samples that li
 This approach is also sensitive to differences in resource selection. For example, let's consider our target species. While the White Stork often searches for prey in recently managed crop fields it can sometimes be found over grasslands and even wetlands. As a consequence, our presence samples can reflect a diverse set of environmental conditions. To account for this and to better define the boundaries between suitable and unsuitable environmental conditions, `backSample()` requires indices for each sample that reflect their spatial aggregation. This index is returned by `labelSample()` which aggregates the elements of `SpatialPoints` object based on their spatial neighborhood within a `RasterLayer`. In this exercise, we will aggregate samples within 60m of each other (i.e. 2 pixels).
 </p>
 
-
-```{r eval=FALSE}
-sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
-```
-```{r echo=FALSE, message=FALSE}
-sample.id <- read.table(list.files(system.file('extdata', '', package="rsMove"), 'sampleIndices.txt', full.names=TRUE))[,,1]
-```
 ```{r message=FALSE}
-sample.id # show indices
+sample.id <- labelSample(presence.samples, ndvi, agg.radius=60) # aggregate samples in space
 absence.samples <- backSample(presence.samples, ndvi, sample.id, sampling.method="pca") # identify absence samples
 absence.samples # show samples
 ```
@@ -134,7 +127,7 @@ As shown by the output, the model was able to identify one additional pixel not 
 </p>
 
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center", echo=FALSE}
-kable_styling(kable(head(resourceModel1$f1, 2), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
+kable_styling(kable(head(resourceModel1$f1, 1), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
 ```
 
 <p align="justify" style="line-height:200%;">
@@ -149,7 +142,7 @@ resourceModel2 <- predictResources(env.presences, env.absences, sample.id, env.d
 ```{r, out.width="98%", fig.height=5, fig.width=10, dpi=600, fig.align="center"}
 plot(resourceModel2$probabilities >= 0.5) # probability map
 points(presence.samples) # presences
-kable_styling(kable(head(resourceModel2$f1, 2), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
+kable_styling(kable(head(resourceModel2$f1, 1), format="html", align="c", full_width=TRUE), "stripped", bootstrap_options="responsive")
 ```
 
 <p align="justify" style="line-height:200%;">

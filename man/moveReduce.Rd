@@ -4,7 +4,7 @@
 \alias{moveReduce}
 \title{moveReduce}
 \usage{
-moveReduce(x, y, z, derive.raster = FALSE)
+moveReduce(x, y, z, preserve.revisits = TRUE, derive.raster = FALSE)
 }
 \arguments{
 \item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
@@ -12,6 +12,8 @@ moveReduce(x, y, z, derive.raster = FALSE)
 \item{y}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
 
 \item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the observation time of \emph{x}.}
+
+\item{preserve.revisits}{Logical. Should the function preserve revisit patterns?}
 
 \item{derive.raster}{Should a \emph{RasterLayer} with the total time per pixel be provided?}
 }
@@ -22,18 +24,18 @@ A \emph{list} object.
 Pixel based summary of movement data that preserves periodic movements.
 }
 \details{
-{Translates (\emph{x}) into pixel coordinates within a reference raster (\emph{y}). The function
-identifies temporal segments corresponding to groups of consecutive observations within the same pixel. In this process, revisits
-to recorded pixels are preserved. Once the segments are identified, the function derives mean x and y
-coordinates for each of them and evaluates the time spent within each pixel. The function reports on
-the start and end timestamps, the mean timestamp and the elapsed time. The output of the function
-consists of:
+{Translates (\emph{x}) into pixel coordinates within a reference raster (\emph{y}). The
+function identifies temporal segments corresponding to groups of consecutive observations within
+the same pixel. In this process, revisits to recorded pixels are preserved. Once the segments are
+identified, the function derives mean x and y coordinates for each of them and evaluates the time
+spent within each pixel. The function reports on the start and end timestamps and the elapsed time.
+If \emph{preserve.revisits} is FALSE, the function will then summarize the output on a pixel level
+summing the time spent at each pixel. Additionally, if \emph{derive.raster} is TRUE, the function
+will derive a \emph{RasterLayer} with the same configuration as \emph{y} depicting the the total
+amount of time spent per pixel. The output of the function consists of:
 \itemize{
-\item{\emph{points} - Shapefile with reduced sample set and its corresponding temporal information.}
-\item{\emph{total.time} - Raster showing the total time spent at each pixel (if \emph{derive.raster} is TRUE).}
-\item{\emph{indices} - Indices for each sample in \emph{x} showing which samples were aggregated.}}
-
-}
+\item{\emph{points} - \emph{SpatialPointsDataFrame} with the reduced sample set.}
+\item{\emph{total.time} - \emph{RasterLayer} depicting the total time spent at each pixel.}}}
 }
 \examples{
 {
@@ -51,7 +53,7 @@ consists of:
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
  # reduce amount of samples
- move.reduce <- moveReduce(shortMove, r, z)
+ move.reduce <- moveReduce(shortMove, r, z, derive.raster=TRUE)
 
 }
 }

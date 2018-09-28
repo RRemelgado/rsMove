@@ -1,13 +1,13 @@
 Package: rsMove
 Type: Package
-Title: Remote Sensing best-practices in Movement Ecology
+Title: Guidelines for the use of Remote Sensing in Movement Ecology
 Version: 0.2.5
-Date: 2018-09-03
+Date: 2018-09-28
 Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de")
 URL: https://github.com/RRemelgado/rsMove/tree/master/
 BugReports: https://github.com/RRemelgado/rsMove/issues/
 Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>
-Description: Best-practice tools to support the combined use of animal movement and remote sensing data. Based on the paper by Remelgado et al. (2015) <doi:10.1002/rse2.70>.
+Description: Tools for the guided selection of satellite data and environmental predictors, the combination of remote sensing and animal movement data and the mapping of resource suitabilitz. Based on the paper by Remelgado et al. (2015) <doi:10.1002/rse2.70>.
 LazyData: TRUE
 Imports: raster, sp, caret, rgdal, gdalUtils, ggplot2, grDevices, RCurl, spatialEco, lubridate, pryr, plyr, igraph, lattice, randomForest
 RoxygenNote: 6.1.0
