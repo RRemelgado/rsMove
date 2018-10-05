@@ -112,3 +112,4 @@ sMoveRes <- function(x, y) {
   return(list(stats=out, plot=p))
 
 }
+

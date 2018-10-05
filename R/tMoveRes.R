@@ -56,11 +56,11 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
 
   out <- do.call(rbind, lapply(time.res, function(r) {
 
-    nw <- as.numeric((et - st)) / r + 1 # number of temporal windows
+    nw <- round(as.numeric((et - st)) / r + 1) # number of temporal windows
 
     tmp <- do.call(rbind, lapply(1:nw, function(w) {
 
-      loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= ((st+r)+(r*(w-1)))) # reference samples
+      loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= (((st+r)+(r*w))-1)) # reference samples
       ext <- extend(raster(extent(xy[loc,]), res=pixel.res, crs=rp), c(2,2), vals=NA)
       regions <- clump(ext) # connected component analysis
       sp <- cellFromXY(ext, xy[loc,]) # pixel positions of xy
@@ -97,7 +97,7 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
   cr <- colorRampPalette(c("khaki2", "forestgreen"))
 
   # build plot object
-  out$resolution <- as.factor(sort(time.res))
+  out$resolution <- factor(time.res, levels=sort(time.res))
   p <- ggplot(out, aes_string(x="resolution", y="nr.pixels", fill="nr.regions")) + theme_bw() +
     scale_fill_gradientn(colors=cr(10), name="Nr. Regions\n") + xlab("\nResolution (days)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") +
@@ -112,3 +112,4 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
   return(list(stats=out, plot=p))
 
 }
+
