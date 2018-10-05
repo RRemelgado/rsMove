@@ -142,26 +142,11 @@ moveSeg <- function(x, z, y, data.type='cont', threshold=NULL, summary.fun=NULL,
 # 3. identify segments
 #---------------------------------------------------------------------------------------------------------------------#
 
-  sc <- list() # segment list
-  sp <- 0 # segment start position
+  # search for segments and return sample indices
+  pd <- rle(x)$lengths
+  seg.id <- vector('numeric', length(sp))
+  for (p in 1:length(pd)) {seg.id[(sum(pd[0:(p-1)])+1):sum(pd[1:p])] <- p}
 
-  # identify segments
-  for (s in 2:length(x)) {
-
-    x.diff <- abs(x[(s)]-x[(s-1)])
-
-    if (x.diff > threshold & sp==0) {
-      sc[[length(sc)+1]] <- c(sp, (s-1))
-      sp <- s-1}
-
-    if (x.diff < threshold & s == length(x)) {sc[[length(sc)+1]] <- c(sp, s)}
-    if (x.diff > threshold & s == length(x)) {sc[[length(sc)+1]] <- c(s, s)}
-
-  }
-
-  # label segments
-  seg.id <- replicate(length(x), 0)
-  for (s in 1:length(sc)) {seg.id[sc[[s]][1]:sc[[s]][2]] <- s}
 
 #---------------------------------------------------------------------------------------------------------------------#
 # 4. derive segment statistics
@@ -244,6 +229,7 @@ moveSeg <- function(x, z, y, data.type='cont', threshold=NULL, summary.fun=NULL,
   #---------------------------------------------------------------------------------------------------------------------#
 
   colnames(odf) <- c("segment.id", "nr.samples", "start.time", "end.time", "total.time", "summary.value")
-  return(list(segment.id=id, segment.stats=odf, segment.plot=p))
+  return(list(segment.id=seg.id, segment.stats=odf, segment.plot=p))
 
 }
+

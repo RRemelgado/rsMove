@@ -51,7 +51,7 @@ as an example, \emph{plotMove} can represent the relation between the elapsed ti
  # plot output
  x <- move.reduce$points@data$x
  y <- move.reduce$points@data$y
- et <- move.reduce$points@data$`Elapsed time (minutes)`
+ et <- move.reduce$points@data$elapsed.time
  op <- plotMove(x, y, size.var=et, fill.var=ov, var.type="cont")
 
 }

@@ -97,7 +97,7 @@ sMoveRes <- function(x, y) {
 
   # build plot object
   out$resolution <- factor(out$resolution, levels=y)
-  p <- ggplot(out, aes_string(x="pixel.res", y="nr.pixels", fill="nr.regions")) +
+  p <- ggplot(out, aes_string(x="resolution", y="nr.pixels", fill="nr.regions")) +
     theme_bw() + scale_fill_gradientn(colors=cr(10), breaks=c(0.0, (fr/2), fr),
     limits=c(0,fr), name="Nr. Regions\n") + xlab("\nResolution (m)") +
     ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat="identity") +
