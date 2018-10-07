@@ -98,7 +98,7 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
     odf <- do.call(rbind, lapply(unique(odf$pos), function(p) {
       i <- which(up==p)
       xy <- xyFromCell(y, p)
-      return(data.frame(x=xy[1], y=xy[2], start.time=min(odf$start.time[i]),
+      return(data.frame(x=xy[1], y=xy[2], pos=p, start.time=min(odf$start.time[i]),
                         end.time=max(odf$end.time[i]), elapsed.time=sum(odf$elapsed.time[i])))}))
 
   }
@@ -117,7 +117,7 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
     up <- unique(sp)
 
     # estimate time sum per cell
-    t.sum <- sapply(up, function(p) {sum(odf$'elapsed.time'[which(sp==p)], na.rm=TRUE)})
+    t.sum <- sapply(up, function(p) {sum(odf$elapsed.time[which(sp==p)], na.rm=TRUE)})
 
     # build raster
     t.sum.r <- rasterize(xyFromCell(y, up), y, t.sum)
