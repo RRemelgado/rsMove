@@ -71,6 +71,7 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
   x <- x[os,]
   z <- z[os]
   sp <- cellFromXY(y, x@coords)
+  up <- unique(sp)
 
   rm(os)
 
@@ -84,22 +85,21 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
   # estimate
   odf <- do.call(rbind, lapply(1:max(sg), function(s) {
     ind <- which(sg==s)
+    pp <- sp[ind[1]]
     mx <- median(x@coords[ind,1])
     my <- median(x@coords[ind,2])
     s.time <- z[ind[1]]
     e.time <- z[ind[length(ind)]]
     d.time <- as.numeric(difftime(e.time, s.time, units='mins'))
-    return(data.frame(x=mx, y=my, start.time=s.time, end.time=e.time, elapsed.time=d.time, segment.id=s))}))
+    return(data.frame(x=mx, y=my, pos=pp, start.time=s.time, end.time=e.time, elapsed.time=d.time, segment.id=s))}))
 
   # if preserve.revisits is FALSE, reduce to unique pixels
   if (!preserve.revisits) {
-
-    odf <- do.call(rbind, sapply(up, function(p) {
-      i <- which(sp==p)
+    odf <- do.call(rbind, lapply(unique(odf$pos), function(p) {
+      i <- which(up==p)
       xy <- xyFromCell(y, p)
       return(data.frame(x=xy[1], y=xy[2], start.time=min(odf$start.time[i]),
-                        end.time=max(odf$end.time[i]),
-                        elapsed.time=sum(odf$elapsed.time[i])))}))
+                        end.time=max(odf$end.time[i]), elapsed.time=sum(odf$elapsed.time[i])))}))
 
   }
 
@@ -117,7 +117,7 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
     up <- unique(sp)
 
     # estimate time sum per cell
-    t.sum <- sapply(up, function(p) {sum(odf$'Elapsed time (minutes)'[which(sp==p)], na.rm=TRUE)})
+    t.sum <- sapply(up, function(p) {sum(odf$'elapsed.time'[which(sp==p)], na.rm=TRUE)})
 
     # build raster
     t.sum.r <- rasterize(xyFromCell(y, up), y, t.sum)
