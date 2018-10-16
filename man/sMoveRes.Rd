@@ -25,7 +25,9 @@ and unique pixel regions after their temporal aggregation. For each spatial reso
 of samples and sample regions. The output of the function consists of:
 \itemize{
  \item{\emph{stats} - Summary statistics reporting on the number of unique samples and sample regions per spatial resolution.}
- \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}}}
+ \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}}
+If \emph{x} is a \emph{move} or a \emph{moveStack} object, the function will iterate through each unique dataset name and return
+a nested output where the elements of of the list are named in accordance with the oataset names.}
 }
 \examples{
 {

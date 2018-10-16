@@ -144,7 +144,7 @@ moveSeg <- function(x, z, y, data.type='cont', threshold=NULL, summary.fun=NULL,
 
   # search for segments and return sample indices
   pd <- rle(x)$lengths
-  seg.id <- vector('numeric', length(sp))
+  seg.id <- vector('numeric', length(pd))
   for (p in 1:length(pd)) {seg.id[(sum(pd[0:(p-1)])+1):sum(pd[1:p])] <- p}
 
 

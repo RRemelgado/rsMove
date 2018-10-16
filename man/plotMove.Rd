@@ -4,7 +4,8 @@
 \alias{plotMove}
 \title{plotMove}
 \usage{
-plotMove(x, y, size.var = NULL, fill.var = NULL, var.type = NULL)
+plotMove(x, y, size.var = NULL, fill.var = NULL, var.type = NULL,
+  var.names = c("size", "value"))
 }
 \arguments{
 \item{x}{Vector of x coordinates.}
@@ -16,6 +17,8 @@ plotMove(x, y, size.var = NULL, fill.var = NULL, var.type = NULL)
 \item{fill.var}{Optional. Controls the fill color.}
 
 \item{var.type}{One of 'cont' or 'cat'. Defines the type of \emph{fill.var}.}
+
+\item{var.names}{Character vector with names for \emph{size.var} and \emph{fill.var} to ve added to the plot.}
 }
 \value{
 A \emph{ggplot} object.
@@ -25,7 +28,7 @@ A \emph{ggplot} object.
 }
 \details{
 {This function was designed to extent on other functions such as \code{\link{dataQuery}}, which provides environmental
-information, and \code{\link{moveReduce}}, which provides information on the time spent per sample. Using these two functions
+information, and \code{\link{moveReduce}}, which provides information on e.g. the time spent per sample. Using these two functions
 as an example, \emph{plotMove} can represent the relation between the elapsed time and the change in environmental conditions.}
 }
 \examples{

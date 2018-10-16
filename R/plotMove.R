@@ -45,22 +45,35 @@
 
 #----------------------------------------------------------------------------------------------------------#
 
-plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.names=c("size", "value")) {
+plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.names=NULL) {
 
-#----------------------------------------------------------------------------------------------------------#
-# 1. Check input data
-#----------------------------------------------------------------------------------------------------------#
+  #----------------------------------------------------------------------------------------------------------#
+  # 1. Check input data
+  #----------------------------------------------------------------------------------------------------------#
 
+  # check coordinates
+  if (!is.numeric(x) | !is.numeric(y)) {stop('"x" and/or "y" not numeric')}
   if (length(x)!=length(y)) {stop('"x" and "y" have different lengths')}
+
+  # check size variable
   if(!is.null(size.var)) {
     if (!is.numeric(size.var)) {stop('"size.var" is nof of a valid class')}
     if (length(size.var)!=length(x)) {stop('coordinates and "size.var" have different lengths')}}
+
+  # check fill variable
   if (!is.null(fill.var)) {
     if (is.null(var.type)) {stop('"fill.var" is set. Please specify "var.type"')}
     if (!var.type%in%c('cont', 'cat')) {stop('"var.type" is not a recognized keyword')}
     if (length(fill.var)!=length(x)) {stop('coordinates and "fill.var" have different lengths')}}
-  if (!is.character(var.names)) {stop('"var.names" is not a character object')}
-  if (length(var.names) != 2) {stop('"var.names" should have two elements')}
+
+  # check variable names
+  if (is.null(var.names)) {
+    if (var.type == 'cont') {var.names <- c('size', 'value')}
+    if (var.type == 'cat') {var.names <- c('size', 'class')}
+  } else {
+    if (!is.character(var.names)) {stop('"var.names" is not a character object')}
+    if (length(var.names) != 2) {stop('"var.names" should have two elements')}
+  }
 
   # abort function if no variable is provided
   if (is.null(size.var) & is.null(fill.var)) {
@@ -68,9 +81,9 @@ plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.name
     return()
   }
 
-#----------------------------------------------------------------------------------------------------------#
-# 2. Determine variable limits/breaks
-#----------------------------------------------------------------------------------------------------------#
+  #----------------------------------------------------------------------------------------------------------#
+  # 2. Determine variable limits/breaks
+  #----------------------------------------------------------------------------------------------------------#
 
   # size breaks
   if (!is.null(size.var)) {tb <- seq(min(size.var), max(size.var), sd(size.var))}
@@ -78,9 +91,9 @@ plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.name
   # color scheme for fill
   if (!is.null(fill.var)) {cr <- colorRampPalette(c("dodgerblue3", "khaki2", "forestgreen"))}
 
-#----------------------------------------------------------------------------------------------------------#
-# 3. Build plots
-#----------------------------------------------------------------------------------------------------------#
+  #----------------------------------------------------------------------------------------------------------#
+  # 3. Build plots
+  #----------------------------------------------------------------------------------------------------------#
 
   # size and environmental data
   if (!is.null(size.var) & !is.null(fill.var)) {
@@ -91,23 +104,23 @@ plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.name
     # build plot
     if (var.type=="cont") {
       p <- ggplot(df) + theme_bw() + geom_point(aes_string(x="x", y="y", size="size", fill="fill"), color="black", pch=21) +
-        guides(col=guide_legend(override.aes = list(shape=15, size=6))) +
+        guides(size=guide_legend(order=1, override.aes=list(shape=1)), col=guide_legend(order=0, override.aes=list(shape=15, size=6))) +
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
               panel.grid.minor=element_blank()) +
-        scale_size_continuous(name="Size", breaks=tb, range=c(2,12)) +
-        scale_fill_gradientn(name="Value", colours=cr(10))}
+        scale_size_continuous(name=var.names[1], breaks=tb, range=c(2,12), labels=sprintf("%0.2f", tb)) +
+        scale_fill_gradientn(name=var.names[2], colours=cr(10))}
     if (var.type=="cat") {
       df$fill <- factor(df$fill)
-      p <- ggplot(df) + theme_bw() + geom_point(aes_string(x="x", y="y", color="fill", size="size")) +
-        guides(col=guide_legend(override.aes=list(shape=15, size=6))) +
+      p <- ggplot(df) + theme_bw() + geom_point(aes_string(x="x", y="y", size="size", color="fill")) +
+        guides(size=guide_legend(order=1, override.aes=list(shape=1)), col=guide_legend(order=0, override.aes=list(shape=15, size=6))) +
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
               panel.grid.minor=element_blank()) +
-        scale_size_continuous(name="Size", breaks=tb, range=c(2,12)) +
-        scale_color_discrete(name="Class")}
+        scale_size_continuous(name=var.names[1], breaks=tb, range=c(2,12), labels=sprintf("%0.2f", tb)) +
+        scale_color_discrete(name=var.names[2])}
 
   }
 
-#----------------------------------------------------------------------------------------------------------#
+  #----------------------------------------------------------------------------------------------------------#
 
   # only size
   if (!is.null(size.var) & is.null(fill.var)) {
@@ -120,10 +133,10 @@ plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.name
       guides(fill=FALSE, col=guide_legend(override.aes = list(shape=15, size=6))) +
       theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
             panel.grid.minor=element_blank()) +
-      scale_size_continuous(name="Size", breaks=tb, range=c(2,12))
+      scale_size_continuous(name=var.names[1], breaks=tb, range=c(2,12), labels=sprintf("%0.2f", tb))
   }
 
-#----------------------------------------------------------------------------------------------------------#
+  #----------------------------------------------------------------------------------------------------------#
 
   # only environmental data
   if (is.null(size.var) & !is.null(fill.var)) {
@@ -137,21 +150,21 @@ plotMove <- function(x, y, size.var=NULL, fill.var=NULL, var.type=NULL, var.name
         guides(col=guide_legend(override.aes = list(shape=15, size=6))) +
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
               panel.grid.minor=element_blank()) +
-        scale_size_continuous(name="Size", breaks=tb, range=c(2,12)) +
-        scale_fill_gradientn(name="Value", colours=cr(10))}
+        scale_size_continuous(name=var.names[1], breaks=tb, range=c(2,12)) +
+        scale_fill_gradientn(name=var.names[2], colours=cr(10))}
     if (var.type=="cat") {
       df$fill <- factor(df$fill)
       p <- ggplot(df, aes_string(x="x", y="y", color="fill")) + theme_bw() + geom_point() +
         guides(col=guide_legend(override.aes = list(shape=15, size=6))) +
         theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
               panel.grid.minor=element_blank()) +
-        scale_size_continuous(name="Size", breaks=tb) +
-        scale_color_discrete(name="Class")}
+        scale_size_continuous(name=var.names[1], breaks=tb, labels=sprintf("%0.2f", tb)) +
+        scale_color_discrete(name=var.names[2])}
 
 
   }
 
-    return(p)
+  return(p)
 
 }
 
