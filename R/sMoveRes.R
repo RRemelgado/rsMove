@@ -14,7 +14,9 @@
 #' of samples and sample regions. The output of the function consists of:
 #' \itemize{
 #'  \item{\emph{stats} - Summary statistics reporting on the number of unique samples and sample regions per spatial resolution.}
-#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}}}
+#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}}
+#'If \emph{x} is a \emph{move} or a \emph{moveStack} object, the function will iterate through each unique dataset name and return
+#'a nested output where the elements of of the list are named in accordance with the oataset names.}
 #' @seealso \code{\link{tMoveRes}} \code{\link{specVar}}
 #' @examples {
 #'
@@ -33,20 +35,17 @@
 
 sMoveRes <- function(x, y) {
 
-#---------------------------------------------------------------------------------------------------------------------#
-#  1. check inpur variables
-#---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------------------#
+  #  1. check inpur variables
+  #---------------------------------------------------------------------------------------------------------------------#
 
   if (!class(x)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"x" is not of a valid class')}
   if (!is.numeric(y)) {stop('"y" is not numeric')}
   if (!is.vector(y)) {stop('"y" is not a vector')}
 
-  # evaluate each resolution
-  out <- list() # output variable
-
-#---------------------------------------------------------------------------------------------------------------------#
-# 2. find unique sample regions
-#---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------------------#
+  # 2. find unique sample regions
+  #---------------------------------------------------------------------------------------------------------------------#
 
   out <-do.call(rbind, lapply(y, function(r) {
 

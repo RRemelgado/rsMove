@@ -47,9 +47,9 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
   if (class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
   rp <- crs(xy) # reference projection
 
-#---------------------------------------------------------------------------------------------------------------------#
-# 2. determine pixel aggregations
-#---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------------------------------------------------#
+  # 2. determine pixel aggregations
+  #---------------------------------------------------------------------------------------------------------------------#
 
   st <- min(obs.date) # start time
   et <- max(obs.date) # end time
@@ -62,12 +62,13 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
 
       loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= (((st+r)+(r*w))-1)) # reference samples
       ext <- extend(raster(extent(xy[loc,]), res=pixel.res, crs=rp), c(2,2), vals=NA)
-      regions <- clump(ext) # connected component analysis
       sp <- cellFromXY(ext, xy[loc,]) # pixel positions of xy
       up <- unique(sp) # unique pixels
+      ext[up] <- 1
+      regions <- clump(ext) # connected component analysis
 
       # return stats
-      return(data.frame(nr.pixels=length(up), nr.regions=length(unique(extract(regions, up)))))
+      return(data.frame(nr.pixels=length(up), nr.regions=cellStats(regions, max, na.rm=TRUE)))
 
     }))
 
