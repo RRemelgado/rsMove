@@ -6,21 +6,22 @@
 using namespace Rcpp;
 
 // intime
-NumericMatrix intime(NumericVector x, NumericMatrix y, NumericVector z);
-RcppExport SEXP _rsMove_intime(SEXP xSEXP, SEXP ySEXP, SEXP zSEXP) {
+NumericMatrix intime(NumericMatrix x, NumericVector ij, NumericVector oj, NumericVector z);
+RcppExport SEXP _rsMove_intime(SEXP xSEXP, SEXP ijSEXP, SEXP ojSEXP, SEXP zSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type y(ySEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ij(ijSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type oj(ojSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
-    rcpp_result_gen = Rcpp::wrap(intime(x, y, z));
+    rcpp_result_gen = Rcpp::wrap(intime(x, ij, oj, z));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_rsMove_intime", (DL_FUNC) &_rsMove_intime, 3},
+    {"_rsMove_intime", (DL_FUNC) &_rsMove_intime, 4},
     {NULL, NULL, 0}
 };
 

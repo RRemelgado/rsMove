@@ -1,55 +1,44 @@
-# include <RcppArmadillo.h>
-// [[Rcpp::depends(RcppArmadillo)]]
-
-#include <RcppArmadillo.h>
+# include <Rcpp.h>
 using namespace Rcpp;
-using namespace arma;
 
-// [[Rcpp::export()]]
-NumericMatrix intime(NumericVector x, NumericMatrix y, NumericVector z) {
+//' @export
+// [[Rcpp::export]]
 
-  int nrow = y.nrow();
-  int ncol = y.ncol();
+NumericMatrix intime(NumericMatrix x, NumericVector ij, NumericVector oj, NumericVector z) {
 
-  NumericMatrix res(nrow,ncol);
+  int nrow = x.nrow();
+  int ncol = x.ncol();
+  int nrec = oj.size();
+
+  NumericMatrix res(nrow,nrec);
 
   for (int r=0; r < nrow; r++) {
 
-    res(r,0) = y(r,0); //  index 1st element (can't interpolate)
-    res(r,ncol-1) = y(r,ncol-1); //  index last element (can't interpolate)
+    for (int i=0; i < nrec; i++) {
 
-    for (int i=1; i< ncol; i++) {
+      int si = ncol+1;
+      for (int j=0; j < ncol; j++) {if((ij[j] == oj[i]) & (LogicalVector::is_na(x(r,j)) == 0)) {si = j;}}
 
-      if (LogicalVector::is_na(y(r,i))) {
+      if (si > ncol) {
 
         // find indices (before)
-        int bi = nrow+1;
-        int mx = x[i]-z[1];
-        for (int j=i; j > -1; --j) {if((LogicalVector::is_na(y(r,j)) == 0) & (bi > nrow) & (x[j] > mx)) {bi = j;}}
+        int bi = ncol+1;
+        int mn = oj[i]-z[0];
+        int mx = oj[i];
+        for (int j=0; j < ncol; j++) {if((LogicalVector::is_na(x(r,j)) == 0) & (ij[j] >= mn) & (ij[j] < mx)) {bi = j;}}
 
         // find indices (after)
-        int ai = nrow+1;
-        mx = x[i]+z[2];
-        for (int j=i+1; j < nrow; j++) {if((LogicalVector::is_na(y(r,j)) == 0) & (ai > nrow) & (x[j] > mx)) {ai = j;}}
+        int ai = ncol+1;
+        mn = oj[i];
+        mx = oj[i]+z[1];
+        for (int j=0; j < ncol; j++) {if((LogicalVector::is_na(x(r,j)) == 0) & (ai > ncol) & (ij[j] > mn) & (ij[j] < mx)) {ai = j;}}
 
-        if ((bi < nrow) & (ai < nrow)) {
+        if ((bi < ncol) & (ai < ncol)) {
 
-          double a = 0;
-          double b = 0;
-
-          double xsum = x[bi] + x[ai];
-          double ysum = y(r,bi) + y(r,ai);
-          double x2sum = pow(x[bi],2) + pow(x[ai],2);
-          double xsum2 = pow(x[ai]+x[bi],2);
-          double xysum = (x[ai*y(r,ai)]) + (x[ai]*x[ai]);
-
-          a = ((ysum*x2sum) - (xsum*xysum)) / (2*x2sum-xsum2);
-          b = ((xysum) - (xsum*ysum)) / (2 * x2sum - xsum2);
-
-          res(r,i) = a + b * x[i];
+          res(r,i) = x(r,bi) + (oj[i]-ij[ai]) * ((x(r,ai)-x(r,bi)) / (ij[ai]-ij[bi]));
 
         } else {res(r,i) = NumericVector::get_na();}
-      } else {res(r,i) = y(r,i);}
+      } else {res(r,i) = x(r,si);}
 
     }
 
@@ -58,15 +47,3 @@ NumericMatrix intime(NumericVector x, NumericMatrix y, NumericVector z) {
   return(res);
 
 }
-
-// You can include R code blocks in C++ files processed with sourceCpp
-// (useful for testing and development). The R code will be automatically
-// run after the compilation.
-//
-
-/*** R
-m <- matrix(0,15,15) # test matrix
-m[] <- sample(1:length(m), length(m)) # assign random numbers
-m[sample(1:length(m), 30)] <- NA # assign random NA's
-om <- intime(c(1:ncol(m)), m, c(2,2)) # interpolate NA's
-  */
