@@ -1,6 +1,18 @@
 # include <Rcpp.h>
 using namespace Rcpp;
 
+//' @title storeLandsat
+//'
+//' @description Time-adjusted, linear interpolation.
+//' @param x matrix with data to interpolate.
+//' @param ij Numeric vector with julian days of input data.
+//' @param oj Numeric vector with julian days of the output data.
+//' @param z Two-element, numeric vector with temporal buffer.
+//' @return A matrix.
+//' @details {For each row in x, the function finds the two
+//' nearest, non NA values to the target dates in ij retrieved
+//' before and after this day. Then, the function linearly
+//' interpolates the missing value linearly.}
 //' @export
 // [[Rcpp::export]]
 

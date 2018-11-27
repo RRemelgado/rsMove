@@ -10,6 +10,8 @@
 #' @importFrom stats lm
 #' @importFrom pryr mem_used
 #' @importFrom utils memory.size
+#' @useDynLib rsMove
+#' @importFrom Rcpp sourceCpp
 #' @seealso \code{\link{dataQuery}} \code{\link{timeDir}} \code{\link{spaceDir}} \code{\link{moveSeg}}
 #' @return A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date in \emph{y}. If a \emph{data.frame}/\emph{matrix}, columns represent dates and rows represent samples.
 #' @details {Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{y}).
@@ -63,33 +65,7 @@ imgInt <- function(x, x.dates, y, time.buffer) {
     processRaster=FALSE}
 
 #-----------------------------------------------------------------------------------------------------------------------------------#
-# 2. build interpolation function
-#-----------------------------------------------------------------------------------------------------------------------------------#
-
-  intTime <- function(x) {
-
-    tmp <- sapply(y, function(d) {
-
-      di <- which(x.dates==d & !is.na(x))
-
-      if (length(di) > 0) {return(mean(x[di]))} else {
-
-        bi <- rev(which(!is.na(x) & x.dates < d & x.dates >= (d-time.buffer[1])))
-        ai <- which(!is.na(x) & x.dates > d & x.dates <= (d+time.buffer[2]))
-
-        if (length(bi)>=1 & length(ai)>=1) {
-          lc <- lm(c(x[bi[1]],x[ai[1]])~as.numeric(c(x.dates[bi[1]],x.dates[ai[1]])))
-          return(as.numeric(d)*lc$coefficients[2]+lc$coefficients[1])
-        } else {return(NA)}
-
-      }})
-
-    return(tmp)
-
-  }
-
-#-----------------------------------------------------------------------------------------------------------------------------------#
-# 3. interpolate
+# 2. interpolate
 #-----------------------------------------------------------------------------------------------------------------------------------#
 
   # apply function (if raster)
@@ -97,7 +73,7 @@ imgInt <- function(x, x.dates, y, time.buffer) {
 
       out <- brick(x[[1]], nl=length(y)) # output image stack
       v <- getValues(x) # import values into memory
-      v <- t(apply(v, 1, intTime)) # interpolate values
+      v <- intime(v, as.numeric(x.dates), as.numeric(y), time.buffer) # interpolate values
       out <- setValues(out, v) # assign data values
       names(out) <- as.character(y) # assign band names
 
@@ -106,8 +82,7 @@ imgInt <- function(x, x.dates, y, time.buffer) {
   # apply function (if data frame/matrix)
   if (!processRaster) {
 
-    out <- as.data.frame(apply(x, 1, intTime))
-    if (length(y) > 1) {out <- t(out)}
+    out <- as.data.frame(intime(as.matrix(x), as.numeric(x.dates), as.numeric(y), time.buffer))
     colnames(out) <- as.character(y)
 
   }
