@@ -3,7 +3,7 @@ Type: Package
 Title: Guidelines for the use of Remote Sensing in Movement Ecology
 Version: 0.2.6
 Date: 2018-10-16
-Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="ruben.remelgado@uni-wuerzburg.de")
+Authors@R: person("Ruben", "Remelgado", role = c("aut", "cre"), email="remelgado.ruben@gmail.com")
 URL: https://github.com/RRemelgado/rsMove/tree/master/
 BugReports: https://github.com/RRemelgado/rsMove/issues/
 Maintainer: Ruben Remelgado <ruben.remelgado@uni-wuerzburg.de>

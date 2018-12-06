@@ -4,16 +4,21 @@
 \alias{imgInt}
 \title{imgInt}
 \usage{
-imgInt(x, x.dates, y, time.buffer)
+imgInt(x, x.dates, y, time.buffer, smooth = TRUE,
+  smooth.fun = function(j) {     runmean2(as.numeric(j), 1) })
 }
 \arguments{
 \item{x}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}
 
 \item{x.dates}{Object of class \emph{Date} with dates of \emph{x}.}
 
-\item{y}{Object of class \emph{Date} with target dates.}
+\item{y}{Object of class \emph{Date} with target dates. Alternatively, a \emph{RasterStack} or \emph{RasterBrick} with julian days for each pixel.}
 
 \item{time.buffer}{A two-element vector with temporal search buffer (expressed in days).}
+
+\item{smooth}{Logical argument. Default is TRUE.}
+
+\item{smooth.fun}{Smoothing function. uses \code{\link{runmean2}} by default.}
 }
 \value{
 A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date in \emph{y}. If a \emph{data.frame}/\emph{matrix}, columns represent dates and rows represent samples.
@@ -23,9 +28,14 @@ A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer
 a \emph{raster}, \emph{SpatialPointsDataFrames} or \emph{matrix}/\emph{data.frame}.}
 }
 \details{
-{Performs a pixel-wise linear interpolation over a raster for a given set of dates (\emph{y}).
-A temporal buffer (\emph{time.buffer}) is required to limit the search for reference data points (\emph{time.buffer}).
-This is defined by a two element vector which limits the search in the past and future.}
+{Wrapper for the function \code{\link{intime}} that performs a time-sensitive, linear interpolation
+of a multi-band raster. The output dates are specified by \emph{y} and can differ from the dates of the input,
+specified by \emph{x.dates}. \emph{time.buffer} controls the search for dates to interpolate from specifying
+the maximum number of days that the selected data points can differ from the target date(s) in \emph{y}.
+\emph{time.buffer} is provided as a two element vector which limits the search in the past and future. If
+\emph{smooth} is TRUE, the function will also smooth the interpolated time series. \emph{fun} determines
+which function to use. By default, \code{\link{runmean2}} is used whcih is an NA-sensitive, c++ implementation
+of a simple running mean.}
 }
 \examples{
 {
@@ -46,8 +56,7 @@ This is defined by a two element vector which limits the search in the past and 
  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # interpolate raster data to target dates
- out <- imgInt(extract(r.stk, shortMove), x.dates,
- as.Date("2013-08-10"), c(60,60))
+ out <- imgInt(r.stk, x.dates, as.Date("2013-08-10"), c(60,60))
 
 }
 }

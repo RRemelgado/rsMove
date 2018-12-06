@@ -19,9 +19,37 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// intime2
+NumericMatrix intime2(NumericMatrix x, NumericMatrix ij, NumericVector oj, NumericVector z);
+RcppExport SEXP _rsMove_intime2(SEXP xSEXP, SEXP ijSEXP, SEXP ojSEXP, SEXP zSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type ij(ijSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type oj(ojSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type z(zSEXP);
+    rcpp_result_gen = Rcpp::wrap(intime2(x, ij, oj, z));
+    return rcpp_result_gen;
+END_RCPP
+}
+// runmean2
+NumericVector runmean2(NumericVector x, int y);
+RcppExport SEXP _rsMove_runmean2(SEXP xSEXP, SEXP ySEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
+    Rcpp::traits::input_parameter< int >::type y(ySEXP);
+    rcpp_result_gen = Rcpp::wrap(runmean2(x, y));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_rsMove_intime", (DL_FUNC) &_rsMove_intime, 4},
+    {"_rsMove_intime2", (DL_FUNC) &_rsMove_intime2, 4},
+    {"_rsMove_runmean2", (DL_FUNC) &_rsMove_runmean2, 2},
     {NULL, NULL, 0}
 };
 
