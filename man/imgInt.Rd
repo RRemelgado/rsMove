@@ -56,7 +56,7 @@ of a simple running mean.}
  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 
  # interpolate raster data to target dates
- out <- imgInt(r.stk, x.dates, as.Date("2013-08-10"), c(60,60))
+ out <- imgInt(r.stk[1:50,1:50,drop=FALSE], x.dates, as.Date("2013-08-10"), c(60,60))
 
 }
 }

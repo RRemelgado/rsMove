@@ -43,7 +43,7 @@
 #'  substr(file.name, 7, 8), '-', substr(file.name, 10, 11)))
 #'
 #'  # interpolate raster data to target dates
-#'  out <- imgInt(r.stk[1:100,1:100,drop=FALSE], x.dates, as.Date("2013-08-10"), c(60,60))
+#'  out <- imgInt(r.stk[1:50,1:50,drop=FALSE], x.dates, as.Date("2013-08-10"), c(60,60))
 #'
 #' }
 #' @export
@@ -71,6 +71,7 @@ imgInt <- function(x, x.dates, y, time.buffer, smooth=TRUE, smooth.fun=function(
   if(class(y)!='Date') {stop('"y" is not a "Date" object')}
   if (is.null(time.buffer)) {stop('"time.buffer" is missing')}
   if (!is.numeric(time.buffer)) {stop('"time.buffer" is not numeric')}
+  nl <- length(y) > 1 # will the output be a multi-band raster?
 
   # smoothing function
   if (!is.logical(smooth)) {stop('"smooth" is not a logical argument')}
@@ -86,10 +87,6 @@ imgInt <- function(x, x.dates, y, time.buffer, smooth=TRUE, smooth.fun=function(
   if (int.method==1) {
     ov <- getValues(x) # import values into memory
     ov <- intime(ov, as.numeric(x.dates), as.numeric(y), time.buffer) # interpolate values
-    if (smooth) {ov[] <- apply(out, 1:2, smooth.fun)}
-    out <- setValues(out, ov) # assign data values
-    names(out) <- as.character(y) # assign band names
-    rm(ov)
   }
 
   # interpolation when each pixel has its own date
@@ -97,11 +94,13 @@ imgInt <- function(x, x.dates, y, time.buffer, smooth=TRUE, smooth.fun=function(
     v1 <- getValues(x) # import values into memory
     v2 <- getValues(x.dates)
     ov <- intime2(v1, v2, as.numeric(y), time.buffer) # interpolate values
-    if (smooth) {ov[] <- apply(out, 1:2, smooth.fun)}
-    out <- setValues(out, ov) # assign data values
-    names(out) <- as.character(y) # assign band names
-    rm(v1, v2, ov)
+    rm(v1, v2)
   }
+
+  # smooth and convert to raster
+  if (smooth & nl) {ov <- t(apply(out, 1:2, smooth.fun))}
+  out <- setValues(out, ov) # assign data values
+  names(out) <- as.character(y) # assign band names
 
   # provide output
   return(out)

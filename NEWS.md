@@ -5,10 +5,13 @@
 =================================================================================
 
 ### New
-  * Added intime(), runmed2() and segMatrix() c++ functions.
-
+  * Added intime(), runmed2() and runmean2() c++ functions.
+  * imgInt() allows for multi-band raster objects with observarion dates.
+  * imgInt() can smooth the output using an user provided function.
+  
 ### Changes:
-  * imgInt() now depends on intime()
+  * imgInt() now depends on intime() and intime2()
+  * ingInt() only accepts raster objects
   * segRaster() now depends on segMatrix()
 
 
