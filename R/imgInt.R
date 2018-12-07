@@ -11,7 +11,6 @@
 #' @importFrom raster crs nlayers brick
 #' @importFrom stats lm
 #' @importFrom pryr mem_used
-#' @importFrom utils memory.size
 #' @importFrom lubridate is.Date
 #' @useDynLib rsMove
 #' @importFrom Rcpp sourceCpp evalCpp
