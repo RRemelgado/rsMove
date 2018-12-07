@@ -40,10 +40,7 @@ require(raster)
 data(longMove)
 
 # extract regions
-hm <- hotMove(longMove, 0.1, return.shp=TRUE)
-
-# plot shapefile (color by region)
-plot(hm$polygons)
+hm <- hotMove(longMove, 0.1)
 
 # add new information to original shapefile
 longMove@data <- cbind(longMove@data, hm$region.id)

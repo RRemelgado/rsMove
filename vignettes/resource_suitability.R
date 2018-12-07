@@ -7,6 +7,10 @@ require(knitr)
 require(kableExtra)
 require(caret)
 require(lattice)
+require(igraph)
+require(randomForest)
+require(e1071)
+require(maptools)
 
 ## ----message=FALSE-------------------------------------------------------
 data("shortMove") # movement data
