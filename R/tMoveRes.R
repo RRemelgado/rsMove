@@ -61,7 +61,7 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
     tmp <- do.call(rbind, lapply(1:nw, function(w) {
 
       loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= (((st+r)+(r*w))-1)) # reference samples
-      ext <- extend(raster(extent(xy[loc,]), res=pixel.res, crs=rp), c(2,2), vals=NA)
+      ext <- raster(extend(extent(xy[loc,]), c(pixel.res, pixel.res)), res=pixel.res, crs=rp, vals=NA)
       sp <- cellFromXY(ext, xy[loc,]) # pixel positions of xy
       up <- unique(sp) # unique pixels
       ext[up] <- 1
