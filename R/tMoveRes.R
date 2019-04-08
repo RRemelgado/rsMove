@@ -61,14 +61,16 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
     tmp <- do.call(rbind, lapply(1:nw, function(w) {
 
       loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= (((st+r)+(r*w))-1)) # reference samples
-      ext <- raster(extend(extent(xy[loc,]), c(pixel.res, pixel.res)), res=pixel.res, crs=rp, vals=NA)
-      sp <- cellFromXY(ext, xy[loc,]) # pixel positions of xy
-      up <- unique(sp) # unique pixels
-      ext[up] <- 1
-      regions <- clump(ext) # connected component analysis
-
-      # return stats
-      return(data.frame(nr.pixels=length(up), nr.regions=cellStats(regions, max, na.rm=TRUE)))
+      if (length(loc) > 0) {
+        ext <- raster(extend(extent(xy[loc, ]), c(pixel.res, pixel.res)), res = pixel.res, crs = rp)
+        sp <- cellFromXY(ext, xy[loc, ])
+        up <- unique(sp)
+        ext[up] <- 1
+        regions <- clump(ext)
+        return(data.frame(nr.pixels = length(up), nr.regions = cellStats(regions, max, na.rm = TRUE)))
+      } else {
+        return(data.frame(nr.pixels=0, nr.regions =0))
+      }
 
     }))
 
