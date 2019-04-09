@@ -55,6 +55,8 @@ moveCloud <- function(x, y, data.path=NULL, buffer.size=NULL, remove.file=FALSE)
 
   # input keywords
   if (!class(y)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"y" is not of a valid class')}
+  if (class(x)[1] != 'Date') {stop('"x" is not of a valid class')}
+  if (sum(is.na(x)) > 0) {stop('please filter missing values in "x"')}
   if (is.na(crs(y))) {stop('"y" does not have a valid projection')}
   if (is.null(data.path)) {
     data.path <- tempdir()
