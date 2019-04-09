@@ -66,7 +66,8 @@ spaceDir <- function(x, y, sample.direction, data.type, obs.time=NULL, distance.
   # sample dates
   if (!is.null(obs.time)) {
     if (!class(obs.time)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"obs.time" is nof of a valid class')}
-    if (length(obs.time)!=length(x)) {stop('errorr: "x" and "obs.time" have different lengths')}}
+    if (length(obs.time)!=length(x)) {stop('errorr: "x" and "obs.time" have different lengths')}
+    if (sum(is.na(obs.time)) > 0) {stop('please filter missing values in "obs.time")}}
 
   # raster
   if (!exists('y')) {stop('"y" is missing')}
