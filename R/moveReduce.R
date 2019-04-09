@@ -130,9 +130,5 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
 
   return(list(points=r.shp, total.time=t.sum.r))
 
-
-
-
-
 }
 
