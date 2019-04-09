@@ -45,6 +45,7 @@ tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
   if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
   if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
   if (class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
+  if(sum(is.na(obs.date)) > 0) {stop('please filter missing values in "obs.date"')}
   rp <- crs(xy) # reference projection
 
   #---------------------------------------------------------------------------------------------------------------------#
