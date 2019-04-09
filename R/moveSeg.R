@@ -59,6 +59,7 @@ moveSeg <- function(x, z, y, data.type='cont', threshold=NULL, summary.fun=NULL,
   # sample dates
   if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
   if (length(z)!=length(y)) {stop('errorr: "y" and "z" have different lengths')}
+  if(sum(is.na(z)) > 0) {stop('please filter missing values in "z"')}
 
   # environmental data
   if (class(x)[1]=='RasterLayer') {
