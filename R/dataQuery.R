@@ -60,7 +60,11 @@ dataQuery <- function(x, y, x.dates, y.dates, time.buffer, spatial.buffer=NULL, 
   # check temporal information
   if (class(x.dates)[1]!='Date') {stop('"x.dates" is not of a valid class')}
   if (class(y.dates)[1]!='Date') {stop('"y.dates" is not of a valid class')}
-
+  
+  # check dimensions of input variables
+  if (ncol(ev) != length(x.dates)) {stop('"x.dates" has a different number of records than "x"')}
+  if (length(y) != length(y.dates)) {stop('"y.dates" has a different number of records than "y"')}
+  
   # auxiliary
   if (!is.null(spatial.buffer)) {if (!is.numeric(spatial.buffer)) {stop('"spatial.buffer" assigned but not numeric')}} else {smooth.fun=NULL}
   if (!is.null(spatial.buffer) & is.null(smooth.fun)) {smooth.fun <- function(x) {sum(x*x) / sum(x)}} else {
