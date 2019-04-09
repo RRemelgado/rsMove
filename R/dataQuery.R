@@ -59,7 +59,9 @@ dataQuery <- function(x, y, x.dates, y.dates, time.buffer, spatial.buffer=NULL, 
 
   # check temporal information
   if (class(x.dates)[1]!='Date') {stop('"x.dates" is not of a valid class')}
+  if (sum(is.na(x.dates)) > 0) {stop('please filter missing values in "x.dates"')}
   if (class(y.dates)[1]!='Date') {stop('"y.dates" is not of a valid class')}
+  if (sum(is.na(y.dates)) > 0) {stop('please filter missing values in "y.dayes"')}
   
   # check dimensions of input variables
   if (ncol(ev) != length(x.dates)) {stop('"x.dates" has a different number of records than "x"')}
