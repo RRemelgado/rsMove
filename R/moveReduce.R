@@ -2,8 +2,8 @@
 #'
 #' @description Pixel based summary of movement data that preserves periodic movements.
 #' @param x Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the observation time of \emph{x}.
 #' @param y Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.
+#' @param z Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the observation time of \emph{x}.
 #' @param preserve.revisits Logical. Should the function preserve revisit patterns?
 #' @param derive.raster Should a \emph{RasterLayer} with the total time per pixel be provided?
 #' @importFrom raster crs cellFromXY rasterize
@@ -55,7 +55,8 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
 
   # sample dates
   if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
-  if (length(z)!=length(x)) {stop('errorr: "x" and "z" have different lengths')}
+  if (length(z)!=length(x)) {stop('"x" and "z" have different lengths')}
+  if (sum(is.na(z)) > 0) {stop('please filter missing values in "z")}
 
   # environmental data
   if (!class(y)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
