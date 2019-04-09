@@ -58,6 +58,7 @@ sampleMove <- function(xy, obs.time, search.radius, distance.method='m', time.un
   if (!exists('obs.time')) {stop('"obs.time" is missing')}
   if (!class(obs.time)[1]%in%c('Date', 'POSIXlt', 'POSIXct')) {stop('"obs.time" is nof of a valid class')}
   if (length(obs.time)!=length(xy)) {stop('"xy" and "obs.time" have different lengths')}
+  if (sum(is.na(obs.time)) > 0) {stop('please filter missing values in "obs.time"')}
   io <-order(obs.time) # index used to check data order
   xy <- xy[io,]
   obs.time <- obs.time[io]
