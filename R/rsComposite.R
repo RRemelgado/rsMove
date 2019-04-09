@@ -67,9 +67,11 @@ rsComposite <- function(x, x.dates, obs.dates, comp.method='closest', temporal.b
   # raster dates
   if (!class(x.dates)[1]%in%c('Date')) {stop('"x.dates" is nof of a valid class')}
   if (length(x.dates)!=nlayers(x)) {stop('"x" and "x.dates" have different lengths')}
+  if (sum(is.na(x.dates)) > 0) {stop('please filter missing values in "x.dates"')}
 
   # reference dates
   if (!class(obs.dates)[1]%in%c('Date')) {stop('"obs.dates" is nof of a valid class')}
+  if (sum(is.na(obs.dates)) > 0) {stop('please filter missing values in "obs.dates"')}
 
   # auxiliary variables
   if (!is.null(temporal.buffer)) {if (!is.numeric(temporal.buffer)) {stop('"temporal.buffer" is not numeric')}}
