@@ -52,6 +52,7 @@ hotMoveStats <- function(x, y, z) {
   } else {z <- replicate(length(x), 1)}
   if (!class(x)%in%c("numeric", "character")) {stop('"x" is not of a valid class')}
   if (class(y)[1]!="Date") {stop('"y" is not of a valid class')}
+  if(sum(is.na(y) > 0) {stop('please filter missing values in "y"')}
   if (length(x)!=length(y)) {stop('"x" and "y" have different lenghts')}
 
   #----------------------------------------------------------------------------------------------------------------------------------------------------------------------------#
