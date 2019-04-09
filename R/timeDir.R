@@ -67,6 +67,7 @@ timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, st
   if (!exists('obs.dates')) {stop('"obs.dates" is missing')}
   if (class(obs.dates)[1]!='Date') {stop('"obs.dates" is nof of a valid class')}
   if (length(obs.dates)!=length(xy)) {stop('"xy" and "obs.dates" have different lengths')}
+  if(sum(is.na(obs.date)) > 0) {stop('please filter missing values in "obs.date"')}
 
   # environmental data dates
   if (class(env.dates)[1]!='Date') {stop('"env.dates" is nof of a valid class')}
