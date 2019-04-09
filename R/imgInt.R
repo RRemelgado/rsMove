@@ -60,6 +60,7 @@ imgInt <- function(x, x.dates, y, time.buffer, smooth=TRUE, smooth.fun=function(
   if (!class(x)[1]%in%c('RasterStack', 'RasterBrick')) {stop('"x" is not of a valid class')}
   if (is.Date(x.dates)) {
     if (nlayers(x)!=length(x.dates)) {stop('"x" and "x.dates" have different lengths')}
+    if (sum(is.na(x.dates)) > 0) {stop('please filter missing values in "x.dates"')}
     int.method <- 1}
   if (class(x.dates) %in% c('RasterStack', 'RasterBrick')) {
     if (nlayers(x)!=nlayers(x.dates)) {stop('"x" and "x.dates" have different lengths')}
