@@ -56,7 +56,7 @@ moveReduce <- function(x, y, z, preserve.revisits=TRUE, derive.raster=FALSE) {
   # sample dates
   if (!class(z)[1]%in%c('Date', 'POSIXct', 'POSIXlt')) {stop('"z" is nof of a valid class')}
   if (length(z)!=length(x)) {stop('"x" and "z" have different lengths')}
-  if (sum(is.na(z)) > 0) {stop('please filter missing values in "z")}
+  if (sum(is.na(z)) > 0) {stop('please filter missing values in "z"')}
 
   # environmental data
   if (!class(y)[1]%in%c('RasterLayer', 'RasterStack', 'RasterBrick')) {
