@@ -67,7 +67,7 @@ timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, st
   if (!exists('obs.dates')) {stop('"obs.dates" is missing')}
   if (class(obs.dates)[1]!='Date') {stop('"obs.dates" is nof of a valid class')}
   if (length(obs.dates)!=length(xy)) {stop('"xy" and "obs.dates" have different lengths')}
-  if(sum(is.na(obs.date)) > 0) {stop('please filter missing values in "obs.date"')}
+  if(sum(is.na(obs.dates)) > 0) {stop('please filter missing values in "obs.dates"')}
 
   # environmental data dates
   if (class(env.dates)[1]!='Date') {stop('"env.dates" is nof of a valid class')}
@@ -137,6 +137,10 @@ timeDir <- function(env.data, env.dates, obs.dates, temporal.buffer, xy=NULL, st
       scale_fill_gradientn(colours=cr(10)) +
       theme(legend.text=element_text(size=10), panel.grid.major=element_blank(),
             panel.grid.minor=element_blank())
-    return(list(stats=df, hist.plot=p1, point.plot=p2))} else {return(list(stats=df, hist.plot=p1))}
+    return(list(stats=df, hist.plot=p1, point.plot=p2))
+  } else {
+    return(list(stats=df, hist.plot=p1))
+  }
 
 }
+
