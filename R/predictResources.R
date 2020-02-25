@@ -9,7 +9,6 @@
 #' @importFrom caret train trainControl
 #' @importFrom raster calc nlayers
 #' @return A \emph{list}.
-#' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @details {Modeling of resource suitability using animal movement data following the method of Remelgado et al (2017). Each
 #' unique label in \emph{z} is kept for validation while the remaining samples are used for training. Then, the function evaluates
 #' the performance of this model reporting (internally) on the number of true positives, false positives and the number of cases for

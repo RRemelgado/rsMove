@@ -6,7 +6,6 @@
 #' @param agg.radius Minimum radius for pixel aggregation. Unit depends on the projection of the data.
 #' @param nr.points Minimum number of observations per pixel.
 #' @param nr.pixels Minimum number of pixels per region.
-#' @references \href{10.1002/rse2.70}{Remelgado, R., Leutner, B., Safi, K., Sonnenschein, R., Kuebert, C. and Wegmann, M. (2017), Linking animal movement and remote sensing - mapping resource suitability from a remote sensing perspective. Remote Sens Ecol Conserv.}
 #' @return A numeric \emph{vector} with region identifiers for each observation in \emph{x} to their correspondent pixel region. Filtered observations are returned as \emph{NA}.
 #' @details {First, the observations are converted to pixel coordinates and pixels with a corresponding number of observations greater than \emph{nr.points}
 #' are filtered out. Then, if \emph{nr.pixels} is set, the function evaluates the spatial connectivity of the pixels and regions with a pixel count smaller
