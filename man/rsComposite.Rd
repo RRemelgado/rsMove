@@ -4,8 +4,13 @@
 \alias{rsComposite}
 \title{rsComposite}
 \usage{
-rsComposite(x, x.dates, obs.dates, comp.method = "closest",
-  temporal.buffer = NULL)
+rsComposite(
+  x,
+  x.dates,
+  obs.dates,
+  comp.method = "closest",
+  temporal.buffer = NULL
+)
 }
 \arguments{
 \item{x}{Object of class \emph{RasterStack} or \emph{RasterBrick}.}

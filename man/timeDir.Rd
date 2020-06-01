@@ -4,8 +4,15 @@
 \alias{timeDir}
 \title{timeDir}
 \usage{
-timeDir(env.data, env.dates, obs.dates, temporal.buffer, xy = NULL,
-  stat.fun = NULL, min.count = 2)
+timeDir(
+  env.data,
+  env.dates,
+  obs.dates,
+  temporal.buffer,
+  xy = NULL,
+  stat.fun = NULL,
+  min.count = 2
+)
 }
 \arguments{
 \item{env.data}{Object of class \emph{RasterStack} or \emph{RasterBrick} or \emph{data.frame}.}

@@ -4,8 +4,14 @@
 \alias{plotMove}
 \title{plotMove}
 \usage{
-plotMove(x, y, size.var = NULL, fill.var = NULL, var.type = NULL,
-  var.names = NULL)
+plotMove(
+  x,
+  y,
+  size.var = NULL,
+  fill.var = NULL,
+  var.type = NULL,
+  var.names = NULL
+)
 }
 \arguments{
 \item{x}{Vector of x coordinates.}

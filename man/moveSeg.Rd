@@ -4,8 +4,16 @@
 \alias{moveSeg}
 \title{moveSeg}
 \usage{
-moveSeg(x, z, y, data.type = "cont", threshold = NULL,
-  summary.fun = NULL, buffer.size = NULL, smooth.fun = NULL)
+moveSeg(
+  x,
+  z,
+  y,
+  data.type = "cont",
+  threshold = NULL,
+  summary.fun = NULL,
+  buffer.size = NULL,
+  smooth.fun = NULL
+)
 }
 \arguments{
 \item{x}{Object of class \emph{RasterLayer} or \emph{data.frame}.}

@@ -4,8 +4,14 @@
 \alias{imgInt}
 \title{imgInt}
 \usage{
-imgInt(x, x.dates, y, time.buffer, smooth = TRUE,
-  smooth.fun = function(j) {     runmean2(as.numeric(j), 1) })
+imgInt(
+  x,
+  x.dates,
+  y,
+  time.buffer,
+  smooth = TRUE,
+  smooth.fun = function(j) {     runmean2(as.numeric(j), 1) }
+)
 }
 \arguments{
 \item{x}{Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.}

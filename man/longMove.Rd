@@ -4,7 +4,9 @@
 \name{longMove}
 \alias{longMove}
 \title{Example data of animal movements during a migration.}
-\format{A SpatialPointsDataFrame}
+\format{
+A SpatialPointsDataFrame
+}
 \usage{
 data(longMove)
 }

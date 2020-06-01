@@ -4,8 +4,7 @@
 \alias{moveCloud}
 \title{moveCloud}
 \usage{
-moveCloud(x, y, data.path = NULL, buffer.size = NULL,
-  remove.file = FALSE)
+moveCloud(x, y, data.path = NULL, buffer.size = NULL, remove.file = FALSE)
 }
 \arguments{
 \item{x}{Object of class \emph{Date} with observation dates of \emph{y}.}

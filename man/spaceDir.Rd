@@ -4,9 +4,17 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(x, y, sample.direction, data.type, obs.time = NULL,
-  distance.method = "m", buffer.size = NULL, stat.fun = NULL,
-  min.count = 2)
+spaceDir(
+  x,
+  y,
+  sample.direction,
+  data.type,
+  obs.time = NULL,
+  distance.method = "m",
+  buffer.size = NULL,
+  stat.fun = NULL,
+  min.count = 2
+)
 }
 \arguments{
 \item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}

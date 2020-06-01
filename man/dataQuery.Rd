@@ -4,8 +4,15 @@
 \alias{dataQuery}
 \title{dataQuery}
 \usage{
-dataQuery(x, y, x.dates, y.dates, time.buffer, spatial.buffer = NULL,
-  smooth.fun = NULL)
+dataQuery(
+  x,
+  y,
+  x.dates,
+  y.dates,
+  time.buffer,
+  spatial.buffer = NULL,
+  smooth.fun = NULL
+)
 }
 \arguments{
 \item{x}{Object of class \emph{RasterStack}, \emph{RasterBrick}.}

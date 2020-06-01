@@ -4,8 +4,13 @@
 \alias{sampleMove}
 \title{sampleMove}
 \usage{
-sampleMove(xy, obs.time, search.radius, distance.method = "m",
-  time.unit = NULL)
+sampleMove(
+  xy,
+  obs.time,
+  search.radius,
+  distance.method = "m",
+  time.unit = NULL
+)
 }
 \arguments{
 \item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}

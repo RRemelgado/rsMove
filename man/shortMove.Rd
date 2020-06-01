@@ -4,7 +4,9 @@
 \name{shortMove}
 \alias{shortMove}
 \title{Example data of animal movements during the nesting period.}
-\format{A SpatialPointsDataFrame}
+\format{
+A SpatialPointsDataFrame
+}
 \usage{
 data(shortMove)
 }

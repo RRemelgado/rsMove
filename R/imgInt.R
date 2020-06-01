@@ -1,7 +1,6 @@
 #' @title imgInt
 #'
-#' @description {Temporal linear interpolation of environmental data using
-#' a \emph{raster}, \emph{SpatialPointsDataFrames} or \emph{matrix}/\emph{data.frame}.}
+#' @description {Temporal linear interpolation of environmental data using a \emph{raster}, \emph{SpatialPointsDataFrames} or \emph{matrix}/\emph{data.frame}.}
 #' @param x Object of class \emph{RasterStack}, \emph{RasterBrick} or \emph{data.frame}.
 #' @param y Object of class \emph{Date} with target dates. Alternatively, a \emph{RasterStack} or \emph{RasterBrick} with julian days for each pixel.
 #' @param x.dates Object of class \emph{Date} with dates of \emph{x}.
