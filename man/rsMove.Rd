@@ -4,3 +4,6 @@
 \name{rsMove}
 \alias{rsMove}
 \title{rsMove.}
+\description{
+Example datasets of the rsMove package
+}

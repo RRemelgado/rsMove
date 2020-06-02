@@ -22,7 +22,7 @@ A \emph{list} object reporting on the variability of cloud cover within and arou
 }
 \description{
 {Provides historical information on cloud cover for a set of coordinate
-pairs. The temporal information is adjusted to the sample observation date}.
+pairs. The temporal information is adjusted to the sample observation date.}
 }
 \details{
 {This function uses daily cloud fraction data from NASA's NEO service. For each observation date in \emph{obs.dates},

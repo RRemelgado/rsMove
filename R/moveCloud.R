@@ -1,7 +1,7 @@
 #' @title moveCloud
 #'
 #' @description {Provides historical information on cloud cover for a set of coordinate
-#' pairs. The temporal information is adjusted to the sample observation date}.
+#' pairs. The temporal information is adjusted to the sample observation date.}
 #' @param x Object of class \emph{Date} with observation dates of \emph{y}.
 #' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
 #' @param data.path Output data path for downloaded data.

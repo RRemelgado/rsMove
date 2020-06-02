@@ -1,6 +1,7 @@
 #' rsMove.
 #'
 #' @name rsMove
+#' @description Example datasets of the rsMove package
 #' @docType package
 #' @import raster sp
 NULL

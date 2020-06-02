@@ -30,8 +30,7 @@ imgInt(
 A \emph{RasterBrick} or a \emph{data frame}. If a \emph{RasterBrick}, each layer represents a date in \emph{y}. If a \emph{data.frame}/\emph{matrix}, columns represent dates and rows represent samples.
 }
 \description{
-{Temporal linear interpolation of environmental data using
-a \emph{raster}, \emph{SpatialPointsDataFrames} or \emph{matrix}/\emph{data.frame}.}
+{Temporal linear interpolation of environmental data using a \emph{raster}, \emph{SpatialPointsDataFrames} or \emph{matrix}/\emph{data.frame}.}
 }
 \details{
 {Wrapper for the function \code{\link{intime}} that performs a time-sensitive, linear interpolation

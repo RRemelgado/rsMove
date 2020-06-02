@@ -15,8 +15,7 @@ specVar(x, y)
 A \emph{list}.
 }
 \description{
-{Tool to support the selection of adequate satellite spatial resolution. Evaluates
-how the spectral variability within a pixel change with the change in spatial resolution.}
+Tool to support the selection of adequate satellite spatial resolution. Evaluates how the spectral variability within a pixel change with the change in spatial resolution.
 }
 \details{
 {Given a raster object (\emph{x}), the function determines how degrading its spatial resolution
