@@ -30,7 +30,7 @@ A paper on the package is currently under review (cross your fingers) and thus t
 
 ### Bug reports & contact
 
-For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/issues/"</a>. Feature requests and other contributions are also welcome.
+For bug reports, please use <a href="https://github.com/RRemelgado/rsMove/issues/">our issue page</a>. Feature requests and other contributions are also welcome.
 
 <br>
 
