@@ -23,7 +23,7 @@ install.packages('rsMove')
 
 ### Examples
 <p align="justify">
-A paper on the package is currently under review (cross your fingers) and thus the vignette on the general applicability of rsMove was removed to avoid conflicts. Hopefully, I'll announce the paper here soon. For the time being, you can click <a href="https://cran.r-project.org/package=rsMove/vignettes/resource_suitability.html">here</a> for a vignette on the use of rsMove to predict environmental resource suitability following the methodology described in <a href="http://onlinelibrary.wiley.com/doi/10.1002/rse2.70/full">this</a> paper.
+A paper on the package is currently under review (cross your fingers) and thus the vignette on the general applicability of rsMove was removed to avoid conflicts. Hopefully, I'll announce the paper here soon. For the time being, you can <a href="https://cran.r-project.org/package=rsMove/vignettes/resource_suitability.html">click here for a vignette </a> on the use of rsMove to predict environmental resource suitability following the methodology described in <a href="http://onlinelibrary.wiley.com/doi/10.1002/rse2.70/full">this paper</a>.
 </p>
 
 <br>
