@@ -23,9 +23,9 @@
 #'
 #'  require(raster)
 #'
-#'  # reference data
-#'  data(longMove)
-#'  longMove <- longMove[1:1000,]
+#'  data(longMove) # access reference data
+#'  longMove <- longMove[c(1:50, 2000:2050,3000:3050),] # subset for testing
+#'
 #'  # test function for intervals of 1, 8 and 16 days (e.g. of MODIS data)
 #'  obs.date <- as.Date(longMove@data$timestamp)
 #'  a.res <- tMoveRes(longMove, obs.date, c(1,8,16), 0.1)
