@@ -4,47 +4,59 @@
 \alias{tMoveRes}
 \title{tMoveRes}
 \usage{
-tMoveRes(xy, obs.date, time.res, pixel.res)
+tMoveRes(x, y, time.res, pixel.res)
 }
 \arguments{
-\item{xy}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x}{\emph{spatVector}.}
 
-\item{obs.date}{Object of class \emph{Date} with \emph{xy} observation dates.}
+\item{y}{\emph{Date} vector with observation dates or each entry in \emph{x}.}
 
 \item{time.res}{Vector of temporal resolutions (expressed in days).}
 
 \item{pixel.res}{Spatial resolution (unit depends on spatial projection).}
 }
 \value{
-A \emph{list} object reporting on the amount and distribution of unique pixels and connected pixel regions per temporal resolution.
+{A \emph{list} containing:
+\itemize{
+ \item{\emph{stats} - Summary statistics reporting on
+ the number of temporal widows, unique samples and unique
+ sample regions per temporal resolution.}
+ \item{\emph{summary.plot} - Plot representing the change in number
+ of unique pixels and pixel regions per temporal resolution.}
+ \item{\emph{temporal.plot} - Plot representing the change in number
+ of unique pixels and pixel regions per temporal resolution and time step.}}}
 }
 \description{
-{Tool to support the selection of an adequate satellite temporal resolution. It evaluates how the change in temporal
-resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
+Analysis of GPS data losses with the choice temporal resolutions.
 }
 \details{
-{Given a base spatial resolution (\emph{pixel.res} and a vector of temporal resolutions (\emph{time.res}), the function determines
-the number of unique pixels and unique pixel regions after their temporal aggregation. For each temporal resolution, the function starts by
-converting \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number of
-samples and sample regions. The output of the function consists of:
-\itemize{
- \item{\emph{stats} - Summary statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
- \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}}}
+{For each spatial resolution given by  \emph{pixel.res}, and for
+each temporal resolutions given by \emph{time.res}, the function simulates
+the number of unique pixels and pixel regions preserved after accounting
+for pseudo-replication at each hypothetical time step, assuming that the
+GPS data until the next date with available environmental data is
+aggregated into unique pixels. Finally, For each temporal aggregation
+window, the function reports the 'pixel ratio' and the 'region ratio',
+i.e., the number of pixels and regions divided by the number of GPS records.}
 }
 \examples{
 {
 
- require(raster)
+ require(terra)
 
- # reference data
- data(longMove)
- longMove <- longMove[1:1000,]
+ #'  # read movement data
+ longMove = read.csv(system.file('extdata',
+ 'longMove.csv', package="rsMove"))
+
+ # convert observations to vector
+ longMove = vect(longMove, geom=c("long","lat"), crs="EPSG:4326")
+
  # test function for intervals of 1, 8 and 16 days (e.g. of MODIS data)
- obs.date <- as.Date(longMove@data$timestamp)
- a.res <- tMoveRes(longMove, obs.date, c(1,8,16), 0.1)
+ obs.date = as.Date(longMove$timestamp)
+ a.res = tMoveRes(longMove, obs.date, c(1,8,16), 0.1)
 
 }
 }
 \seealso{
-\code{\link{sMoveRes}} \code{\link{specVar}}
+\code{\link{sMoveRes}}
 }

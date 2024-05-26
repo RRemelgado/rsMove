@@ -1,232 +1,210 @@
 #' @title moveCloud
 #'
-#' @description {Provides historical information on cloud cover for a set of coordinate
-#' pairs. The temporal information is adjusted to the sample observation date.}
-#' @param x Object of class \emph{Date} with observation dates of \emph{y}.
-#' @param y Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param data.path Output data path for downloaded data.
-#' @param buffer.size Two element vector with temporal buffer size (expressed in days).
-#' @param remove.file Logical. Should the files be deleted after usage?
-#' @importFrom raster raster extract
+#' @description Extract Cloud Cover Fraction (CCF) data for a set of coordinate pairs.
+#' @param x Object of class \emph{SpatVector}.
+#' @param y Object of class \emph{Date} with observation dates of \emph{y}.
+#' @param start First data from when to download CCF data.
+#' @param end Last data from when to download CCF data.
+#' @param interval Daily interval of data download.
+#' @param data.path Output path for downloading data on cloud cover.
+#' @importFrom terra rast extract app crds
 #' @importFrom grDevices colorRampPalette
-#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar element_text
+#' @importFrom ggplot2 ggplot aes labs theme geom_bar coord_cartesian scale_y_continuous scale_fill_gradientn
 #' @importFrom utils download.file
 #' @importFrom RCurl url.exists
-#' @return A \emph{list} object reporting on the variability of cloud cover within and around each observation dates.
-#' @details {This function uses daily cloud fraction data from NASA's NEO service. For each observation date in \emph{obs.dates},
-#' the function downloads the correspondent image and extracts the percent cloud cover for the corresponding samples in \emph{y}.
-#' Before downloading any data, the function will look within \emph{data.path} for previoulsy acquired data. If they exist, they
-#' won't be downloaded reducing the processing time required by the function. Moreover, if \emph{buffer.size} is specified, for
-#' each date, the function will download all images that are within the specified temporal buffer. \emph{buffer.size} requires a
-#'  twoelement vector which specifies the buffer size before and after the target dates. These additional images will be used to
-#'  report on the closest time step with the lowest possible cloud cover. The final output provides a \emph{data.frame} ($report)
-#'  with information on:
-#' \itemize{
-#'  \item{\emph{cloud cover \% (day)}: cloud cover for the observation dates.}
-#'  \item{\emph{best date (after)}: dates before the observation dates with the lowest cloud cover.}
-#'  \item{\emph{best date cloud cover \% (before)}: cloud cover for best before dates.}
-#'  \item{\emph{best date (after)}: dates after the observation dates with the lowest cloud cover.}
-#'  \item{\emph{best date cloud cover \% (after)}: cloud cover best after dates.}}
-#'  Finally, the function generates a plot ($plot) reporting on the variability of cloud cover
-#'  and the number of observation registered in \emph{y} for each date.}
+#' @importFrom stats  weighted.mean
+#' @details {The function extracts data on daily Cloud Cover Fractions (CCF)
+#' from NASA's Earth Observation (NEO). For a sequence of dates defined by
+#' \emph{start}, \emph{end}, and \emph{interval}, the function downloads the
+#' correspondent CCF data and stores them in  \emph{data.path}. These data,
+#' which have a global coverage and a spatial resolution of 0.1 degrees, will
+#' only be downloaded if they do not already exist in \emph{data.path}. When
+#' checking for existing data, the function will follow a standard naming
+#' convention, so data acquired independently will likely be missed. After
+#' downloading the needed data, the function will extract the CCF fraction
+#' values for all dates at the coordinates in \emph{x}. This will be used to
+#' calculate the mean and standard deviation of the CCF at each date. In
+#' addition, the function will extract CCF data for each date in \emph{y} that
+#' falls between \emph{start} and \emph{end}.}
+#' @return {A \emph{list} containing: \itemize{
+#'  \item{\emph{x.stats} - CCF statistics at each entry in \emph{x}}
+#'  \item{\emph{r.stats} - CCF statistics at each unique date between\emph{start} and \emph{end} summarized across the elements of \emph{x}}
+#'  \item{\emph{x.plot} - Plot of the data in \emph{x.stats}}.
+#'  \item{\emph{r.plot} - Plot of the data in \emph{r.stats}}.}}
 #' @references \url{https://cneos.jpl.nasa.gov/}
 #' @seealso \code{\link{sMoveRes}} \code{\link{tMoveRes}}
 #' @examples \dontrun{
 #'
-#'  require(raster)
+#'  require(terra)
 #'
 #'  # read movement data
-#'  data(shortMove)
+#'  longMove <- read.csv(system.file('extdata',
+#'  'longMove.csv', package="rsMove"))
+#'
+#'  # convert observations to vector
+#'  longMove = vect(longMove, geom=c("long","lat"), crs="EPSG:4326")
 #'
 #'  # test function for 30 day buffer
-#'  od <- as.Date(shortMove@data$date)
-#'  c.cover <- moveCloud(shortMove, od, data.path=".", buffer.size=c(30,30))
+#'  obs.dates <- as.Date(longMove$timestamp)
+#'  c.cover <- moveCloud(shortMove, obs.dates)
 #'
 #' }
 #' @export
 
 #-----------------------------------------------------------------------------------------------------------------------#
 
-moveCloud <- function(x, y, data.path=NULL, buffer.size=NULL, remove.file=FALSE) {
+moveCloud <- function(x, y, start, end, interval, data.path) {
 
   #---------------------------------------------------------------------------------------------------------------------#
   #  1. check inpur variables
   #---------------------------------------------------------------------------------------------------------------------#
 
-  # input keywords
-  if (!class(y)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"y" is not of a valid class')}
-  if (class(x)[1] != 'Date') {stop('"x" is not of a valid class')}
-  if (sum(is.na(x)) > 0) {stop('please filter missing values in "x"')}
-  if (is.na(crs(y))) {stop('"y" does not have a valid projection')}
-  if (is.null(data.path)) {
-    data.path <- tempdir()
-    remove.file <- TRUE
-  } else {
-    if (!dir.exists(data.path)) {stop('"dpath" not found in file system')}
-    data.path <- paste0(file.path(data.path), .Platform$file.sep)}
-  if (!is.null(buffer.size)) {apply.buffer<-TRUE} else {apply.buffer<-FALSE}
+  if (!class(x)[1]%in%c('SpatVector')) stop('"x" is not of a valid class')
+  x = as.data.frame(crds(project(x, "EPSG:4326"))) # reproject data if needed
+  if (class(y)[1] != 'Date') stop('"start" is not of a valid class')
 
-  # ftp servers
-  myd <- "ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/MYDAL2_D_CLD_FR/" # aqua
-  mod <- "ftp://neoftp.sci.gsfc.nasa.gov/geotiff.float/MODAL2_D_CLD_FR/" # terra
+  if (class(start)[1] != 'Date') stop('"start" is not of a valid class')
+  if (class(end)[1] != 'Date') stop('"end" is not of a valid class')
+  if (!is.numeric(interval)) stop('"interval" is not of a valid class')
 
-  #---------------------------------------------------------------------------------------------------------------------#
-  # 2. download data and derive statistics
-  #---------------------------------------------------------------------------------------------------------------------#
+  if (!dir.exists(data.path)) {
+    test = tryCatch(dir.create(data.path), error=function(e) return(TRUE))
+    if (is.logical(test)) stop('provided "data.path" not valid')
+  }
+
+  # data sources
+  myd <- "https://neo.gsfc.nasa.gov/archive/geotiff.float/MYDAL2_D_CLD_FR/" # aqua
+  mod <- "https://neo.gsfc.nasa.gov/archive/geotiff.float/MODAL2_D_CLD_FR//" # terra
+
+  #---------------------------------------------------------------------------#
+  # 2. download data on cloud cover
+  #---------------------------------------------------------------------------#
 
   # target dates
- x <- as.Date(x)
-  ud <- unique(x)
+  target_dates = seq(start, end, interval)
 
-  # output variables
-  d.cc <- vector('numeric', length(y))
-  p.cc.b <- d.cc
-  p.dt.b <- d.cc
-  class(p.dt.b) <- "Date"
-  d.df.b <- d.cc
-  p.dt.df <- d.cc
-  p.cc.a <- d.cc
-  p.dt.a <- p.dt.b
-  d.df.a <- d.cc
+  # warn user of the volume of data required
+  data.volume = 5.6*length(target_dates)
+  message(paste0("warning: about to store ", data.volume, " Mb"))
 
-  for (d in 1:length(ud)) {
+  # download data
+  dates = list()
+  files = list()
 
-    # target observations
-    loc <- which(x==ud[d])
+  for (d in 1:length(target_dates)) {
 
-    # set file name
-    ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", ud[d], ".FLOAT.TIFF")
-    ofile1 <- paste0(data.path, basename(ifile1))
-    ifile2 <- paste0(myd, "MYDAL2_D_CLD_FR_", ud[d], ".FLOAT.TIFF")
-    ofile2 <- paste0(data.path, basename(ifile2))
+    date = target_dates[d]
 
-    # check if file exists
-    if (!file.exists(ofile1)) {
-      if (url.exists(ifile1)) {download.file(ifile1, ofile1, quiet=TRUE, mode="wb")
-        mod.r <- TRUE} else {mod.r <- FALSE}} else {mod.r <- TRUE}
-    if (!file.exists(ofile2)) {
-      if (url.exists(ifile2)) {download.file(ifile2, ofile2, quiet=TRUE, mode="wb")
-        myd.r <- TRUE} else {myd.r <- FALSE}} else {myd.r <- TRUE}
+    # file to store
+    ofile = file.path(data.path, paste0("MYDAL2-ccf_",
+                                        paste0(strsplit(as.character(date),
+                                                        "[-]")[[1]],
+                                               collapse=""), "_10km.tif"))
 
-    # read data and crop to y extent
-    if (mod.r & myd.r) {d.cc[loc] <- (extract(raster(ofile1), y[loc,]) + extract(raster(ofile2), y[loc,])) / 2}
-    if (mod.r & !myd.r) {d.cc[loc] <- extract(raster(ofile1), y[loc,])}
-    if (!mod.r & myd.r) {d.cc[loc] <- extract(raster(ofile1), y[loc,])}
+    if (!file.exists(ofile)) {
 
-    # search for nearby images
-    if(apply.buffer) {
+      # list images to be downloaded
+      s1 = file.path(myd, paste0("MYDAL2_D_CLD_FR_",
+                                 date, ".FLOAT.TIFF"))
+      o1 = file.path(data.path, basename(s1))
+      if (!file.exists(s1)) c1 = tryCatch(
+        download.file(s1, o1, mode="wb", quiet=T),
+        error=function(e) return(TRUE))
 
-      # determine dates within the buffer
-      day.ls <- seq(ud[d]-buffer.size[1], ud[d]+buffer.size[2], 1)
+      s2 = file.path(mod, paste0("MODAL2_D_CLD_FR_",
+                                 date, ".FLOAT.TIFF"))
+      o2 = file.path(data.path, basename(s2))
+      if (!file.exists(s2)) c2 = tryCatch(
+        download.file(s2, o2, mode="wb", quiet=T),
+        error=function(e) return(TRUE))
 
-      df <- lapply(day.ls, function(x) {
-        ifile1 <- paste0(mod, "MODAL2_D_CLD_FR_", x, ".FLOAT.TIFF")
-        ofile1 <- paste0(data.path, basename(ifile1))
-        ifile2 <- paste0(myd, "MYDAL2_D_CLD_FR_", x, ".FLOAT.TIFF")
-        ofile2 <- paste0(data.path, basename(ifile2))
-        if (!file.exists(ofile1)) {
-          if (url.exists(ifile1)) {download.file(ifile1, ofile1, quiet=TRUE, mode="wb")
-            mod.r <- TRUE} else {mod.r <- FALSE}}
-        if (!file.exists(ofile2)) {
-          if (url.exists(ifile2)) {download.file(ifile2, ofile2, quiet=TRUE, mode="wb")
-            myd.r <- TRUE} else {myd.r <- FALSE}}
-        if (mod.r & myd.r) {return((extract(raster(ofile1), y[loc,]) +
-                                     extract(raster(ofile2), y[loc,])) / 2)}
-        if (mod.r & !myd.r) {return(extract(raster(ofile1), y[loc,]))}
-        if (!mod.r & myd.r) {return(extract(raster(ofile2), y[loc,]))}})
+      if (!is.logical(c1) | !is.logical(c2)) {
 
-      # extract values
-      f.cc <- do.call(cbind, df)
+        tmp = c(o1, o2)
+        tmp = tmp[file.exists(tmp)]
+        cloud.cover.img = rast(tmp)
+        cloud.cover.img[cloud.cover.img > 1] = NA
 
-      # find closest minimum
-      dq <- lapply(1:length(loc), function(x) {
-        diff0 <- day.ls - ud[d]
-        ind <- which(diff0 < 0)
-        if (length(ind)>0) {
-          bv <- min(f.cc[x,ind])
-          diff1 <- abs(diff0[ind])
-          ind <- ind[which(f.cc[x,ind]==bv)]
-          ind <- ind[which(diff0[ind]==min(diff0[ind]))]
-          db <- diff0[ind]
-          bd <- day.ls[ind]
-        } else {
-          bd <- NA
-          bv <- NA
-          db <- NA}
-        ind <- which(diff0 > 0)
-        if (length(ind)>0) {
-          av <- min(f.cc[x,ind])
-          diff1 <- abs(diff0[ind])
-          ind <- ind[which(f.cc[x,ind]==av)]
-          ind <- ind[which(diff0[ind]==min(diff0[ind]))]
-          da <- abs(day.ls[ind]-ud[d])
-          ad <- day.ls[ind]
-        } else {
-          ad <- NA
-          av <- NA
-          da <- NA}
-        return(list(bd=bd, bv=bv, db=db, ad=ad, av=av, da=da))})
+        # average cloud cover measured with AQUA & TERRA
+        cloud.cover.img = app(cloud.cover.img, mean, na.rm=T)
+        files[[d]] = ofile
+        writeRaster(cloud.cover.img, files[[d]])
+        dates[[d]] = date
 
-      # update target variables
-      p.dt.b[loc] <- do.call('c', lapply(dq, function(x) {x$bd}))
-      p.cc.b[loc] <- unlist(lapply(dq, function(x) {x$bv}))
-      d.df.b[loc] <- unlist(lapply(dq, function(x) {x$db}))
-      p.dt.a[loc] <- do.call('c', lapply(dq, function(x) {x$ad}))
-      p.cc.a[loc] <- unlist(lapply(dq, function(x) {x$av}))
-      d.df.a[loc] <- unlist(lapply(dq, function(x) {x$da}))
+        file.remove(tmp)
 
-      rm(f.cc)
+      }
 
     } else {
-      p.cc.b <- NA
-      p.cc.a <- NA
-      p.dt.b <- NA
-      p.dt.a <- NA}
-
-    # remove files if required
-    if (remove.file) {file.remove(list.files(data.path, '_D_CLD_FR_'))}
+      files[[d]] = ofile
+      dates[[d]] = date
+    }
 
   }
 
-  # add column names output
-  df <- data.frame(date=x, day.cover=d.cc, p.day.before=p.dt.b, p.cover.before=p.cc.b,
-                   p.cover.after=p.cc.a, p.day.after=p.dt.a, stringsAsFactors=F)
+  files = do.call("c", files)
+  dates = do.call("c", dates)
 
-  colnames(df) <- c("date (original)", "cloud cover % (day)", "best date (before)",
-                    "best date cloud cover % (before)", "best date (after)",
-                    "best date cloud cover % (after)")
+  #---------------------------------------------------------------------------#
+  # 3. extract cloud cover values for each GPS coordinate
+  #---------------------------------------------------------------------------#
 
-# #-------------------------------------------------------------------------------------------#
-# # 3. build plot
-# #-------------------------------------------------------------------------------------------#
+  # find GPS coordinates falling within the specified temporal window
+  ind = which(y %in% dates)
 
-  # plot table
-  ud <- sort(ud)
-  df0 <- do.call(rbind, lapply(ud, function(d) {
-    ind <- which(x==d)
-    cc <- mean(df[ind,2], na.rm=TRUE)
-    data.frame(date=d, cover=cc, count=length(ind), stringsAsFactors=FALSE)}))
+  r.cloud.cover = extract(rast(files), x[ind,], ID=F)
+  r.cloud.cover.data = data.frame(date=dates,
+                                  mean=apply(r.cloud.cover, 2, mean, na.rm=T),
+                                  sd=apply(r.cloud.cover, 2, sd, na.rm=T))
 
-  # color ramp of fill
-  cr <- colorRampPalette(c("khaki2", "forestgreen"))
+  x.cloud.cover = rep(0,length(ind))
+  unique_dates = unique(y[ind])
+  for (d in 1:length(unique_dates)) {
+    di = which(y[ind] == unique_dates[d])
+    ii = which(dates == unique_dates[d])
+    e = extract(rast(files[ii]), x[di,], ID=F)[[1]]
+    x.cloud.cover[di] = e
+  }
 
-  # plot
-  p <- ggplot(df0, aes_string(x="date", y="cover", fill="count")) + theme_bw() +
-    scale_fill_gradientn(colors=cr(10), name="Nr. Samples") +
-    xlab("Observation dates") + ylab("Cloud cover (%)") +
-    geom_bar(width=0.7, stat = "identity") +
-    theme(axis.text.x=element_text(size=12),
-          axis.title.x =element_text(size=14),
-          axis.text.y=element_text(size=12),
-          axis.title.y =element_text(size=14),
-          legend.text=element_text(size=12),
-          legend.title=element_text(size=14)) + ylim(0,100)
+  x.cloud.cover.data = data.frame(index=ind, date=y[ind],
+                                  cloud.cover=x.cloud.cover)
 
-#   p <- ggplot(df, aes_string(x="date (original)", y="cloud cover % (day)")) +
-#     theme_bw() + geom_bar(stat="identity", colour="black", fill="grey80") +
-#     theme(axis.title=element_text(size=12), axis.text=element_text(size=10)) +
-#     xlab("Date") + ylab("Cloud Cover (%)")
+  #---------------------------------------------------------------------------#
+  # 4. build plot
+  #---------------------------------------------------------------------------#
 
-  return(list(stats=df, plot=p))
+  # table used to plot
+  gdf = ddply(x.cloud.cover.data, .(date), summarise,
+              cover=mean(cloud.cover),
+              mean=mean(cloud.cover),
+              sd=sd(cloud.cover))
+
+  p1 <- ggplot(gdf, aes(x=date, y=cover)) +
+    theme_bw(base_size=6) +
+    geom_bar(width=0.7, stat="identity", fill="grey60") +
+    coord_cartesian(xlim=c(start,end), ylim=c(0,1)) +
+    labs(x="Observation date", y="Cloud Cover Fraction") +
+    scale_y_continuous(expand=c(0,0)) +
+    theme(panel.grid=element_blank(),
+          panel.background=element_blank(),
+          panel.border=element_blank(),
+          axis.line=element_line(linewidth=0.2, colour="grey5"))
+
+  # plot cloud cover across the reference period
+  p2 <- ggplot(r.cloud.cover.data, aes(x=date, y=mean)) +
+    theme_bw(base_size=6) +
+    geom_line(colour="grey10") +
+    geom_ribbon(aes(ymin=mean-sd, ymax=mean+sd), alpha=0.3) +
+    coord_cartesian(xlim=c(start,end), ylim=c(0,1)) +
+    labs(x="Observation date", y="Cloud Cover Fraction") +
+    scale_y_continuous(expand=c(0,0)) +
+    theme(panel.grid=element_blank(),
+          panel.background=element_blank(),
+          panel.border=element_blank(),
+          axis.line=element_line(linewidth=0.2, colour="grey5"))
+
+  return(list(x.stats=x.cloud.cover.data,
+              r.stats=r.cloud.cover.data,
+              x.plot=p1, r.plot=p2))
 
 }

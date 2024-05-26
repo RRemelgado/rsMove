@@ -4,79 +4,73 @@
 \alias{spaceDir}
 \title{spaceDir}
 \usage{
-spaceDir(
-  x,
-  y,
-  sample.direction,
-  data.type,
-  obs.time = NULL,
-  distance.method = "m",
-  buffer.size = NULL,
-  stat.fun = NULL,
-  min.count = 2
-)
+spaceDir(x, y, z, space.buffer, time.buffer, fun, min.count = 2)
 }
 \arguments{
-\item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x}{\emph{SpatVector} object.}
 
-\item{y}{Object of class \emph{RasterLayer}.}
+\item{y}{Object of class \emph{SpatRaster}.}
 
-\item{sample.direction}{One of \emph{forward}, \emph{backward} or \emph{both}. Default is \emph{both}.}
+\item{z}{Object of class \emph{Date} or \emph{POSIXct} with observation dates for each entry in \emph{x}.}
 
-\item{data.type}{One of 'cont' or 'cat'. Defines which type of variable is in use.}
+\item{space.buffer}{Spatial buffer size expressed in meters.}
 
-\item{obs.time}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with \emph{x} observation dates.}
+\item{time.buffer}{Temporal buffer size expressed in days.}
 
-\item{distance.method}{One of 'm' or 'deg' specifying the projection unit. Default is 'm'.}
-
-\item{buffer.size}{Spatial buffer size expressed in the map units.}
-
-\item{stat.fun}{Output statistical metric.}
+\item{fun}{List of functions to apply to each time step.}
 
 \item{min.count}{Minimum number of pixels required by \emph{stat.fun}. Default is 2.}
 }
 \value{
-A \emph{list} containing shapefiles with information on environmental change and travel distance/time and a plot of the results.
+{A \emph{data.frame} with statistics at each GPS observation.
+In addition the user defined statistics, the table will contain several
+entries describing the data used to calculate those statistics:
+\itemize{
+ \item{\emph{distance_traveled} - Total distance traveled between all observations}
+ \item{\emph{elapsed_time} - Time between the first and last observation}
+ \item{\emph{nr_observations} - nr_observations}
+ \item{\emph{pixel_value} - Pixel value at the main observation}}}
 }
 \description{
 Analysis of environmental change in space along a movement track.
 }
 \details{
-{This function quantifies environmnetal changes in space along a movement track. For each set of consecutive points, the
-function will derive coordinates for all unique pixels that overlap with - and are beteween - each point in a spatial moving widow
-with a shape defined by \emph{sample.direction}. The user can define \emph{buffer.size} to consider all pixels within a predefined
-spatial distance of the initially selected pixels. Once all pixels are selected, the function will extract the corresponding values
-in \emph{y} summarize them using a pre-defined statistical function. If \emph{data.type} is \emph{cont}, a statistical function can
-be provided through \emph{stat.fun}. However, if \emph{data.type} is \emph{cat}, the function will report on the dominant class and
-on the shannon index for each window. If the number of pixels within the a window is lower than \emph{min.count} the function will
-return \emph{NA}. On top of this, \emph{spaceDir} will also report on the linear distance traveled between endpoints (in meters) and
-the travel time (in minutes). The output of the function is a list consisting of:
-\itemize{
- \item{\emph{endpoints} - Point shapefile with endpoints of each spatial segment. Reports on a given statistical metric, traveled distance, travel time and the mean timestamp.}
- \item{\emph{segments} - Line shapefile with spatial segments. Reports on the same information as \emph{endpoints}.
- \item{\emph{plot} - Plotting of \emph{segments} where each segment is colored according to the extracted raster value.}}}}
+{The function quantifies environmental changes along a spatial
+gradient defined by GPS tracking dataset. For each GPS observation, the
+function finds the nearest observations within a given \emph{buffer.size},
+and uses those observations to apply a user-define list of functions
+(\emph{fun}) applied to thethe underlying pixel values in \emph{y}. In
+addition, the function will report on the linear distance traveled
+between endpoints (in meters) and the associated travel time (in minutes).}
 }
 \examples{
 {
 
- require(raster)
+ require(terra)
 
  # read raster data
  r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 
- # read movement data
- data(shortMove)
+ shortMove <- read.csv(system.file('extdata',
+ 'shortMove.csv', package="rsMove"))
+
+ # convert observations to vector
+ shortMove = vect(shortMove, geom=c("x","y"), crs="EPSG:32632")
 
  # observation time
- obs.time <- strptime(paste0(shortMove@data$date, ' ',shortMove@data$time),
+ obs.time <- strptime(paste0(shortMove$date, ' ',shortMove$time),
  format="\%Y/\%m/\%d \%H:\%M:\%S")
 
- # perform directional sampling
- of <- function(i) {lm(i~c(1:length(i)))$coefficients[2]}
- s.sample <- spaceDir(shortMove, r, "backward", "cont", obs.time=obs.time, stat.fun=of)
+ # construct target functions
+ functions <- list(
+    slope=function(i) lm(i~c(1:length(i)))$coefficients[2][[1]],
+    mean=function(i) mean(i, na.rm=T),
+    sd=function(i) sd(i, na.rm=T)
+ )
+ s.sample <- spaceDir(shortMove, r, obs.time, 30, 1, fun=functions)
 
 }
 }
 \seealso{
-\code{\link{timeDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
+\code{\link{timeDir}}
 }

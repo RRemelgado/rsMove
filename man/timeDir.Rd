@@ -4,77 +4,81 @@
 \alias{timeDir}
 \title{timeDir}
 \usage{
-timeDir(
-  env.data,
-  env.dates,
-  obs.dates,
-  temporal.buffer,
-  xy = NULL,
-  stat.fun = NULL,
-  min.count = 2
-)
+timeDir(x, x.dates, y, y.dates, temporal.buffer, fun = NULL, min.count = 2)
 }
 \arguments{
-\item{env.data}{Object of class \emph{RasterStack} or \emph{RasterBrick} or \emph{data.frame}.}
+\item{x}{Object of class \emph{SpatRaster}.}
 
-\item{env.dates}{Object of class \emph{Date} with \emph{env.data} observation dates.}
+\item{x.dates}{Object of class \emph{Date} with observation dates of \emph{y}.}
 
-\item{obs.dates}{Object of class \emph{Date} with \emph{xy} observation dates.}
+\item{y}{Object of class \emph{SpatVector}.}
+
+\item{y.dates}{Object of class \emph{Date} with observation dates of \emph{y}.}
 
 \item{temporal.buffer}{two element vector with temporal window size (expressed in days).}
 
-\item{xy}{Object of class "SpatialPoints" or "SpatialPointsDataFrame".}
-
-\item{stat.fun}{Output statistical metric.}
+\item{fun}{List of statistical function to apply to the data.}
 
 \item{min.count}{Minimum number of samples required by \emph{stat.fun}. Default is 2.}
 }
 \value{
-A \emph{vector} with a requested statistical metric for each point in \emph{xy} and informative plots.
+{A \emph{data.frame} with statistics at each GPS observation.
+In addition the user defined statistics, the table will contain several
+entries describing the data used to calculate those statistics:
+\itemize{
+ \item{\emph{distance_traveled} - Total distance traveled between all observations}
+ \item{\emph{elapsed_time} - Time between the first and last observation}
+ \item{\emph{nr_observations} - nr_observations}
+ \item{\emph{pixel_value} - Pixel value at the main observation}}}
 }
 \description{
 Analysis of environmental change in time for a set of coordinate pairs.
 }
 \details{
-{This function quantifies environmental change in time along a movement track. First, for each point in \emph{xy},
-the function compares its observation date (\emph{obs.dates}) against the acquisition dates (\emph{env.dates}) of \emph{env.data}
-to select non \emph{NA} timesteps within a predefined temporal window (\emph{temporal.buffer}). The user can adjust this window to
-determine which images are the most important. For example, if one wishes to know how the landscape evolved up to the observation
-date of the target sample, \emph{temporal.buffer} can be define as, e.g., c(30,0) forcing the function to only consider pixels recorded
-within the previous 30 days. After selecting adequate temporal information for each data point, a statistical metric is estimated. This
-statistical metric is specified by \emph{stat.fun}. By default, the function reports on the slope between the acquisition dates of \emph{env.data}
-and their corresponding values. When providing a new function, set x for \emph{env.dates} and y for \emph{env.data}. The final output is a list consisting of:
-\itemize{
-\item{\emph{stats} - \emph{data.frame} with the estimated statistical metric for each data point.}
-\item{\emph{hist.plot} - Histogram plot of the requested statistical metric. The bin size is the standard deviation of all estimated values.}
-\item{\emph{point.plot} - Plot of the \emph{xy} showing the spatial variability of the requested statistical metric.}
-}}
+{This function quantifies environmental changes in time for each
+GPS entry along a movement track. First, for each point in \emph{y}, the
+function compares its observation date (\emph{y.dates}) against the dates
+with environmental data (\emph{x.dates}), and preserves those entries in
+\emph{x} that fall within the \emph{temporal.buffer}. The user can adjust
+this window to determine which images are the most important. For example,
+if one wishes to know how the landscape evolved up to the observation date
+of the target sample, \emph{temporal.buffer} can be define as, e.g., c(30,0)
+forcing the function to only consider pixels recorded within the previous 30
+days. After selecting adequate temporal information for each data point, a
+list of user-defined statistical metrics are calculated (i.e., \emph{fun}).}
 }
 \examples{
 {
 
- require(raster)
+ require(terra)
 
  # read raster data
  file <- list.files(system.file('extdata', '', package="rsMove"), 'ndvi.tif', full.names=TRUE)
- r.stk <- stack(file)
- r.stk <- stack(r.stk, r.stk, r.stk) # dummy files for the example
+ r.stk <- rast(file)
+ r.stk <- c(r.stk, r.stk, r.stk) # dummy files for the example
 
  # read movement data
- data(shortMove)
+ shortMove <- read.csv(system.file('extdata', 'shortMove.csv', package="rsMove"))
+
+ # convert observations to vector
+ shortMove = vect(shortMove, geom=c("x","y"), crs="EPSG:32632")
 
  # raster dates
  r.dates <- seq.Date(as.Date("2013-08-01"), as.Date("2013-08-09"), 1)
 
  # sample dates
- obs.dates <- as.Date(shortMove@data$date)
+ obs.dates <- as.Date(shortMove$date)
 
  # perform directional sampling
- of <- function(x,y) {lm(y~x)$coefficients[2]}
- time.env <- timeDir(r.stk, r.dates, obs.dates, c(30,30), xy=shortMove, stat.fun=of)
+ functions <- list(
+    slope=function(x,y) lm(y~x)$coefficients[2][[1]],
+    mean=function(x,y) mean(y, na.rm=T),
+    sd=function(x,y) sd(y, na.rm=T)
+ )
+ time.env <- timeDir(r.stk, r.dates, shortMove, obs.dates, 3, fun=functions)
 
 }
 }
 \seealso{
-\code{\link{spaceDir}} \code{\link{dataQuery}} \code{\link{imgInt}}
+\code{\link{spaceDir}}
 }

@@ -1,119 +1,156 @@
 #' @title tMoveRes
 #'
-#' @description {Tool to support the selection of an adequate satellite temporal resolution. It evaluates how the change in temporal
-#' resolution changes the amount of samples and sample regions based on a set of coordinate pairs and their observation dates.}
-#' @param xy Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.
-#' @param obs.date Object of class \emph{Date} with \emph{xy} observation dates.
+#' @description Analysis of GPS data losses with the choice temporal resolutions.
+#' @param x \emph{spatVector}.
+#' @param y \emph{Date} vector with observation dates or each entry in \emph{x}.
 #' @param time.res Vector of temporal resolutions (expressed in days).
 #' @param pixel.res Spatial resolution (unit depends on spatial projection).
-#' @importFrom ggplot2 ggplot xlab ylab theme geom_bar element_text
-#' @importFrom raster raster extent extend cellFromXY crs
-#' @importFrom utils download.file
+#' @importFrom ggplot2 ggplot aes theme geom_bar coord_cartesian element_blank element_line scale_y_continuous scale_fill_gradientn labs
+#' @importFrom terra rast ext extend cellFromXY crs
+#' @importFrom plyr ddply . summarise
+#' @importFrom dbscan dbscan
 #' @importFrom grDevices colorRampPalette
-#' @return A \emph{list} object reporting on the amount and distribution of unique pixels and connected pixel regions per temporal resolution.
-#' @details {Given a base spatial resolution (\emph{pixel.res} and a vector of temporal resolutions (\emph{time.res}), the function determines
-#' the number of unique pixels and unique pixel regions after their temporal aggregation. For each temporal resolution, the function starts by
-#' converting \emph{xy} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number of
-#' samples and sample regions. The output of the function consists of:
+#' @details {For each spatial resolution given by  \emph{pixel.res}, and for
+#' each temporal resolutions given by \emph{time.res}, the function simulates
+#' the number of unique pixels and pixel regions preserved after accounting
+#' for pseudo-replication at each hypothetical time step, assuming that the
+#' GPS data until the next date with available environmental data is
+#' aggregated into unique pixels. Finally, For each temporal aggregation
+#' window, the function reports the 'pixel ratio' and the 'region ratio',
+#' i.e., the number of pixels and regions divided by the number of GPS records.}
+#' @return {A \emph{list} containing:
 #' \itemize{
-#'  \item{\emph{stats} - Summary statistics reporting on the number of temporal widows, unique samples and unique sample regions per temporal resolution.}
-#'  \item{\emph{plot} - Plot representing the change in number of samples and sample regions per temporal resolution.}}}
-#' @seealso \code{\link{sMoveRes}} \code{\link{specVar}}
+#'  \item{\emph{stats} - Summary statistics reporting on
+#'  the number of temporal widows, unique samples and unique
+#'  sample regions per temporal resolution.}
+#'  \item{\emph{summary.plot} - Plot representing the change in number
+#'  of unique pixels and pixel regions per temporal resolution.}
+#'  \item{\emph{temporal.plot} - Plot representing the change in number
+#'  of unique pixels and pixel regions per temporal resolution and time step.}}}
+#' @seealso \code{\link{sMoveRes}}
 #' @examples {
 #'
-#'  require(raster)
+#'  require(terra)
 #'
-#'  data(longMove) # access reference data
-#'  longMove <- longMove[c(1:50, 2000:2050,3000:3050),] # subset for testing
+#'  #'  # read movement data
+#'  longMove = read.csv(system.file('extdata',
+#'  'longMove.csv', package="rsMove"))
+#'
+#'  # convert observations to vector
+#'  longMove = vect(longMove, geom=c("long","lat"), crs="EPSG:4326")
 #'
 #'  # test function for intervals of 1, 8 and 16 days (e.g. of MODIS data)
-#'  obs.date <- as.Date(longMove@data$timestamp)
-#'  a.res <- tMoveRes(longMove, obs.date, c(1,8,16), 0.1)
+#'  obs.date = as.Date(longMove$timestamp)
+#'  a.res = tMoveRes(longMove, obs.date, c(1,8,16), 0.1)
 #'
 #' }
 #' @export
 
-#-------------------------------------------------------------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
+#-----------------------------------------------------------------------------#
 
-tMoveRes <- function(xy, obs.date, time.res, pixel.res) {
+tMoveRes = function(x, y, time.res, pixel.res) {
 
-#---------------------------------------------------------------------------------------------------------------------#
-#  1. check inpur variables
-#---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------#
+  #  1. check input variables
+  #---------------------------------------------------------------------------#
 
-  if (!class(xy)[1]%in%c('SpatialPoints', 'SpatialPointsDataFrame')) {stop('"xy" is not of a valid class')}
+  if (!class(x)[1]%in%c('SpatVector')) stop('"x" is not of a valid class')
+  if (!class(y)[1]%in%c('Date')) stop('"y" is not of a valid class')
   if (length(pixel.res)>1) {stop('"pixel.res" has more than one element')}
   if (!is.numeric(time.res)) {stop('"time.res" is not numeric')}
-  if (class(obs.date)!="Date") {stop('"obs.date" is not of class "Date"')}
-  if(sum(is.na(obs.date)) > 0) {stop('please filter missing values in "obs.date"')}
-  rp <- crs(xy) # reference projection
 
-  #---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------#
   # 2. determine pixel aggregations
-  #---------------------------------------------------------------------------------------------------------------------#
+  #---------------------------------------------------------------------------#
 
-  st <- min(obs.date) # start time
-  et <- max(obs.date) # end time
+  st = min(y) # start time
+  et = max(y) # end time
 
-  out <- do.call(rbind, lapply(time.res, function(r) {
+  # reference raster (extend to avoid missing samples along the borders)
+  e = extend(rast(ext(x), res=pixel.res, crs=crs(x)), pixel.res)
 
-    nw <- round(as.numeric((et - st)) / r + 1) # number of temporal windows
+  out = do.call(rbind, lapply(time.res, function(r) {
 
-    tmp <- do.call(rbind, lapply(1:nw, function(w) {
+    nw = round(as.numeric((et - st)) / r + 1) # number of temporal windows
 
-      loc <- which(obs.date >= (st+r*(w-1)) & obs.date <= (((st+r)+(r*w))-1)) # reference samples
+    tmp = do.call(rbind, lapply(1:nw, function(w) {
+
+      # last date
+      date = ((st+r)+(r*w))-1
+
+      # GPS observations recorded within the target window
+      loc = which(y >= (st+r*(w-1)) & y <= (((st+r)+(r*w))-1))
+
       if (length(loc) > 0) {
-        ext <- raster(extend(extent(xy[loc, ]), c(pixel.res, pixel.res)), res = pixel.res, crs = rp)
-        sp <- cellFromXY(ext, xy[loc, ])
-        up <- unique(sp)
-        ext[up] <- 1
-        regions <- clump(ext)
-        return(data.frame(nr.pixels = length(up), nr.regions = cellStats(regions, max, na.rm = TRUE)))
+
+        # cell positions of elements x and region clustering
+        odf = data.frame(date=date, resolution=r, nr.observations=length(loc),
+                         nr.pixels=length(unique(cellFromXY(e, crds(x[loc,])))),
+                         nr.regions=length(unique(dbscan(crds(x[loc,]),
+                                                         eps=r,borderPoints=T,
+                                                         minPts=1)$cluster)))
+
+        return(odf)
       } else {
-        return(data.frame(nr.pixels=0, nr.regions =0))
+        return(data.frame(date=date, resolution=r,
+                          nr.observations=0, nr.pixels=0,
+                          nr.regions=0))
       }
 
     }))
 
     #  estimate final count of pixels/regions
-    return(as.data.frame(t(apply(tmp, 2, sum))))
+    return(tmp)
 
   }))
 
-  row.names(out) <- NULL
+  # calculate the ratio of pixes/regions per number of entries in x
+  i = which(out$nr.observations > 0)
+  out$pixel.ratio = 0
+  out$region.ratio = 0
+  out$pixel.ratio[i] = out$nr.pixels[i] / out$nr.observations[i]
+  out$region.ratio[i] = out$nr.regions[i] / out$nr.observations[i]
 
-#---------------------------------------------------------------------------------------------------------------------#
-# 3. plot output
-#---------------------------------------------------------------------------------------------------------------------#
-
-  # determine yscale range
-  mv <- max(out$nr.pixels)
-  if (mv < 100) {
-    mv <- mv / 10
-    yr <- round(mv*2)/2
-    if (mv > yr) {yr <- (yr+0.5)*10} else {yr <- yr*10}}
-  if (mv >= 100) {
-    mv <- mv / 100
-    yr <- round(mv*20)/20
-    if (mv > yr) {yr <- (yr+0.5)*100} else {yr <- yr*100}}
+  #---------------------------------------------------------------------------#
+  # 3. plot output
+  #---------------------------------------------------------------------------#
 
   # make color palette
-  cr <- colorRampPalette(c("khaki2", "forestgreen"))
+  cr = colorRampPalette(c('#8c510a','#bf812d','#dfc27d',
+                        '#f6e8c3','#f5f5f5','#c7eae5',
+                        '#80cdc1','#35978f','#01665e'))
 
   # build plot object
-  out$resolution <- factor(time.res, levels=sort(time.res))
-  p <- ggplot(out, aes_string(x="resolution", y="nr.pixels", fill="nr.regions")) + theme_bw() +
-    scale_fill_gradientn(colors=cr(10), name="Nr. Regions\n") + xlab("\nResolution (days)") +
-    ylab("Nr. Pixels\n") + geom_bar(width=0.7, stat = "identity") +
-    theme(axis.text.x=element_text(size=12),
-          axis.title.x =element_text(size=14),
-          axis.text.y=element_text(size=12),
-          axis.title.y =element_text(size=14),
-          legend.text=element_text(size=12),
-          legend.title=element_text(size=14)) + ylim(0,yr)
+  out$resolution = factor(out$resolution, levels=sort(time.res))
+
+  gdf = ddply(out, .(resolution), summarise,
+              pixel.ratio=sum(nr.pixels)/sum(nr.observations),
+              region.ratio=sum(nr.regions)/sum(nr.observations))
+
+  p1 = ggplot(gdf, aes(x=resolution, y=pixel.ratio, fill=region.ratio)) +
+    theme_bw(base_size=6) + geom_bar(stat="identity", width=1) +
+    scale_y_continuous(expand=c(0,0)) + coord_cartesian(ylim=c(0,1.0)) +
+    scale_fill_gradientn(colors=cr(9), breaks=c(0.0, 0.5, 1.0),
+                         limits=c(0,1.0), name="Region ratio\n") +
+    labs(x="\nResolution (m)", y="Pixel ratio\n") +
+    theme(panel.grid=element_blank(),
+          panel.background=element_blank(),
+          panel.border=element_blank(),
+          axis.line=element_line(linewidth=0.2, colour="grey5"))
+
+  p2 = ggplot(out, aes(x=date, y=pixel.ratio)) +
+    theme_bw(base_size=6) +
+    geom_bar(stat="identity", width=1, fill="grey60") +
+    scale_y_continuous(expand=c(0,0)) + coord_cartesian(ylim=c(0,1.0)) +
+    labs(x="\nDate", y="Pixel ratio\n") +
+    facet_wrap(~resolution, nrow=1) + # , strip.position="right") +
+    theme(panel.grid=element_blank(),
+          panel.background=element_blank(),
+          strip.background=element_blank(),
+          axis.line=element_line(linewidth=0.2, colour="grey5"))
 
   # return data frame and plot
-  return(list(stats=out, plot=p))
+  return(list(stats=out, summary.plot=p1, temporal.plot=p2))
 
 }
-

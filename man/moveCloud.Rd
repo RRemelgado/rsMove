@@ -4,55 +4,61 @@
 \alias{moveCloud}
 \title{moveCloud}
 \usage{
-moveCloud(x, y, data.path = NULL, buffer.size = NULL, remove.file = FALSE)
+moveCloud(x, y, start, end, interval, data.path)
 }
 \arguments{
-\item{x}{Object of class \emph{Date} with observation dates of \emph{y}.}
+\item{x}{Object of class \emph{SpatVector}.}
 
-\item{y}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{y}{Object of class \emph{Date} with observation dates of \emph{y}.}
 
-\item{data.path}{Output data path for downloaded data.}
+\item{start}{First data from when to download CCF data.}
 
-\item{buffer.size}{Two element vector with temporal buffer size (expressed in days).}
+\item{end}{Last data from when to download CCF data.}
 
-\item{remove.file}{Logical. Should the files be deleted after usage?}
+\item{interval}{Daily interval of data download.}
+
+\item{data.path}{Output path for downloading data on cloud cover.}
 }
 \value{
-A \emph{list} object reporting on the variability of cloud cover within and around each observation dates.
+{A \emph{list} containing: \itemize{
+ \item{\emph{x.stats} - CCF statistics at each entry in \emph{x}}
+ \item{\emph{r.stats} - CCF statistics at each unique date between\emph{start} and \emph{end} summarized across the elements of \emph{x}}
+ \item{\emph{x.plot} - Plot of the data in \emph{x.stats}}.
+ \item{\emph{r.plot} - Plot of the data in \emph{r.stats}}.}}
 }
 \description{
-{Provides historical information on cloud cover for a set of coordinate
-pairs. The temporal information is adjusted to the sample observation date.}
+Extract Cloud Cover Fraction (CCF) data for a set of coordinate pairs.
 }
 \details{
-{This function uses daily cloud fraction data from NASA's NEO service. For each observation date in \emph{obs.dates},
-the function downloads the correspondent image and extracts the percent cloud cover for the corresponding samples in \emph{y}.
-Before downloading any data, the function will look within \emph{data.path} for previoulsy acquired data. If they exist, they
-won't be downloaded reducing the processing time required by the function. Moreover, if \emph{buffer.size} is specified, for
-each date, the function will download all images that are within the specified temporal buffer. \emph{buffer.size} requires a
- twoelement vector which specifies the buffer size before and after the target dates. These additional images will be used to
- report on the closest time step with the lowest possible cloud cover. The final output provides a \emph{data.frame} ($report)
- with information on:
-\itemize{
- \item{\emph{cloud cover \% (day)}: cloud cover for the observation dates.}
- \item{\emph{best date (after)}: dates before the observation dates with the lowest cloud cover.}
- \item{\emph{best date cloud cover \% (before)}: cloud cover for best before dates.}
- \item{\emph{best date (after)}: dates after the observation dates with the lowest cloud cover.}
- \item{\emph{best date cloud cover \% (after)}: cloud cover best after dates.}}
- Finally, the function generates a plot ($plot) reporting on the variability of cloud cover
- and the number of observation registered in \emph{y} for each date.}
+{The function extracts data on daily Cloud Cover Fractions (CCF)
+from NASA's Earth Observation (NEO). For a sequence of dates defined by
+\emph{start}, \emph{end}, and \emph{interval}, the function downloads the
+correspondent CCF data and stores them in  \emph{data.path}. These data,
+which have a global coverage and a spatial resolution of 0.1 degrees, will
+only be downloaded if they do not already exist in \emph{data.path}. When
+checking for existing data, the function will follow a standard naming
+convention, so data acquired independently will likely be missed. After
+downloading the needed data, the function will extract the CCF fraction
+values for all dates at the coordinates in \emph{x}. This will be used to
+calculate the mean and standard deviation of the CCF at each date. In
+addition, the function will extract CCF data for each date in \emph{y} that
+falls between \emph{start} and \emph{end}.}
 }
 \examples{
 \dontrun{
 
- require(raster)
+ require(terra)
 
  # read movement data
- data(shortMove)
+ longMove <- read.csv(system.file('extdata',
+ 'longMove.csv', package="rsMove"))
+
+ # convert observations to vector
+ longMove = vect(longMove, geom=c("long","lat"), crs="EPSG:4326")
 
  # test function for 30 day buffer
- od <- as.Date(shortMove@data$date)
- c.cover <- moveCloud(shortMove, od, data.path=".", buffer.size=c(30,30))
+ obs.dates <- as.Date(longMove$timestamp)
+ c.cover <- moveCloud(shortMove, obs.dates)
 
 }
 }

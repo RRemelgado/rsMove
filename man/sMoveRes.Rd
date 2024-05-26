@@ -7,41 +7,50 @@
 sMoveRes(x, y)
 }
 \arguments{
-\item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x}{Object of class \emph{spatVector}.}
 
-\item{y}{vector of spatial resolutions (unit depends on spatial projection).}
+\item{y}{Numeric vector with target  spatial resolutions.}
 }
 \value{
 A \emph{list}.
+
+{The function returns a list with:
+\itemize{
+ \item{\emph{stats} - Summary statistics reporting on the number
+ of unique samples and sample regions per spatial resolution.}
+ \item{\emph{plot} - Plot representing the change in number of
+ samples and sample regions per spatial resolution.}}}
 }
 \description{
-{Tool to support the selection of an adequate satellite spatial resolution. Evaluates how the change
-in spatial resolution changes the amount of samples and sample regions based on a set of coordinate pairs.}
+Analysis of GPS data losses with the choice spatial resolutions.
 }
 \details{
-{Given a vector of pixel resolutions (\emph{y}), the function determines the number of unique pixels
-and unique pixel regions after their temporal aggregation. For each spatial resolution, the function starts by converting
-\emph{x} to unique pixel coordinates and labels them based on their spatial aggregation. Then, the function counts the number
-of samples and sample regions. The output of the function consists of:
-\itemize{
- \item{\emph{stats} - Summary statistics reporting on the number of unique samples and sample regions per spatial resolution.}
- \item{\emph{plot} - Plot representing the change in number of samples and sample regions per spatial resolution.}}
-If \emph{x} is a \emph{move} or a \emph{moveStack} object, the function will iterate through each unique dataset name and return
-a nested output where the elements of of the list are named in accordance with the oataset names.}
+{The function simulates how many unique combinations of animal
+observations and environmental data would be preserved when choosing an
+environmental dataset with the resolution given in \emph{y}. It also
+estimates simulates how many unique pixel regions (i.e., groups of
+spatially connected pixels) would be preserved after accounting for
+pseudo-replication. Finally, For each spatial resolution, the function
+reports the 'pixel ratio' and the 'region ratio', i.e., the number of
+pixels and regions divided by the number of GPS records.}
 }
 \examples{
 {
 
- require(raster)
+ require(terra)
 
  # read movement data
- data(shortMove)
+ shortMove = read.csv(system.file('extdata',
+ 'shortMove.csv', package="rsMove"))
+
+ # convert observations to vector
+ shortMove = vect(shortMove, geom=c("x","y"), crs="EPSG:32632")
 
  # test function for 5, 10 20 and 30 m
- a.res <- sMoveRes(shortMove, c(5, 10, 20, 30))
+ a.res = sMoveRes(shortMove, c(5, 10, 20, 30))
 
 }
 }
 \seealso{
-\code{\link{tMoveRes}} \code{\link{specVar}}
+\code{\link{tMoveRes}}
 }

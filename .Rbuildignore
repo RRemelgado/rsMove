@@ -3,3 +3,5 @@
 ^\.Rproj\.user$
 ^NEWS\.md$
 ^cran-comments\.md$
+^data/
+book/

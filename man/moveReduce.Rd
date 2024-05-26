@@ -4,59 +4,58 @@
 \alias{moveReduce}
 \title{moveReduce}
 \usage{
-moveReduce(x, y, z, preserve.revisits = TRUE, derive.raster = FALSE)
+moveReduce(x, y, z, preserve.revisits = TRUE)
 }
 \arguments{
-\item{x}{Object of class \emph{SpatialPoints} or \emph{SpatialPointsDataFrame}.}
+\item{x}{Object of class \emph{spatVector}.}
 
-\item{y}{Object of class \emph{RasterLayer}, \emph{RasterStack} or \emph{RasterBrick}.}
+\item{y}{Object of class \emph{spatRaster}.}
 
-\item{z}{Object of class \emph{Date}, \emph{POSIXlt} or \emph{POSIXct} with the observation time of \emph{x}.}
+\item{z}{Object of class \emph{Date} or \emph{POSIXct} with the observation time of each element in \emph{x}.}
 
 \item{preserve.revisits}{Logical. Should the function preserve revisit patterns?}
-
-\item{derive.raster}{Should a \emph{RasterLayer} with the total time per pixel be provided?}
 }
 \value{
-A \emph{list} object.
+A \emph{spatVector} object.
 }
 \description{
 Pixel based summary of movement data that preserves periodic movements.
 }
 \details{
-{Translates (\emph{x}) into pixel coordinates within a reference raster (\emph{y}). The
-function identifies temporal segments corresponding to groups of consecutive observations within
-the same pixel. In this process, revisits to recorded pixels are preserved. Once the segments are
-identified, the function derives mean x and y coordinates for each of them and evaluates the time
-spent within each pixel. The function reports on the start and end timestamps and the elapsed time.
-If \emph{preserve.revisits} is FALSE, the function will then summarize the output on a pixel level
-summing the time spent at each pixel. Additionally, if \emph{derive.raster} is TRUE, the function
-will derive a \emph{RasterLayer} with the same configuration as \emph{y} depicting the the total
-amount of time spent per pixel. The output of the function consists of:
-\itemize{
-\item{\emph{points} - \emph{SpatialPointsDataFrame} with the reduced sample set.}
-\item{\emph{total.time} - \emph{RasterLayer} depicting the total time spent at each pixel.}}}
+{Translates (\emph{x}) into pixel coordinates within a reference
+raster (\emph{y}). The function identifies temporal segments corresponding
+to groups of consecutive observations within the same pixel. In this process,
+revisits to recorded pixels are preserved. Once the segments are identified,
+the function derives mean x and y coordinates for each of them and evaluates
+the time spent within each pixel. The function reports on the start and end
+timestamps and the elapsed time. If \emph{preserve.revisits} is FALSE, the
+function will then summarize the output on a pixel level summing the time
+spent at each pixel. Additionally, if \emph{derive.raster} is TRUE, the
+function will derive a \emph{RasterLayer} with the same configuration as
+\emph{y} depicting the the total amount of time spent per pixel.
+The output of the function consists of a \emph{spatVector}
+with the reduced sample set.}
 }
 \examples{
 {
 
- require(raster)
+ require(terra)
 
  # read raster data
- r <- raster(system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
+ r <- (system.file('extdata', '2013-07-16_ndvi.tif', package="rsMove"))
 
  # read movement data
- data(shortMove)
+ shortMove <- read.csv(system.file('extdata', 'shortMove.csv', package="rsMove"))
+
+ # convert observations to vector
+ shortMove = vect(shortMove, geom=c("x","y"), crs="EPSG:32632")
 
  # observation time
- z <- strptime(paste0(shortMove@data$date, ' ', shortMove@data$time),
- format="\%Y/\%m/\%d \%H:\%M:\%S")
+ z <- as.POSIXct(strptime(paste0(shortMove$date, ' ', shortMove$time),
+ format="\%Y/\%m/\%d \%H:\%M:\%S"))
 
  # reduce amount of samples
  move.reduce <- moveReduce(shortMove, r, z, derive.raster=TRUE)
 
 }
-}
-\seealso{
-\code{\link{sampleMove}} \code{\link{moveSeg}}
 }
